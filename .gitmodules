@@ -1,0 +1,9 @@
+[submodule "whatever/third-party/glm"]
+	path = whatever/third-party/glm
+	url = https://github.com/sadiuk/glm
+[submodule "whatever/third-party/fmt"]
+	path = whatever/third-party/fmt
+	url = https://github.com/sadiuk/fmt
+[submodule "whatever/third-party/imgui"]
+	path = whatever/third-party/imgui
+	url = https://github.com/sadiuk/imgui
