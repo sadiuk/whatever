@@ -1,5 +1,4 @@
 .vs
-.bak
 whatever/bin/*
 
 whatever/third-party/vs_projects/imgui/x86
