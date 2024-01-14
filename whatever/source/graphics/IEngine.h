@@ -1,14 +1,24 @@
 #pragma once
 #include <memory>
 #include <string>
-#define ENGINE_VERSION 0
-enum GRAPHICS_API
-{
-	VULKAN
-};
+#include "ui/IWindow.h"
 
-class IEngine
+#define ENGINE_VERSION 0
+
+
+
+struct IEngine
 {
-public:
-	static std::shared_ptr<IEngine> Create(GRAPHICS_API api, const std::string& appName);
+	enum GRAPHICS_API
+	{
+		VULKAN
+	};
+	struct CreationParams
+	{
+		GRAPHICS_API api;
+		std::string appName;
+		std::shared_ptr<IWindow> window;
+	};
+	static std::shared_ptr<IEngine> Create(const CreationParams& params);
+	virtual GRAPHICS_API GetAPI() = 0;
 };

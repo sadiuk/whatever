@@ -27,22 +27,49 @@
     <ClCompile Include="..\source\graphics\IEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\ui\WindowSDL2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanSurfaceSDL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\ISurface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\IEngine.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="..\source\graphics\IVulkanSurface.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\VulkanEngine.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="..\source\graphics\VulkanSurfaceSDL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\ISurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\IEngine.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\util\ConsoleLogger.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\util\ILogger.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ui\IWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VkMakros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ui\WindowSDL2.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #include "App.h"
-#undef main
+#define SDL_MAIN_HANDLED
 int main()
 {
 	App app;

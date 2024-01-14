@@ -6,9 +6,10 @@
 class WindowSDL2 : public IWindow
 {
 public:
-	WindowSDL2(const std::string& caption, uint32_t width, uint32_t height, uint32_t posX, uint32_t posY);
+	WindowSDL2(const CreationParams& params);
 	void* GetNativeHandle() override;
-
+	bool IsOpen() override;
+	WINDOW_LIB GetWindowingLib() { return SDL2; }
 private:
 
 	SDL_Window* m_window;

@@ -1,6 +1,7 @@
 #pragma once
 #include "memory"
 #include "graphics/IEngine.h"
+#include "ui/IWindow.h"
 #include <string>
 class App
 {
@@ -14,5 +15,5 @@ private:
 
 
 	std::shared_ptr<IEngine> m_graphicsEngine;
-	std::string m_name = "Test";
+	std::shared_ptr<IWindow> m_window;
 };

@@ -151,13 +151,22 @@
   <ItemGroup>
     <ClCompile Include="..\source\App.cpp" />
     <ClCompile Include="..\source\graphics\IEngine.cpp" />
+    <ClCompile Include="..\source\graphics\ISurface.cpp" />
     <ClCompile Include="..\source\graphics\VulkanEngine.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanSurfaceSDL.cpp" />
+    <ClCompile Include="..\source\ui\WindowSDL2.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h" />
     <ClInclude Include="..\source\graphics\IEngine.h" />
+    <ClInclude Include="..\source\graphics\ISurface.h" />
+    <ClInclude Include="..\source\graphics\IVulkanSurface.h" />
+    <ClInclude Include="..\source\graphics\VkMakros.h" />
     <ClInclude Include="..\source\graphics\VulkanEngine.h" />
+    <ClInclude Include="..\source\graphics\VulkanSurfaceSDL.h" />
+    <ClInclude Include="..\source\ui\IWindow.h" />
+    <ClInclude Include="..\source\ui\WindowSDL2.h" />
     <ClInclude Include="..\source\util\ConsoleLogger.h" />
     <ClInclude Include="..\source\util\ILogger.h" />
   </ItemGroup>
