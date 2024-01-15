@@ -4,17 +4,20 @@
 #include "graphics/ISurface.h"
 void App::Init()
 {
+	glm::uvec2 windowSize = { 800, 600 };
 	IWindow::CreationParams windowParams{};
 	windowParams.caption = "EngineTest";
-	windowParams.posX = 300;
-	windowParams.posY = 200;
-	windowParams.width = 800;
-	windowParams.height = 600;
+	windowParams.windowPos.x = 300;
+	windowParams.windowPos.y = 200;
+	windowParams.size = windowSize;
 	m_window = std::make_shared<WindowSDL2>(windowParams);
 
+	ISwapChain::CreateInfo swapchainParams{};
+	swapchainParams.extent = windowSize;
 	IEngine::CreationParams engineParams{};
 	engineParams.api = IEngine::GRAPHICS_API::VULKAN;
 	engineParams.appName = "EngineTest";
 	engineParams.window = m_window;
+	engineParams.swapchainInfo = swapchainParams;
 	m_graphicsEngine = IEngine::Create(engineParams);
 }

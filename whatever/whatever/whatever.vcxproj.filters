@@ -71,5 +71,11 @@
     <ClInclude Include="..\source\ui\WindowSDL2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\graphics\ISwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanSwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

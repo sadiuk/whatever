@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+#include "glm/glm.hpp"
 
 
 
@@ -14,10 +15,8 @@ enum WINDOW_LIB
 struct CreationParams
 {
 	std::string caption;
-	uint32_t width;
-	uint32_t height;
-	uint32_t posX;
-	uint32_t posY;
+	glm::uvec2 size;
+	glm::ivec2 windowPos;
 };
 	virtual bool IsOpen() = 0;
 	virtual void* GetNativeHandle() = 0;

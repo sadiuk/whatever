@@ -24,27 +24,40 @@ class VulkanEngine : public IEngine
 		std::optional<uint32_t> computeFamilyIndex{};
 		bool IsValid() { return graphicsFamilyIndex.has_value() && computeFamilyIndex.has_value(); }
 	};
+	struct AvailableSwapchainCapabilities
+	{
+		VkSurfaceCapabilitiesKHR surfaceCaps;
+		std::vector<VkSurfaceFormatKHR> availableFormats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
 public:
-	VulkanEngine(const std::string& appName, ISurfaceFactory* factory);
+	VulkanEngine(const IEngine::CreationParams& params, ISurfaceFactory* factory);
 	~VulkanEngine();
 	GRAPHICS_API GetAPI() override { return VULKAN; }
+
 private:
-	bool Init(const std::string& appName);
+	bool Init();
+	bool Deinit();
 	bool CreateInstance(const std::string& appName);
 	bool SelectPhysicalDevice();
 	bool CreateLogicalDevice();
 	bool CreateAllocator();
 	bool InitSurface();
+	bool CreateSwapChain();
+	
 	bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
+	AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 
-	bool Deinit();
 private:
 	VkInstance m_instance;
 	VkPhysicalDevice m_physicalDevice;
 	VkDevice m_device;
-
+	VkSwapchainKHR m_swapchain;
 	VmaAllocator m_allocator;
-	QueueFamilyIndices m_queueFamilyIndices;
-	
 	std::shared_ptr<IVulkanSurface> m_surface;
+
+	
+
+	QueueFamilyIndices m_queueFamilyIndices;
+	CreationParams m_creationParams;
 };

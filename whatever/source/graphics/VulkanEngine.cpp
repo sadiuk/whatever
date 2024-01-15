@@ -7,10 +7,11 @@
 
 #include <algorithm>
 
-VulkanEngine::VulkanEngine(const std::string& appName, ISurfaceFactory* factory)
+VulkanEngine::VulkanEngine(const IEngine::CreationParams& params, ISurfaceFactory* factory):
+	m_creationParams(params)
 {
 	m_surface = std::static_pointer_cast<IVulkanSurface>(factory->Create());
-	Init(appName);
+	Init();
 
 }
 
@@ -19,11 +20,70 @@ VulkanEngine::~VulkanEngine()
 	Deinit();
 }
 
-bool VulkanEngine::Init(const std::string& appName)
+bool VulkanEngine::CreateSwapChain()
+{
+	VkSwapchainCreateInfoKHR swapchainCreateInfo{};
+
+
+	AvailableSwapchainCapabilities caps = GetAvailableSwapchainCapabilities();
+	VkSurfaceFormatKHR surfaceFmt{};
+	if (auto surfaceFmtIter = std::find_if(
+		caps.availableFormats.begin(), caps.availableFormats.end(),
+		[](const VkSurfaceFormatKHR& fmt) { return fmt.format == VK_FORMAT_B8G8R8A8_SRGB; });
+		surfaceFmtIter != caps.availableFormats.end())
+	{
+		surfaceFmt = *surfaceFmtIter;
+	}
+	else
+	{
+		assert(false);
+		surfaceFmt = caps.availableFormats[0];
+	}
+	swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	swapchainCreateInfo.pNext = nullptr;
+	swapchainCreateInfo.flags = 0;
+	swapchainCreateInfo.surface = (VkSurfaceKHR)m_surface->GetNativeHandle();
+	swapchainCreateInfo.minImageCount = 3;
+	swapchainCreateInfo.imageFormat = surfaceFmt.format;
+	swapchainCreateInfo.imageColorSpace = surfaceFmt.colorSpace;
+	swapchainCreateInfo.imageExtent = caps.surfaceCaps.currentExtent;
+	swapchainCreateInfo.imageArrayLayers = 1;
+	swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	if (m_queueFamilyIndices.graphicsFamilyIndex.value() != m_queueFamilyIndices.computeFamilyIndex.value())
+	{
+		uint32_t queuefamilyIndices[2] = {
+			m_queueFamilyIndices.graphicsFamilyIndex.value(),
+			m_queueFamilyIndices.computeFamilyIndex.value()
+		};
+		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		swapchainCreateInfo.queueFamilyIndexCount = 2;
+		swapchainCreateInfo.pQueueFamilyIndices = queuefamilyIndices;
+	}
+	else
+	{
+		uint32_t queueFamilyIndex = m_queueFamilyIndices.graphicsFamilyIndex.value();
+		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		swapchainCreateInfo.queueFamilyIndexCount = 1;
+		swapchainCreateInfo.pQueueFamilyIndices = &queueFamilyIndex;
+	}
+	swapchainCreateInfo.preTransform = caps.surfaceCaps.currentTransform;
+	swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	swapchainCreateInfo.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+	swapchainCreateInfo.clipped = VK_TRUE;
+	swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &m_swapchain));
+	return true;
+}
+	//vkCreateSwapchainKHR(m_device,)
+
+
+
+bool VulkanEngine::Init()
 {
 	do
 	{
-		if (!CreateInstance(appName))
+		if (!CreateInstance(m_creationParams.appName))
 			break;
 		if (!SelectPhysicalDevice())
 			break;
@@ -32,6 +92,8 @@ bool VulkanEngine::Init(const std::string& appName)
 		if (!CreateAllocator())
 			break;
 		if (!InitSurface())
+			break;
+		if (!CreateSwapChain())
 			break;
 			return true;
 	} while (false);
@@ -128,14 +190,17 @@ bool VulkanEngine::CreateLogicalDevice()
 	queueInfos[0].pQueuePriorities = &queuePriority;
 	assert(m_queueFamilyIndices.graphicsFamilyIndex.value() == m_queueFamilyIndices.computeFamilyIndex.value());
 
+	const std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 	VkPhysicalDeviceFeatures deviceFeatures{};
 	VkDeviceCreateInfo deviceInfo = {};
 	deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	deviceInfo.pNext = nullptr;
 	deviceInfo.queueCreateInfoCount = 1;
 	deviceInfo.pQueueCreateInfos = queueInfos;
-	deviceInfo.enabledExtensionCount = 0;
-	deviceInfo.ppEnabledExtensionNames = nullptr;
+	deviceInfo.enabledExtensionCount = deviceExtensions.size();
+	deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
 	deviceInfo.enabledLayerCount = 0;
 	deviceInfo.ppEnabledLayerNames = nullptr;
 	deviceInfo.pEnabledFeatures = &deviceFeatures;
@@ -187,8 +252,26 @@ bool VulkanEngine::EnsureValidationLayersAvailable(std::vector<const char*> requ
 
 }
 
+VulkanEngine::AvailableSwapchainCapabilities VulkanEngine::GetAvailableSwapchainCapabilities()
+{
+	AvailableSwapchainCapabilities caps{};
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &caps.surfaceCaps);
+
+	uint32_t formatCount = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &formatCount, nullptr);
+	caps.availableFormats.resize(formatCount);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &formatCount, caps.availableFormats.data());
+
+	uint32_t modeCount = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, nullptr);
+	caps.presentModes.resize(modeCount);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, caps.presentModes.data());
+	return caps;
+}
+
 bool VulkanEngine::Deinit()
 {
+	vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 	m_surface->Deinitialize(m_instance);
 
 	vkDestroyDevice(m_device, nullptr);
