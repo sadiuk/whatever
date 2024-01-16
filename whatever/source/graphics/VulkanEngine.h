@@ -44,7 +44,8 @@ private:
 	bool CreateAllocator();
 	bool InitSurface();
 	bool CreateSwapChain();
-	
+	bool CreateSwapchainImages();
+
 	bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 	AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 
@@ -53,9 +54,12 @@ private:
 	VkPhysicalDevice m_physicalDevice;
 	VkDevice m_device;
 	VkSwapchainKHR m_swapchain;
+	VkFormat m_swapchainFormat;
 	VmaAllocator m_allocator;
 	std::shared_ptr<IVulkanSurface> m_surface;
 
+	std::vector<VkImage>  m_swapchainImages;
+	std::vector<VkImageView>  m_swapchainImageViews;
 	
 
 	QueueFamilyIndices m_queueFamilyIndices;

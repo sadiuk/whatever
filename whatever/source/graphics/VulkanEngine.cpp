@@ -44,7 +44,7 @@ bool VulkanEngine::CreateSwapChain()
 	swapchainCreateInfo.flags = 0;
 	swapchainCreateInfo.surface = (VkSurfaceKHR)m_surface->GetNativeHandle();
 	swapchainCreateInfo.minImageCount = 3;
-	swapchainCreateInfo.imageFormat = surfaceFmt.format;
+	swapchainCreateInfo.imageFormat = m_swapchainFormat = surfaceFmt.format;
 	swapchainCreateInfo.imageColorSpace = surfaceFmt.colorSpace;
 	swapchainCreateInfo.imageExtent = caps.surfaceCaps.currentExtent;
 	swapchainCreateInfo.imageArrayLayers = 1;
@@ -73,10 +73,43 @@ bool VulkanEngine::CreateSwapChain()
 	swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &m_swapchain));
+
+	return CreateSwapchainImages();
+	
+}
+bool VulkanEngine::CreateSwapchainImages()
+{
+	uint32_t imageCount{};
+	ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, nullptr));
+	m_swapchainImages.resize(imageCount);
+	ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, m_swapchainImages.data()));
+
+	m_swapchainImageViews.resize(imageCount);
+	VkImageViewCreateInfo imageViewInfo{};
+	for (int i = 0; i < imageCount; ++i)
+	{
+		imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewInfo.pNext = nullptr;
+		imageViewInfo.flags = 0;
+		imageViewInfo.image = m_swapchainImages[i];
+		imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewInfo.format = m_swapchainFormat;
+		imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewInfo.subresourceRange.baseArrayLayer = 0;
+		imageViewInfo.subresourceRange.baseMipLevel = 0;
+		imageViewInfo.subresourceRange.layerCount = 1;
+		imageViewInfo.subresourceRange.levelCount = 1;
+		imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_device, &imageViewInfo, nullptr, &m_swapchainImageViews[i]));
+		
+	}
+
 	return true;
 }
-	//vkCreateSwapchainKHR(m_device,)
-
 
 
 bool VulkanEngine::Init()
