@@ -33,7 +33,8 @@ class VulkanEngine : public IEngine
 public:
 	VulkanEngine(const IEngine::CreationParams& params, ISurfaceFactory* factory);
 	~VulkanEngine();
-	GRAPHICS_API GetAPI() override { return VULKAN; }
+	GraphicsAPI GetAPI() override { return Vulkan; }
+	VkDevice GetNativeDeviceHandle() { return m_device; }
 
 private:
 	bool Init();
@@ -49,6 +50,7 @@ private:
 	bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 	AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 
+	std::shared_ptr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
 private:
 	VkInstance m_instance;
 	VkPhysicalDevice m_physicalDevice;

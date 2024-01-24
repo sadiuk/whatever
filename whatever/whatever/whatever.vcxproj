@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -118,7 +118,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(VULKAN_SDK)/Lib/vulkan-1.lib;$(SolutionDir)third-party\SDL2\lib\x64\SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(VULKAN_SDK)/Lib/vulkan-1.lib;$(VULKAN_SDK)/Lib/dxcompiler.lib;$(SolutionDir)third-party\SDL2\lib\x64\SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)third-party\SDL2\lib\x64\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -141,7 +141,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(VULKAN_SDK)/Lib/vulkan-1.lib;$(SolutionDir)third-party\SDL2\lib\x64\SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(VULKAN_SDK)/Lib/vulkan-1.lib;$(VULKAN_SDK)/Lib/dxcompiler.lib;$(SolutionDir)third-party\SDL2\lib\x64\SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)third-party\SDL2\lib\x64\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -152,25 +152,40 @@
     <ClCompile Include="..\source\App.cpp" />
     <ClCompile Include="..\source\graphics\IEngine.cpp" />
     <ClCompile Include="..\source\graphics\ISurface.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanConstantTranslator.cpp" />
     <ClCompile Include="..\source\graphics\VulkanEngine.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanGraphicsPipeline.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanShader.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanShaderCompilerDXC.cpp" />
     <ClCompile Include="..\source\graphics\VulkanSurfaceSDL.cpp" />
     <ClCompile Include="..\source\ui\WindowSDL2.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h" />
+    <ClInclude Include="..\source\graphics\GraphicsConstants.h" />
     <ClInclude Include="..\source\graphics\IEngine.h" />
+    <ClInclude Include="..\source\graphics\IGraphicsPipeline.h" />
+    <ClInclude Include="..\source\graphics\IShader.h" />
+    <ClInclude Include="..\source\graphics\IShaderCompiler.h" />
     <ClInclude Include="..\source\graphics\ISurface.h" />
     <ClInclude Include="..\source\graphics\ISwapChain.h" />
     <ClInclude Include="..\source\graphics\IVulkanSurface.h" />
     <ClInclude Include="..\source\graphics\VkMakros.h" />
+    <ClInclude Include="..\source\graphics\VulkanConstantTranslator.h" />
     <ClInclude Include="..\source\graphics\VulkanEngine.h" />
+    <ClInclude Include="..\source\graphics\VulkanGraphicsPipeline.h" />
+    <ClInclude Include="..\source\graphics\VulkanShader.h" />
+    <ClInclude Include="..\source\graphics\VulkanShaderCompilerDXC.h" />
     <ClInclude Include="..\source\graphics\VulkanSurfaceSDL.h" />
     <ClInclude Include="..\source\graphics\VulkanSwapChain.h" />
+    <ClInclude Include="..\source\IService.h" />
+    <ClInclude Include="..\source\IServiceProvider.h" />
     <ClInclude Include="..\source\ui\IWindow.h" />
     <ClInclude Include="..\source\ui\WindowSDL2.h" />
     <ClInclude Include="..\source\util\ConsoleLogger.h" />
     <ClInclude Include="..\source\util\ILogger.h" />
+    <ClInclude Include="..\source\util\StringUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

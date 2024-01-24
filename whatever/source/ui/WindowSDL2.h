@@ -9,7 +9,7 @@ public:
 	WindowSDL2(const CreationParams& params);
 	void* GetNativeHandle() override;
 	bool IsOpen() override;
-	WINDOW_LIB GetWindowingLib() { return SDL2; }
+	WindowLib GetWindowingLib() { return SDL2; }
 private:
 
 	SDL_Window* m_window;

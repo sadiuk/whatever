@@ -15,7 +15,7 @@ void App::Init()
 	ISwapChain::CreateInfo swapchainParams{};
 	swapchainParams.extent = windowSize;
 	IEngine::CreationParams engineParams{};
-	engineParams.api = IEngine::GRAPHICS_API::VULKAN;
+	engineParams.api = IEngine::GraphicsAPI::Vulkan;
 	engineParams.appName = "EngineTest";
 	engineParams.window = m_window;
 	engineParams.swapchainInfo = swapchainParams;

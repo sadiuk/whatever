@@ -8,7 +8,7 @@
 class IWindow
 {
 public:
-enum WINDOW_LIB
+enum WindowLib
 {
 	SDL2
 };
@@ -20,5 +20,5 @@ struct CreationParams
 };
 	virtual bool IsOpen() = 0;
 	virtual void* GetNativeHandle() = 0;
-	virtual WINDOW_LIB GetWindowingLib() = 0;
+	virtual WindowLib GetWindowingLib() = 0;
 };

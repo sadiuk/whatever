@@ -19,7 +19,7 @@ struct ISurfaceFactory
 {
 	ISurfaceFactory(const ISurface::CreationParams& params) : m_params(params) {}
 	virtual std::shared_ptr<ISurface> Create() = 0;
-
+	virtual ~ISurfaceFactory() = default;
 protected:
 	ISurface::CreationParams m_params;
 };

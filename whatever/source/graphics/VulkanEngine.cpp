@@ -1,5 +1,6 @@
 #include "VulkanEngine.h"
 #include "VkMakros.h"
+#include "VulkanGraphicsPipeline.h"
 
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
@@ -300,6 +301,12 @@ VulkanEngine::AvailableSwapchainCapabilities VulkanEngine::GetAvailableSwapchain
 	caps.presentModes.resize(modeCount);
 	vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, caps.presentModes.data());
 	return caps;
+}
+
+std::shared_ptr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
+{
+	auto pipeline = std::make_shared<VulkanGraphicsPipeline>(this, params);
+	return nullptr;
 }
 
 bool VulkanEngine::Deinit()
