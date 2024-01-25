@@ -113,22 +113,58 @@ VkPipelineVertexInputStateCreateInfo VulkanGraphicsPipeline::CreatePipelineVerte
 
 VkPipelineInputAssemblyStateCreateInfo VulkanGraphicsPipeline::CreatePipelineInputAssemblyStateCreateInfo()
 {
-	return VkPipelineInputAssemblyStateCreateInfo();
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+	inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssemblyInfo.pNext = nullptr;
+	inputAssemblyInfo.topology = VulkanConstantsTranslator::GetVkPrimitiveTopology(m_params.vertexTopology);
+	inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
+	return inputAssemblyInfo;
 }
 
 VkPipelineTessellationStateCreateInfo VulkanGraphicsPipeline::CreatePipelineTessellationStateCreateInfo()
 {
-	return VkPipelineTessellationStateCreateInfo();
+	VkPipelineTessellationStateCreateInfo tessStateInfo{};
+	tessStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+	tessStateInfo.pNext = nullptr;
+	tessStateInfo.patchControlPoints = 0;
+	return tessStateInfo;
 }
 
 VkPipelineViewportStateCreateInfo VulkanGraphicsPipeline::CreatePipelineViewportStateCreateInfo()
 {
-	return VkPipelineViewportStateCreateInfo();
+	VkViewport viewport{};
+	viewport.x = m_params.viewportInfo.x;
+	viewport.y = m_params.viewportInfo.y;
+	viewport.width = m_params.viewportInfo.width;
+	viewport.height = m_params.viewportInfo.height;
+	viewport.minDepth = 1;
+	viewport.maxDepth = 0;
+	VkRect2D scissors;
+	scissors.offset = { (int32_t)m_params.viewportInfo.x, (int32_t)m_params.viewportInfo.y };
+	scissors.extent = { m_params.viewportInfo.width, m_params.viewportInfo.height };
+	VkPipelineViewportStateCreateInfo viewportInfo{};
+	viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportInfo.pNext = nullptr;
+	viewportInfo.viewportCount = 1;
+	viewportInfo.pViewports = &viewport;
+	viewportInfo.scissorCount = 1;
+	viewportInfo.pScissors = &scissors;
+
+	return viewportInfo;
 }
 
 VkPipelineRasterizationStateCreateInfo VulkanGraphicsPipeline::CreatePipelineRasterizationStateCreateInfo()
 {
-	return VkPipelineRasterizationStateCreateInfo();
+	VkPipelineRasterizationStateCreateInfo rasterStateInfo{};
+	rasterStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterStateInfo.pNext = nullptr;
+	rasterStateInfo.depthBiasEnable = VK_FALSE;
+	rasterStateInfo.frontFace = VulkanConstantsTranslator::GetVkFrontFace(m_params.rasterInfo.frontFace);
+	rasterStateInfo.cullMode = VulkanConstantsTranslator::GetVkCullMode(m_params.rasterInfo.cullMode);
+	rasterStateInfo.polygonMode = VulkanConstantsTranslator::GetVkPolygonMode(m_params.rasterInfo.polygonMode);
+	rasterStateInfo.depthClampEnable = m_params.rasterInfo.enableDepthClamp;
+	rasterStateInfo.lineWidth = 1; // Ah i'll add this one later some day;
+	return rasterStateInfo;
 }
 
 VkPipelineMultisampleStateCreateInfo VulkanGraphicsPipeline::CreatePipelineMultisampleStateCreateInfo()

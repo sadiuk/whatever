@@ -167,7 +167,7 @@
     <ClInclude Include="..\source\graphics\IEngine.h" />
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h" />
     <ClInclude Include="..\source\graphics\IShader.h" />
-    <ClInclude Include="..\source\graphics\IShaderCompiler.h" />
+    <ClInclude Include="..\source\graphics\IVulkanShaderCompiler.h" />
     <ClInclude Include="..\source\graphics\ISurface.h" />
     <ClInclude Include="..\source\graphics\ISwapChain.h" />
     <ClInclude Include="..\source\graphics\IVulkanSurface.h" />
