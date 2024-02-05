@@ -6,14 +6,16 @@
 class App
 {
 public:
-	App()
-	{
-		Init();
-	}
+	App();
+	void Run();
 private:
 	void Init();
 
 
+
 	std::shared_ptr<IEngine> m_graphicsEngine;
 	std::shared_ptr<IWindow> m_window;
+
+	glm::uvec2 m_windowSize;
+	glm::uvec2 m_windowPos;
 };

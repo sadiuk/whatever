@@ -10,6 +10,7 @@
 
 struct IEngine
 {
+	IEngine(IServiceProvider* services) : m_services(services) {}
 	enum GraphicsAPI
 	{
 		Vulkan
@@ -21,8 +22,14 @@ struct IEngine
 		std::shared_ptr<IWindow> window;
 		ISwapChain::CreateInfo swapchainInfo;
 	};
-	static std::shared_ptr<IEngine> Create(const CreationParams& params);
+	static std::shared_ptr<IEngine> Create(const CreationParams& params, IServiceProvider* services);
 	virtual GraphicsAPI GetAPI() = 0;
 
 	virtual std::shared_ptr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
+	virtual ImageFormat GetSwapchainFormat() = 0;
+
+
+
+private:
+	IServiceProvider* m_services,
 };

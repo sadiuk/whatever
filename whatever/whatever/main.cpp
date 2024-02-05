@@ -4,5 +4,5 @@ int main()
 {
 	App app;
 
-	return 0;
+	app.Run();	
 }

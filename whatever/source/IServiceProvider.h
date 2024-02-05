@@ -18,11 +18,11 @@ struct IServiceProvider
 	template<IServiceDerived Service>
 	Service* GetService()
 	{
-		auto it = m_services.find(m_services.begin(), m_services.end(), Service::GetServiceNameStatic());
+		auto it = m_services.find(Service::GetServiceNameStatic());
 		assert(it != m_services.end());
-		return it;
+		return static_cast<Service*>(it->second.get());
 	}
 
-	std::unordered_map<std::string, std::shared_ptr<IService>> m_services;
+	std::map<std::string, std::shared_ptr<IService>> m_services;
 };
 

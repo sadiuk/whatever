@@ -2,6 +2,8 @@
 #include "IShader.h"
 #include "GraphicsConstants.h"
 
+#include "vulkan/vulkan.h"
+
 #include <vector>
 class VulkanShader : public IShader
 {

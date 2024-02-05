@@ -1,5 +1,7 @@
 #pragma once
 
+#define TOVKBOOL(x) ((x) ? VK_TRUE : VK_FALSE)
+
 #define ASSERT_VK_SUCCESS_ELSE_RET0(x) if((x) != VK_SUCCESS) { assert(false); return 0; }
 
 #define ASSERT_VK_SUCCESS_ELSE_RET(x) if((x) != VK_SUCCESS) { assert(false); return; }

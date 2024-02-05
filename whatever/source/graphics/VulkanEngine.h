@@ -3,7 +3,7 @@
 #include "IVulkanSurface.h" 
 #include <ui/IWindow.h>
 
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
 
 #include <optional>
@@ -31,11 +31,10 @@ class VulkanEngine : public IEngine
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 public:
-	VulkanEngine(const IEngine::CreationParams& params, ISurfaceFactory* factory);
+	VulkanEngine(const IEngine::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory);
 	~VulkanEngine();
 	GraphicsAPI GetAPI() override { return Vulkan; }
 	VkDevice GetNativeDeviceHandle() { return m_device; }
-
 private:
 	bool Init();
 	bool Deinit();
@@ -49,8 +48,9 @@ private:
 
 	bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 	AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
-
+public:
 	std::shared_ptr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
+	ImageFormat GetSwapchainFormat() override;
 private:
 	VkInstance m_instance;
 	VkPhysicalDevice m_physicalDevice;

@@ -7,8 +7,10 @@
 #include "SDL.h"
 
 #include <algorithm>
+#include "VulkanConstantTranslator.h"
 
-VulkanEngine::VulkanEngine(const IEngine::CreationParams& params, ISurfaceFactory* factory):
+VulkanEngine::VulkanEngine(const IEngine::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory):
+	IEngine(services),
 	m_creationParams(params)
 {
 	m_surface = std::static_pointer_cast<IVulkanSurface>(factory->Create());
@@ -305,8 +307,13 @@ VulkanEngine::AvailableSwapchainCapabilities VulkanEngine::GetAvailableSwapchain
 
 std::shared_ptr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
 {
-	auto pipeline = std::make_shared<VulkanGraphicsPipeline>(this, params);
+	auto pipeline = std::make_shared<VulkanGraphicsPipeline>(this, m_services, params);
 	return nullptr;
+}
+
+ImageFormat VulkanEngine::GetSwapchainFormat()
+{
+	return VulkanConstantsTranslator::GetEngineImageFormat(m_swapchainFormat);
 }
 
 bool VulkanEngine::Deinit()
