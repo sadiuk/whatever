@@ -2,9 +2,13 @@
 #include "ui/WindowSDL2.h"
 #include "vulkan/vulkan.h"
 #include "graphics/ISurface.h"
-#include "IServiceProvider.h"
+#include "VulkanAppServiceProvider.h"
+using namespace wtv;
+
 void App::Init()
 {
+	m_services = std::make_shared<VulkanAppServiceProvider>();
+
 	IWindow::CreationParams windowParams{};
 	windowParams.caption = "EngineTest";
 	windowParams.windowPos = m_windowPos;
@@ -18,7 +22,7 @@ void App::Init()
 	engineParams.appName = "EngineTest";
 	engineParams.window = m_window;
 	engineParams.swapchainInfo = swapchainParams;
-	m_graphicsEngine = IEngine::Create(engineParams, );
+	m_graphicsEngine = IEngine::Create(engineParams, m_services.get());
 }
 
 App::App()

@@ -6,17 +6,19 @@
 #include <memory>
 #include <filesystem>
 
-
-struct IVulkanShaderCompiler : public IService
+namespace wtv
 {
-	IMPL_ISERVICE(IVulkanShaderCompiler);
-
-	struct CompilationParams
+	struct IVulkanShaderCompiler : public IService
 	{
-		VkDevice device;
-		std::string entryPoint;
-		ShaderStage stage;
-		std::filesystem::path sourcePath;
+		IMPL_ISERVICE(IVulkanShaderCompiler);
+
+		struct CompilationParams
+		{
+			VkDevice device;
+			std::string entryPoint;
+			ShaderStage stage;
+			std::filesystem::path sourcePath;
+		};
+		virtual std::shared_ptr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) = 0;
 	};
-	virtual std::shared_ptr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) = 0;
-};
+}

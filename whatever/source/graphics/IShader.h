@@ -1,8 +1,10 @@
 #pragma once
 #include <filesystem>
 #include <string>
-
-struct IShader
+namespace wtv
 {
-	IShader() {}
-};
+	struct IShader
+	{
+		IShader() {}
+	};
+}

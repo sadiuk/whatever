@@ -1,10 +1,12 @@
 #pragma once
 #include <glm/glm.hpp>
-
-struct ISwapChain
+namespace wtv
 {
-	struct CreateInfo
+	struct ISwapChain
 	{
-		glm::uvec2 extent;
+		struct CreateInfo
+		{
+			glm::uvec2 extent;
+		};
 	};
-};
+}

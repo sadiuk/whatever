@@ -159,6 +159,7 @@
     <ClCompile Include="..\source\graphics\VulkanShaderCompilerDXC.cpp" />
     <ClCompile Include="..\source\graphics\VulkanSurfaceSDL.cpp" />
     <ClCompile Include="..\source\ui\WindowSDL2.cpp" />
+    <ClCompile Include="..\source\VulkanAppServiceProvider.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,7 +179,6 @@
     <ClInclude Include="..\source\graphics\VulkanShader.h" />
     <ClInclude Include="..\source\graphics\VulkanShaderCompilerDXC.h" />
     <ClInclude Include="..\source\graphics\VulkanSurfaceSDL.h" />
-    <ClInclude Include="..\source\graphics\VulkanSwapChain.h" />
     <ClInclude Include="..\source\IService.h" />
     <ClInclude Include="..\source\IServiceProvider.h" />
     <ClInclude Include="..\source\ui\IWindow.h" />
@@ -186,6 +186,7 @@
     <ClInclude Include="..\source\util\ConsoleLogger.h" />
     <ClInclude Include="..\source\util\ILogger.h" />
     <ClInclude Include="..\source\util\StringUtils.h" />
+    <ClInclude Include="..\source\VulkanAppServiceProvider.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

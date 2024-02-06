@@ -48,6 +48,9 @@
     <ClCompile Include="..\source\graphics\VulkanConstantTranslator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\VulkanAppServiceProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -86,9 +89,6 @@
     <ClInclude Include="..\source\graphics\ISwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\VulkanSwapChain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\IServiceProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\VulkanAppServiceProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
