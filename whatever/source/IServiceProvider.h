@@ -1,5 +1,6 @@
 #pragma once
 #include <IService.h>
+#include "util/RefPtr.h"
 
 #include <concepts>
 #include <unordered_map>
@@ -8,7 +9,7 @@
 
 namespace wtv
 {
-	struct IServiceProvider
+	struct IServiceProvider : public IReferenceCounted
 	{
 		template<IServiceDerived Service>
 		void AddService(const std::shared_ptr<Service>& service)

@@ -2,6 +2,7 @@
 #include "VulkanShader.h"
 #include "GraphicsConstants.h"
 #include "IService.h"
+#include <util/RefPtr.h>
 
 #include <memory>
 #include <filesystem>
@@ -19,6 +20,6 @@ namespace wtv
 			ShaderStage stage;
 			std::filesystem::path sourcePath;
 		};
-		virtual std::shared_ptr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) = 0;
+		virtual RefPtr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) = 0;
 	};
 }

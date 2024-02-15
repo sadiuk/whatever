@@ -1,12 +1,13 @@
 #pragma once
-#include <string>
+#include "util/RefPtr.h"
 
 #include "glm/glm.hpp"
 
+#include <string>
 
 namespace wtv
 {
-	class IWindow
+	class IWindow : public IReferenceCounted
 	{
 	public:
 		enum WindowLib

@@ -37,8 +37,8 @@ namespace wtv
 	}
 
 
-	std::shared_ptr<ISurface> VulkanSurfaceSDLFactory::Create()
+	RefPtr<ISurface> VulkanSurfaceSDLFactory::Create()
 	{
-		return std::make_shared<VulkanSurfaceSDL>(m_params);
+		return MakeRef<VulkanSurfaceSDL>(m_params);
 	}
 }

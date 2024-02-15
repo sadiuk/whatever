@@ -2,6 +2,7 @@
 #include "graphics/IEngine.h"
 #include "ui/IWindow.h"
 #include "IServiceProvider.h"
+#include "util/RefPtr.h"
 
 #include <memory>
 #include <string>
@@ -15,9 +16,9 @@ private:
 
 
 
-	std::shared_ptr<wtv::IEngine> m_graphicsEngine;
-	std::shared_ptr<wtv::IWindow> m_window;
-	std::shared_ptr<wtv::IServiceProvider> m_services;
+	wtv::RefPtr<wtv::IEngine> m_graphicsEngine;
+	wtv::RefPtr<wtv::IWindow> m_window;
+	wtv::RefPtr<wtv::IServiceProvider> m_services;
 	glm::uvec2 m_windowSize;
 	glm::uvec2 m_windowPos;
 };

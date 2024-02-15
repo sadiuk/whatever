@@ -12,7 +12,7 @@ namespace wtv
 	class VulkanShaderCompilerDXC : public IVulkanShaderCompiler
 	{
 	public:
-		std::shared_ptr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) override;
+		RefPtr<VulkanShader> CreateShaderFromFile(const CompilationParams& params) override;
 		VulkanShaderCompilerDXC();
 
 	private:

@@ -13,7 +13,7 @@ namespace wtv
 	struct VulkanSurfaceSDLFactory : ISurfaceFactory
 	{
 		VulkanSurfaceSDLFactory(const ISurface::CreationParams& params) : ISurfaceFactory(params) {}
-		std::shared_ptr<ISurface> Create();
+		RefPtr<ISurface> Create();
 	};
 	class VulkanSurfaceSDL : public IVulkanSurface
 	{
@@ -25,6 +25,6 @@ namespace wtv
 		bool Deinitialize(VkInstance instance) override;
 	private:
 		VkSurfaceKHR m_surface;
-		std::shared_ptr<IWindow> m_window;
+		RefPtr<IWindow> m_window;
 	};
 }

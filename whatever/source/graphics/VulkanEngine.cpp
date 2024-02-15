@@ -15,7 +15,7 @@ namespace wtv
 		IEngine(services),
 		m_creationParams(params)
 	{
-		m_surface = std::static_pointer_cast<IVulkanSurface>(factory->Create());
+		m_surface = StaticRefCast<IVulkanSurface>(factory->Create());
 		Init();
 
 	}
@@ -307,15 +307,15 @@ namespace wtv
 		return caps;
 	}
 
-	std::shared_ptr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
+	RefPtr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
 	{
-		auto pipeline = std::make_shared<VulkanGraphicsPipeline>(this, m_services, params);
-		return nullptr;
+		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params);
+		return pipeline;
 	}
 
 	ImageFormat VulkanEngine::GetSwapchainFormat()
 	{
-		return VulkanConstantsTranslator::GetEngineImageFormat(m_swapchainFormat);
+		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchainFormat);
 	}
 
 	bool VulkanEngine::Deinit()

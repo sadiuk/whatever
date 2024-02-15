@@ -1,16 +1,17 @@
 #pragma once
-#include <memory>
 #include "ui/IWindow.h"
 #include "IEngine.h"
+#include <util/RefPtr.h>
 
+#include <memory>
 namespace wtv
 {
 
-	struct ISurface
+	struct ISurface : public IReferenceCounted
 	{
 		struct CreationParams
 		{
-			std::shared_ptr<IWindow> window;
+			RefPtr<IWindow> window;
 		};
 
 		virtual void* GetNativeHandle() = 0;
@@ -19,7 +20,7 @@ namespace wtv
 	struct ISurfaceFactory
 	{
 		ISurfaceFactory(const ISurface::CreationParams& params) : m_params(params) {}
-		virtual std::shared_ptr<ISurface> Create() = 0;
+		virtual RefPtr<ISurface> Create() = 0;
 		virtual ~ISurfaceFactory() = default;
 	protected:
 		ISurface::CreationParams m_params;

@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include "VulkanShader.h"
+#include <iostream>
 namespace wtv
 {
 	VulkanShaderCompilerDXC::VulkanShaderCompilerDXC()
@@ -28,7 +29,7 @@ namespace wtv
 		}
 
 	}
-	std::shared_ptr<VulkanShader> VulkanShaderCompilerDXC::CreateShaderFromFile(const CompilationParams& params)
+	RefPtr<VulkanShader> VulkanShaderCompilerDXC::CreateShaderFromFile(const CompilationParams& params)
 	{
 		std::wstring filename = params.sourcePath.wstring();
 		HRESULT hres;
@@ -42,16 +43,21 @@ namespace wtv
 
 		// Select target profile based on shader file extension
 		LPCWSTR targetProfile{};
-		size_t idx = filename.rfind('.');
-		if (idx != std::string::npos) {
-			std::wstring extension = filename.substr(idx + 1);
-			if (extension == L"vert") {
-				targetProfile = L"vs_6_1";
-			}
-			if (extension == L"frag") {
-				targetProfile = L"ps_6_1";
-			}
-			// Mapping for other file types go here (cs_x_y, lib_x_y, etc.)
+		switch (params.stage)
+		{
+		case ShaderStage::Vertex:
+		{
+			targetProfile = L"vs_6_1";
+			break;
+		}
+		case ShaderStage::Fragment:
+		{
+			targetProfile = L"ps_6_1";
+			break;
+		}
+		default:
+			assert(false);
+			break;
 		}
 
 		// Configure the compiler arguments for compiling the HLSL shader to SPIR-V
@@ -91,7 +97,7 @@ namespace wtv
 			hres = result->GetErrorBuffer(&errorBlob);
 			if (SUCCEEDED(hres) && errorBlob) {
 				// Log Error
-				//std::cerr << "Shader compilation failed :\n\n" << (const char*)errorBlob->GetBufferPointer();
+				std::cerr << "Shader compilation failed :\n\n" << (const char*)errorBlob->GetBufferPointer();
 				//throw std::runtime_error("Compilation failed");
 			}
 		}
@@ -106,6 +112,6 @@ namespace wtv
 		shaderParams.codeLength = code->GetBufferSize();
 		shaderParams.device = params.device;
 		shaderParams.shaderName = params.sourcePath.filename().string();
-		return std::make_shared<VulkanShader>(shaderParams);
+		return MakeRef<VulkanShader>(shaderParams);
 	}
 }

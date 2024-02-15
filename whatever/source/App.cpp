@@ -7,13 +7,13 @@ using namespace wtv;
 
 void App::Init()
 {
-	m_services = std::make_shared<VulkanAppServiceProvider>();
+	m_services = MakeRef<VulkanAppServiceProvider>();
 
 	IWindow::CreationParams windowParams{};
 	windowParams.caption = "EngineTest";
 	windowParams.windowPos = m_windowPos;
 	windowParams.size = m_windowSize;
-	m_window = std::make_shared<WindowSDL2>(windowParams);
+	m_window = MakeRef<WindowSDL2>(windowParams);
 
 	ISwapChain::CreateInfo swapchainParams{};
 	swapchainParams.extent = m_windowSize;

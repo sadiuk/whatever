@@ -50,7 +50,7 @@ namespace wtv
 		bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 		AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 	public:
-		std::shared_ptr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
+		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
 		ImageFormat GetSwapchainFormat() override;
 	private:
 		VkInstance m_instance;
@@ -59,7 +59,7 @@ namespace wtv
 		VkSwapchainKHR m_swapchain;
 		VkFormat m_swapchainFormat;
 		VmaAllocator m_allocator;
-		std::shared_ptr<IVulkanSurface> m_surface;
+		RefPtr<IVulkanSurface> m_surface;
 
 		std::vector<VkImage>  m_swapchainImages;
 		std::vector<VkImageView>  m_swapchainImageViews;

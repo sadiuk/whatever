@@ -1,12 +1,13 @@
 #pragma once
 #include "GraphicsConstants.h"
+#include "util/RefPtr.h"
 
 #include <vector>
 #include <string>
 #include <map>
 namespace wtv
 {
-	struct IGraphicsPipeline
+	struct IGraphicsPipeline : public IReferenceCounted
 	{
 		struct StageDesc
 		{
@@ -54,7 +55,7 @@ namespace wtv
 		};
 		struct RasterInfo
 		{
-			bool enableDepthClamp = true;
+			bool enableDepthClamp = false;
 			FrontFace frontFace;
 			CullMode cullMode;
 			PolygonMode polygonMode;

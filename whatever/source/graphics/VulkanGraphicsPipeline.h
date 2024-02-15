@@ -44,11 +44,12 @@ namespace wtv
 	private:
 		IEngine* m_engine;
 		IServiceProvider* m_services;
-		VkPipeline m_pipeline;
-		VkDevice m_device;
-		VkRenderPass m_renderPass;
-
-		std::array<std::shared_ptr<VulkanShader>, (size_t)ShaderStage::GraphicsStageCount> m_shaderStages;
+		VkPipeline m_pipeline{};
+		VkDevice m_device{};
+		VkRenderPass m_renderPass{};
+		VkPipelineCache m_pipelineCache{};
+		VkPipelineLayout m_pipelineLayout{};
+		std::array<RefPtr<VulkanShader>, (size_t)ShaderStage::GraphicsStageCount> m_shaderStages;
 
 
 		std::vector<VkPushConstantRange> m_pushConstantRanges;

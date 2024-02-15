@@ -5,12 +5,13 @@
 #include "ISwapChain.h"
 #include "IGraphicsPipeline.h"
 #include "IServiceProvider.h"
+#include "util/RefPtr.h"
 #define ENGINE_VERSION 0
 
 
 namespace wtv
 {
-	struct IEngine
+	struct IEngine : public IReferenceCounted
 	{
 		IEngine(IServiceProvider* services) : m_services(services) {}
 		enum GraphicsAPI
@@ -21,17 +22,17 @@ namespace wtv
 		{
 			GraphicsAPI api;
 			std::string appName;
-			std::shared_ptr<IWindow> window;
+			RefPtr<IWindow> window;
 			ISwapChain::CreateInfo swapchainInfo;
 		};
-		static std::shared_ptr<IEngine> Create(const CreationParams& params, IServiceProvider* services);
+		static RefPtr<IEngine> Create(const CreationParams& params, IServiceProvider* services);
 		virtual GraphicsAPI GetAPI() = 0;
 
-		virtual std::shared_ptr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
+		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 
 
-
+		virtual ~IEngine() {}
 	protected:
 		IServiceProvider* m_services;
 	};
