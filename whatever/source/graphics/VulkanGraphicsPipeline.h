@@ -15,7 +15,6 @@ namespace wtv
 		VulkanGraphicsPipeline(IEngine* engine, IServiceProvider* services, const CreateInfo& params);
 		~VulkanGraphicsPipeline();
 	private:
-		VkPipelineCache CreatePipelineCache();
 		std::vector<VkPipelineShaderStageCreateInfo> CreateShaderStages();
 		VkPipelineVertexInputStateCreateInfo CreatePipelineVertexInputStateCreateInfo(
 			std::vector<VkVertexInputAttributeDescription>& attrDesc,
@@ -36,6 +35,7 @@ namespace wtv
 		VkPipelineDynamicStateCreateInfo CreatePipelineDynamicStateCreateInfo();
 		VkPipelineLayout CreatePipelineLayout();
 		VkRenderPass CreateRenderPass();
+		VkPipelineCache CreatePipelineCache();
 
 		std::vector<VkVertexInputAttributeDescription> CreateAttributeDescriptionList();
 		std::vector<VkVertexInputBindingDescription> CreateBindingDescriptionList();

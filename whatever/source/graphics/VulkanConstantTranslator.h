@@ -1,9 +1,10 @@
 #pragma once
 #include "GraphicsConstants.h"
 #include <vulkan/vulkan.h>
+#include <type_traits>
 namespace wtv
 {
-	struct VulkanConstantsTranslator
+	struct VulkanConstantTranslator
 	{
 		static VkFormat GetVkFormatForAttribute(VertexAtributeType attributeType);
 		static VkShaderStageFlagBits GetVkShaderStage(ShaderStage stage);
@@ -16,7 +17,8 @@ namespace wtv
 		static VkBlendFactor GetVkBlendFactor(BlendFactor blendFactor);
 		static VkBlendOp GetVkBlendOp(BlendOperation blendOp);
 		static VkFormat GetVkFormat(ImageFormat imageFormat);
-
+		static VkImageType GetVkImageType(ImageDimension dim);
 		static ImageFormat GetEngineImageFormat(VkFormat imageFormat);
+		static uint32_t GetVkImageUsageMask(std::underlying_type_t<ImageUsage> usageBits);
 	};
 }

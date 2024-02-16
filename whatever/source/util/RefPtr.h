@@ -67,7 +67,7 @@ namespace wtv
 			m_pointer = other.m_pointer;
 			return *this;
 		}
-		this_t& operator=(this_t&& other)
+		this_t& operator=(this_t&& other) noexcept
 		{
 			if (this->m_pointer == other.m_pointer)
 			{

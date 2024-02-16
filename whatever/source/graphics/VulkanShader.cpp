@@ -1,4 +1,5 @@
 #include "VulkanShader.h"
+#include "VkMakros.h"
 #include "vulkan/vulkan.h"
 namespace wtv
 {
@@ -9,6 +10,6 @@ namespace wtv
 		moduleInfo.pNext = nullptr;
 		moduleInfo.codeSize = m_params.codeLength;
 		moduleInfo.pCode = m_params.spirvCode;
-		vkCreateShaderModule(params.device, &moduleInfo, nullptr, &m_module);
+		ASSERT_VK_SUCCESS(vkCreateShaderModule(params.device, &moduleInfo, nullptr, &m_module));
 	}
 }

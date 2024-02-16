@@ -1,7 +1,7 @@
 #include "VulkanConstantTranslator.h"
 namespace wtv
 {
-    VkFormat VulkanConstantsTranslator::GetVkFormatForAttribute(VertexAtributeType attributeType)
+    VkFormat VulkanConstantTranslator::GetVkFormatForAttribute(VertexAtributeType attributeType)
     {
         switch (attributeType) {
         case VertexAtributeType::int1:
@@ -37,7 +37,7 @@ namespace wtv
         }
     }
 
-    VkShaderStageFlagBits VulkanConstantsTranslator::GetVkShaderStage(ShaderStage stage)
+    VkShaderStageFlagBits VulkanConstantTranslator::GetVkShaderStage(ShaderStage stage)
     {
         switch (stage) {
         case ShaderStage::Vertex:
@@ -55,7 +55,7 @@ namespace wtv
         }
     }
 
-    VkPrimitiveTopology VulkanConstantsTranslator::GetVkPrimitiveTopology(PrimitiveTopology topology)
+    VkPrimitiveTopology VulkanConstantTranslator::GetVkPrimitiveTopology(PrimitiveTopology topology)
     {
         switch (topology) {
         case PrimitiveTopology::PointList:
@@ -86,7 +86,7 @@ namespace wtv
         }
     }
 
-    VkFrontFace VulkanConstantsTranslator::GetVkFrontFace(FrontFace frontFaceEnum)
+    VkFrontFace VulkanConstantTranslator::GetVkFrontFace(FrontFace frontFaceEnum)
     {
         switch (frontFaceEnum) {
         case FrontFace::CounterClockwise:
@@ -99,7 +99,7 @@ namespace wtv
         }
     }
 
-    VkCullModeFlags VulkanConstantsTranslator::GetVkCullMode(CullMode cullMode)
+    VkCullModeFlags VulkanConstantTranslator::GetVkCullMode(CullMode cullMode)
     {
         switch (cullMode) {
         case CullMode::None:
@@ -116,7 +116,7 @@ namespace wtv
         }
     }
 
-    VkPolygonMode VulkanConstantsTranslator::GetVkPolygonMode(PolygonMode polygonModeEnum)
+    VkPolygonMode VulkanConstantTranslator::GetVkPolygonMode(PolygonMode polygonModeEnum)
     {
         switch (polygonModeEnum) {
         case PolygonMode::Fill:
@@ -131,7 +131,7 @@ namespace wtv
         }
     }
 
-    VkCompareOp VulkanConstantsTranslator::GetCompareOperation(CompareOperation depthTestOperationEnum)
+    VkCompareOp VulkanConstantTranslator::GetCompareOperation(CompareOperation depthTestOperationEnum)
     {
         switch (depthTestOperationEnum) {
         case CompareOperation::Never:
@@ -156,7 +156,7 @@ namespace wtv
         }
     }
 
-    VkStencilOp VulkanConstantsTranslator::GetStencilTestOperation(StencilTestOperation stencilTestOperationEnum)
+    VkStencilOp VulkanConstantTranslator::GetStencilTestOperation(StencilTestOperation stencilTestOperationEnum)
     {
         switch (stencilTestOperationEnum) {
         case StencilTestOperation::Keep:
@@ -181,7 +181,7 @@ namespace wtv
         }
     }
 
-    VkBlendOp VulkanConstantsTranslator::GetVkBlendOp(BlendOperation blendOp)
+    VkBlendOp VulkanConstantTranslator::GetVkBlendOp(BlendOperation blendOp)
     {
         switch (blendOp) {
         case BlendOperation::Add:
@@ -201,7 +201,7 @@ namespace wtv
         }
     }
 
-    VkFormat VulkanConstantsTranslator::GetVkFormat(ImageFormat imageFormat)
+    VkFormat VulkanConstantTranslator::GetVkFormat(ImageFormat imageFormat)
     {
         switch (imageFormat)
         {
@@ -441,7 +441,23 @@ namespace wtv
         }
     }
 
-    ImageFormat VulkanConstantsTranslator::GetEngineImageFormat(VkFormat imageFormat)
+    VkImageType VulkanConstantTranslator::GetVkImageType(ImageDimension dim)
+    {
+        switch (dim)
+        {
+        case ImageDimension::Dimension1D:
+                return VK_IMAGE_TYPE_1D;
+        case ImageDimension::Dimension2D:
+            return VK_IMAGE_TYPE_2D;
+        case ImageDimension::Dimension3D:
+            return VK_IMAGE_TYPE_3D;
+        default:
+            assert(false);
+            return VK_IMAGE_TYPE_MAX_ENUM;
+        }
+    }
+
+    ImageFormat VulkanConstantTranslator::GetEngineImageFormat(VkFormat imageFormat)
     {
         switch (imageFormat)
         {
@@ -682,7 +698,31 @@ namespace wtv
         }
     }
 
-    VkBlendFactor VulkanConstantsTranslator::GetVkBlendFactor(BlendFactor blendFactor)
+    uint32_t VulkanConstantTranslator::GetVkImageUsageMask(std::underlying_type_t<ImageUsage> usageBits)
+    {
+        if (usageBits == (uint32_t)ImageUsage::Undefined)
+            return VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM;
+
+        uint32_t result = 0;
+
+        if (usageBits & (uint32_t)ImageUsage::CopySource)
+            result |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        if (usageBits & (uint32_t)ImageUsage::CopyDestination)
+            result |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        if (usageBits & (uint32_t)ImageUsage::SampledImage)
+            result |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if (usageBits & (uint32_t)ImageUsage::StorageImage)
+            result |= VK_IMAGE_USAGE_STORAGE_BIT;
+        if (usageBits & (uint32_t)ImageUsage::ColorAttachment)
+            result |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        if (usageBits & (uint32_t)ImageUsage::DepthStencilAttachment)
+            result |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        if (usageBits & (uint32_t)ImageUsage::SubpassInput)
+            result |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+        return result;
+    }
+
+    VkBlendFactor VulkanConstantTranslator::GetVkBlendFactor(BlendFactor blendFactor)
     {
         switch (blendFactor) {
         case BlendFactor::Zero:
@@ -727,5 +767,7 @@ namespace wtv
             assert(false);
             return VK_BLEND_FACTOR_MAX_ENUM;
         }
+        return VK_BLEND_FACTOR_MAX_ENUM;
+
     }
 }

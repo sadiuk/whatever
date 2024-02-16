@@ -91,7 +91,7 @@ namespace wtv
 
 		m_swapchainImageViews.resize(imageCount);
 		VkImageViewCreateInfo imageViewInfo{};
-		for (int i = 0; i < imageCount; ++i)
+		for (uint32_t i = 0; i < imageCount; ++i)
 		{
 			imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			imageViewInfo.pNext = nullptr;
@@ -166,7 +166,7 @@ namespace wtv
 		instanceCreateInfo.pNext = nullptr;
 		instanceCreateInfo.flags = 0;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		instanceCreateInfo.enabledExtensionCount = extensions.size();
+		instanceCreateInfo.enabledExtensionCount = (uint32_t)extensions.size();
 		instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 		instanceCreateInfo.enabledLayerCount = (uint32_t)validationLayers.size();
 		instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
@@ -237,7 +237,7 @@ namespace wtv
 		deviceInfo.pNext = nullptr;
 		deviceInfo.queueCreateInfoCount = 1;
 		deviceInfo.pQueueCreateInfos = queueInfos;
-		deviceInfo.enabledExtensionCount = deviceExtensions.size();
+		deviceInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 		deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
 		deviceInfo.enabledLayerCount = 0;
 		deviceInfo.ppEnabledLayerNames = nullptr;

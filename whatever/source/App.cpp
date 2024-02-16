@@ -50,8 +50,13 @@ void App::Run()
 	pipelineInfo.renderTargetInfoVec[0].clearBeforeWrite = true;
 	pipelineInfo.renderTargetInfoVec[0].format = m_graphicsEngine->GetSwapchainFormat();
 
-	//pipelineInfo.stagesDescription.resize(2);
-
+	pipelineInfo.stagesDescription.resize(2);
+	pipelineInfo.stagesDescription[0].stage = ShaderStage::Vertex;
+	pipelineInfo.stagesDescription[0].path = "C:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
+	pipelineInfo.stagesDescription[0].entryPoint = "VS";
+	pipelineInfo.stagesDescription[1].stage = ShaderStage::Fragment;
+	pipelineInfo.stagesDescription[1].path = "C:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
+	pipelineInfo.stagesDescription[1].entryPoint = "PS";
 	//pipelineInfo.vertexBufferLayout
 	
 	pipelineInfo.vertexTopology = PrimitiveTopology::TriangleList;
