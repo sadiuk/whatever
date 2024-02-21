@@ -143,5 +143,8 @@
     <ClInclude Include="..\source\graphics\IFramebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\graphics\IImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

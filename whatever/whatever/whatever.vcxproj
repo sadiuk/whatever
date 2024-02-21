@@ -171,6 +171,7 @@
     <ClInclude Include="..\source\graphics\IFramebuffer.h" />
     <ClInclude Include="..\source\graphics\IGPUImage.h" />
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h" />
+    <ClInclude Include="..\source\graphics\IImage.h" />
     <ClInclude Include="..\source\graphics\IShader.h" />
     <ClInclude Include="..\source\graphics\IVulkanShaderCompiler.h" />
     <ClInclude Include="..\source\graphics\ISurface.h" />

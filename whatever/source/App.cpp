@@ -46,9 +46,11 @@ void App::Run()
 	pipelineInfo.rasterInfo.cullMode = CullMode::None;
 	pipelineInfo.rasterInfo.polygonMode = PolygonMode::Fill;
 
-	pipelineInfo.renderTargetInfoVec.resize(1);
-	pipelineInfo.renderTargetInfoVec[0].clearBeforeWrite = true;
-	pipelineInfo.renderTargetInfoVec[0].format = m_graphicsEngine->GetSwapchainFormat();
+	IFramebuffer::Layout framebufferLayout{};
+	framebufferLayout.colorBuffers.emplace_back();
+	framebufferLayout.colorBuffers[0].clearBeforeWrite = true;
+	framebufferLayout.colorBuffers[0].format = m_graphicsEngine->GetSwapchainFormat();
+	pipelineInfo.framebufferLayout = framebufferLayout;
 
 	pipelineInfo.stagesDescription.resize(2);
 	pipelineInfo.stagesDescription[0].stage = ShaderStage::Vertex;
@@ -68,4 +70,10 @@ void App::Run()
 
 	auto graphPipeline = m_graphicsEngine->CreateGraphicsPipeline(pipelineInfo);
 
+	IFramebuffer::CreateInfo framebufferInfo{};
+	IImage::View swapchainImageView(m_graphicsEngine->GetSwapchainImages()[0].get());
+	framebufferInfo.colorBuffers = { swapchainImageView };
+	framebufferInfo.layout = framebufferLayout;
+	auto framebuffer = m_graphicsEngine->CreateFramebuffer(framebufferInfo);
+	int a = -0;
 }

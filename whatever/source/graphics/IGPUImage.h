@@ -1,30 +1,19 @@
 #pragma once
 #include "GraphicsConstants.h"
+#include "IImage.h"
 
 #include <cstdint>
 #include <type_traits>
 namespace wtv
 {
-	struct IGPUImage
+	struct IGPUImage : public IImage
 	{
-		struct View
+		IGPUImage(const CreationParams& params) : m_props(params)
 		{
-		};
-		struct CreationParams
-		{
-			uint32_t width;
-			uint32_t height;
-			uint32_t depth = 1;
-			uint32_t arraySize = 1;
-			uint32_t mipLevels = 1;
-			ImageFormat format;
-			ImageDimension dimension = ImageDimension::Dimension2D;
-			uint32_t samples = 1;
-			std::underlying_type_t<ImageUsage> usageFlags;
-		};
-
+		}
+		const Properties& GetProperties() const override { return m_props; }
+		virtual ~IGPUImage() {}
 	protected:
-		IGPUImage(const CreationParams& params) : m_params(params) {}
-		CreationParams m_params;
+		Properties m_props;
 	};
 }

@@ -289,13 +289,15 @@ namespace wtv
 
 	VkRenderPass VulkanGraphicsPipeline::CreateRenderPass()
 	{
-		std::vector<VkAttachmentDescription> attachmentDescs(m_params.renderTargetInfoVec.size());
+		std::vector<IFramebuffer::RenderTargetInfo> allRenderTargets(m_params.framebufferLayout.colorBuffers.begin(), m_params.framebufferLayout.colorBuffers.end());
+		allRenderTargets.insert(allRenderTargets.end(), m_params.framebufferLayout.depthBuffers.begin(), m_params.framebufferLayout.depthBuffers.end());
+		std::vector<VkAttachmentDescription> attachmentDescs(allRenderTargets.size());
 		for (int i = 0; i < attachmentDescs.size(); ++i)
 		{
 			// TODO: image layouts, stencil stuff
 			attachmentDescs[i] = {};
-			attachmentDescs[i].format = VulkanConstantTranslator::GetVkFormat(m_params.renderTargetInfoVec[i].format);
-			attachmentDescs[i].loadOp = m_params.renderTargetInfoVec[i].clearBeforeWrite ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+			attachmentDescs[i].format = VulkanConstantTranslator::GetVkFormat(allRenderTargets[i].format);
+			attachmentDescs[i].loadOp = allRenderTargets[i].clearBeforeWrite ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
 			attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;

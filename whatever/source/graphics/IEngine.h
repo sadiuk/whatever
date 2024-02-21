@@ -29,6 +29,8 @@ namespace wtv
 		virtual GraphicsAPI GetAPI() = 0;
 
 		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
+		virtual RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) = 0;
+		virtual std::vector<RefPtr<IGPUImage>> GetSwapchainImages() = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 
 

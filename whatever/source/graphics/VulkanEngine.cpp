@@ -1,13 +1,14 @@
 #include "VulkanEngine.h"
 #include "VkMakros.h"
 #include "VulkanGraphicsPipeline.h"
+#include "VulkanFramebuffer.h"
+#include "VulkanConstantTranslator.h"
 
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
 #include "SDL.h"
 
 #include <algorithm>
-#include "VulkanConstantTranslator.h"
 
 namespace wtv
 {
@@ -32,6 +33,9 @@ namespace wtv
 
 		AvailableSwapchainCapabilities caps = GetAvailableSwapchainCapabilities();
 		VkSurfaceFormatKHR surfaceFmt{};
+
+		IImage::CreationParams swapchainImageParams{};
+
 		if (auto surfaceFmtIter = std::find_if(
 			caps.availableFormats.begin(), caps.availableFormats.end(),
 			[](const VkSurfaceFormatKHR& fmt) { return fmt.format == VK_FORMAT_B8G8R8A8_SRGB; });
@@ -54,6 +58,12 @@ namespace wtv
 		swapchainCreateInfo.imageExtent = caps.surfaceCaps.currentExtent;
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		
+		swapchainImageParams.width = swapchainCreateInfo.imageExtent.width;
+		swapchainImageParams.height = swapchainCreateInfo.imageExtent.height;
+		swapchainImageParams.arraySize = swapchainCreateInfo.imageArrayLayers;
+		swapchainImageParams.format = VulkanConstantTranslator::GetEngineImageFormat(swapchainCreateInfo.imageFormat);
+
 		if (m_queueFamilyIndices.graphicsFamilyIndex.value() != m_queueFamilyIndices.computeFamilyIndex.value())
 		{
 			uint32_t queuefamilyIndices[2] = {
@@ -79,40 +89,22 @@ namespace wtv
 
 		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &m_swapchain));
 
-		return CreateSwapchainImages();
+		return CreateSwapchainImages(swapchainImageParams);
 
 	}
-	bool VulkanEngine::CreateSwapchainImages()
+	bool VulkanEngine::CreateSwapchainImages(const IImage::CreationParams& params)
 	{
 		uint32_t imageCount{};
 		ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, nullptr));
+		std::vector<VkImage> rawSwapchainImages;
+		rawSwapchainImages.resize(imageCount);
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, rawSwapchainImages.data()));
+
 		m_swapchainImages.resize(imageCount);
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, m_swapchainImages.data()));
-
-		m_swapchainImageViews.resize(imageCount);
-		VkImageViewCreateInfo imageViewInfo{};
-		for (uint32_t i = 0; i < imageCount; ++i)
+		for (int i = 0; i < m_swapchainImages.size(); ++i)
 		{
-			imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			imageViewInfo.pNext = nullptr;
-			imageViewInfo.flags = 0;
-			imageViewInfo.image = m_swapchainImages[i];
-			imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			imageViewInfo.format = m_swapchainFormat;
-			imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewInfo.subresourceRange.baseArrayLayer = 0;
-			imageViewInfo.subresourceRange.baseMipLevel = 0;
-			imageViewInfo.subresourceRange.layerCount = 1;
-			imageViewInfo.subresourceRange.levelCount = 1;
-			imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-			ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_device, &imageViewInfo, nullptr, &m_swapchainImageViews[i]));
-
+			m_swapchainImages[i] = MakeRef<VulkanGPUImage>(m_device, params, rawSwapchainImages[i]);
 		}
-
 		return true;
 	}
 
@@ -311,6 +303,30 @@ namespace wtv
 	{
 		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params);
 		return pipeline;
+	}
+
+	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params)
+	{
+		if (params.colorBuffers.size() > 1)
+		{
+			for (int i = 1; i < params.colorBuffers.size(); ++i)
+			{
+				if (!params.colorBuffers[i].HasSameExtent(params.colorBuffers[i - 1])) return nullptr;
+				// Log that all image views must have same extent
+			}
+		}
+		auto framebuffer = MakeRef<VulkanFramebuffer>(params, m_device);
+		return framebuffer;
+	}
+
+	std::vector<RefPtr<IGPUImage>> VulkanEngine::GetSwapchainImages()
+	{
+		std::vector<RefPtr<IGPUImage>> result(m_swapchainImages.size());
+		for (int i = 0; i < m_swapchainImages.size(); ++i)
+		{
+			result[i] = m_swapchainImages[i];
+		}
+		return result;
 	}
 
 	ImageFormat VulkanEngine::GetSwapchainFormat()

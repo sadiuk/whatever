@@ -1,6 +1,7 @@
 #pragma once
 #include "IEngine.h"
 #include "IVulkanSurface.h" 
+#include "VulkanGPUImage.h"
 #include <ui/IWindow.h>
 
 #include "vulkan/vulkan.h"
@@ -45,12 +46,14 @@ namespace wtv
 		bool CreateAllocator();
 		bool InitSurface();
 		bool CreateSwapChain();
-		bool CreateSwapchainImages();
+		bool CreateSwapchainImages(const IImage::CreationParams& params);
 
 		bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 		AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 	public:
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
+		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) override;
+		std::vector<RefPtr<IGPUImage>> GetSwapchainImages() override;
 		ImageFormat GetSwapchainFormat() override;
 	private:
 		VkInstance m_instance;
@@ -61,8 +64,7 @@ namespace wtv
 		VmaAllocator m_allocator;
 		RefPtr<IVulkanSurface> m_surface;
 
-		std::vector<VkImage>  m_swapchainImages;
-		std::vector<VkImageView>  m_swapchainImageViews;
+		std::vector<RefPtr<VulkanGPUImage>>  m_swapchainImages;
 
 
 		QueueFamilyIndices m_queueFamilyIndices;

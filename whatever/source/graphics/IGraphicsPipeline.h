@@ -1,5 +1,6 @@
 #pragma once
 #include "GraphicsConstants.h"
+#include "IFramebuffer.h"
 #include "util/RefPtr.h"
 
 #include <vector>
@@ -63,14 +64,11 @@ namespace wtv
 		struct DescriptorSetLayout
 		{
 		};
-		struct RenderTargetInfo
-		{
-			ImageFormat format;
-			bool clearBeforeWrite = false;
-		};
+
 		using VerterBufferLayout = std::vector<VertexAtributeType>;
 		using StagesDescription = std::vector<StageDesc>;
-		using RenderTargetInfoVec = std::vector<RenderTargetInfo>;
+		//using RenderTargetInfoVec = std::vector<RenderTargetInfo>;
+
 		struct CreateInfo
 		{
 			VerterBufferLayout vertexBufferLayout;
@@ -80,7 +78,7 @@ namespace wtv
 			RasterInfo rasterInfo;
 			DepthStencilInfo depthStencilInfo;
 			BlendStateInfo blendStateInfo;
-			RenderTargetInfoVec renderTargetInfoVec;
+			IFramebuffer::Layout framebufferLayout;
 		};
 
 		IGraphicsPipeline(const CreateInfo& params) : m_params(params) {}
