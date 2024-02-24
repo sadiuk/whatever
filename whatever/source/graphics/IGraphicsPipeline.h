@@ -81,8 +81,10 @@ namespace wtv
 			IFramebuffer::Layout framebufferLayout;
 		};
 
+
 		IGraphicsPipeline(const CreateInfo& params) : m_params(params) {}
 		virtual ~IGraphicsPipeline() {}
+		virtual RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) = 0;
 	protected:
 		CreateInfo m_params;
 

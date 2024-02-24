@@ -66,6 +66,11 @@ namespace wtv
 		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_device, m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
+	RefPtr<IFramebuffer> VulkanGraphicsPipeline::CreateFramebuffer(const IFramebuffer::CreateInfo& params)
+	{
+		return static_cast<VulkanEngine*>(m_engine)->CreateFramebuffer(params, m_renderPass);
+	}
+
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
 		vkDestroyPipeline(m_device, m_pipeline, nullptr);

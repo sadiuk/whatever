@@ -4,7 +4,7 @@
 
 namespace wtv
 {
-	VulkanFramebuffer::VulkanFramebuffer(const CreateInfo& params, VkDevice device) :
+	VulkanFramebuffer::VulkanFramebuffer(const CreateInfo& params, VkDevice device, VkRenderPass renderpass) :
 		IFramebuffer(params),
 		m_device(device)
 	{
@@ -48,6 +48,7 @@ namespace wtv
 		createInfo.layers = arraySize;
 		createInfo.attachmentCount = (uint32_t)attachments.size();
 		createInfo.pAttachments = attachments.data();
+		createInfo.renderPass = renderpass;
 		ASSERT_VK_SUCCESS(vkCreateFramebuffer(m_device, &createInfo, nullptr, &m_framebuffer));
 
 	}

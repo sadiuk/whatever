@@ -305,7 +305,7 @@ namespace wtv
 		return pipeline;
 	}
 
-	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params)
+	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass)
 	{
 		if (params.colorBuffers.size() > 1)
 		{
@@ -315,7 +315,7 @@ namespace wtv
 				// Log that all image views must have same extent
 			}
 		}
-		auto framebuffer = MakeRef<VulkanFramebuffer>(params, m_device);
+		auto framebuffer = MakeRef<VulkanFramebuffer>(params, m_device, renderpass);
 		return framebuffer;
 	}
 
@@ -333,6 +333,7 @@ namespace wtv
 	{
 		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchainFormat);
 	}
+
 
 	bool VulkanEngine::Deinit()
 	{

@@ -52,7 +52,7 @@ namespace wtv
 		AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
 	public:
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
-		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) override;
+		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass);
 		std::vector<RefPtr<IGPUImage>> GetSwapchainImages() override;
 		ImageFormat GetSwapchainFormat() override;
 	private:

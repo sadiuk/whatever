@@ -74,6 +74,8 @@ void App::Run()
 	IImage::View swapchainImageView(m_graphicsEngine->GetSwapchainImages()[0].get());
 	framebufferInfo.colorBuffers = { swapchainImageView };
 	framebufferInfo.layout = framebufferLayout;
-	auto framebuffer = m_graphicsEngine->CreateFramebuffer(framebufferInfo);
+	auto framebuffer = graphPipeline->CreateFramebuffer(framebufferInfo);
+
+
 	int a = -0;
 }

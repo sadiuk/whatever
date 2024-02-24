@@ -7,7 +7,7 @@ namespace wtv
 	class VulkanFramebuffer : public IFramebuffer
 	{
 	public:
-		VulkanFramebuffer(const CreateInfo& params, VkDevice device);
+		VulkanFramebuffer(const CreateInfo& params, VkDevice device, VkRenderPass renderpass);
 
 	private:
 		VkDevice m_device;
