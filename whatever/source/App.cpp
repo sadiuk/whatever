@@ -63,10 +63,12 @@ void App::Run()
 	
 	pipelineInfo.vertexTopology = PrimitiveTopology::TriangleList;
 
-	pipelineInfo.viewportInfo.x = 0;
-	pipelineInfo.viewportInfo.y = 0;
-	pipelineInfo.viewportInfo.width = m_windowSize.x;
-	pipelineInfo.viewportInfo.height = m_windowSize.y;
+	ViewportInfo viewport;
+	viewport.x = 0;
+	viewport.y = 0;
+	viewport.width = m_windowSize.x;
+	viewport.height = m_windowSize.y;
+	pipelineInfo.viewportInfo = viewport;
 
 	auto graphPipeline = m_graphicsEngine->CreateGraphicsPipeline(pipelineInfo);
 
@@ -76,6 +78,16 @@ void App::Run()
 	framebufferInfo.layout = framebufferLayout;
 	auto framebuffer = graphPipeline->CreateFramebuffer(framebufferInfo);
 
+	auto commandBuffer = m_graphicsEngine->CreateCommandBuffer();
 
+	glm::vec4 clearColor(0, 1, 0, 1);
+	commandBuffer->Begin();
+	commandBuffer->SetClearColorValue(0, &clearColor.x);
+	commandBuffer->SetViewport(viewport);
+	commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
+	commandBuffer->BindPipelineAndFramebuffer(graphPipeline.get(), framebuffer.get());
+	commandBuffer->End();
+
+	m_graphicsEngine->Submit(commandBuffer.get());
 	int a = -0;
 }

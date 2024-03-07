@@ -3,6 +3,7 @@
 #include "IVulkanSurface.h" 
 #include "VulkanGPUImage.h"
 #include <ui/IWindow.h>
+#include "VulkanQueue.h"
 
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
@@ -46,15 +47,21 @@ namespace wtv
 		bool CreateAllocator();
 		bool InitSurface();
 		bool CreateSwapChain();
+		bool CreateCommandPool();
+		bool CreateCommandQueues();
 		bool CreateSwapchainImages(const IImage::CreationParams& params);
-
 		bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 		AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
-	public:
+	public: // override from IEngine
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
-		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass);
+		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
 		std::vector<RefPtr<IGPUImage>> GetSwapchainImages() override;
 		ImageFormat GetSwapchainFormat() override;
+		void Submit(ICommandBuffer* cb) override;
+
+	public:
+		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass);
+		VkDevice GetDevice() const { return m_device; }
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;
@@ -62,7 +69,10 @@ namespace wtv
 		VkSwapchainKHR m_swapchain;
 		VkFormat m_swapchainFormat;
 		VmaAllocator m_allocator;
+		VkCommandPool m_commandPool;
 		RefPtr<IVulkanSurface> m_surface;
+
+		RefPtr<VulkanQueue> m_graphicsQueue;
 
 		std::vector<RefPtr<VulkanGPUImage>>  m_swapchainImages;
 

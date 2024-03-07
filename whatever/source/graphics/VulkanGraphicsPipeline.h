@@ -14,6 +14,8 @@ namespace wtv
 	public:
 		VulkanGraphicsPipeline(IEngine* engine, IServiceProvider* services, const CreateInfo& params);
 		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) override;
+		VkRenderPass GetRenderPass() { return m_renderPass; }
+		VkPipeline GetPipeline() { return m_pipeline; }
 		~VulkanGraphicsPipeline();
 	private:
 		std::vector<VkPipelineShaderStageCreateInfo> CreateShaderStages();

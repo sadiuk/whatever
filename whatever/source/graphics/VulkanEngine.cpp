@@ -9,6 +9,7 @@
 #include "SDL.h"
 
 #include <algorithm>
+#include "VulkanCommandBuffer.h"
 
 namespace wtv
 {
@@ -92,6 +93,21 @@ namespace wtv
 		return CreateSwapchainImages(swapchainImageParams);
 
 	}
+	bool VulkanEngine::CreateCommandPool()
+	{
+		assert(m_queueFamilyIndices.graphicsFamilyIndex.value() == m_queueFamilyIndices.computeFamilyIndex.value());
+		VkCommandPoolCreateInfo commandPoolInfo{};
+		commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		commandPoolInfo.pNext = nullptr;
+		commandPoolInfo.queueFamilyIndex = m_queueFamilyIndices.graphicsFamilyIndex.value();
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateCommandPool(m_device, &commandPoolInfo, nullptr, &m_commandPool));
+		return true;
+	}       
+	bool VulkanEngine::CreateCommandQueues()
+	{
+		m_graphicsQueue = MakeRef<VulkanQueue>(this, m_queueFamilyIndices.graphicsFamilyIndex.value(), 0);
+		return true;
+	}
 	bool VulkanEngine::CreateSwapchainImages(const IImage::CreationParams& params)
 	{
 		uint32_t imageCount{};
@@ -108,7 +124,6 @@ namespace wtv
 		return true;
 	}
 
-
 	bool VulkanEngine::Init()
 	{
 		do
@@ -124,6 +139,10 @@ namespace wtv
 			if (!InitSurface())
 				break;
 			if (!CreateSwapChain())
+				break;
+			if (!CreateCommandPool())
+				break;
+			if (!CreateCommandQueues())
 				break;
 			return true;
 		} while (false);
@@ -305,6 +324,11 @@ namespace wtv
 		return pipeline;
 	}
 
+	RefPtr<ICommandBuffer> VulkanEngine::CreateCommandBuffer()
+	{
+		return MakeRef<VulkanCommandBuffer>(m_device, m_commandPool);
+	}
+
 	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass)
 	{
 		if (params.colorBuffers.size() > 1)
@@ -332,6 +356,11 @@ namespace wtv
 	ImageFormat VulkanEngine::GetSwapchainFormat()
 	{
 		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchainFormat);
+	}
+
+	void VulkanEngine::Submit(ICommandBuffer* cb)
+	{
+		m_graphicsQueue->Submit(cb);
 	}
 
 
