@@ -10,7 +10,7 @@ namespace wtv
 		m_engine(engine),
 		m_services(services)
 	{
-		m_device = static_cast<VulkanEngine*>(m_engine)->GetNativeDeviceHandle();
+		m_device = static_cast<VulkanEngine*>(m_engine)->GetDevice();
 
 		m_pipelineCache = CreatePipelineCache();
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages = CreateShaderStages();

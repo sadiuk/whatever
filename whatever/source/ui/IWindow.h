@@ -23,5 +23,6 @@ namespace wtv
 		virtual bool IsOpen() = 0;
 		virtual void* GetNativeHandle() = 0;
 		virtual WindowLib GetWindowingLib() = 0;
+		virtual void Update() = 0;
 	};
 }

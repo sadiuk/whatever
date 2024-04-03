@@ -11,6 +11,6 @@ namespace wtv
 		virtual void* GetNativeHandle() = 0;
 		virtual void GetRequiredExtensions(VkInstance instance, std::vector<const char*>& outExtensions) = 0;
 		virtual bool Initialize(VkInstance instance) = 0;
-		virtual bool Deinitialize(VkInstance instance) = 0;
+		virtual bool Deinitialize() = 0;
 	};
 }

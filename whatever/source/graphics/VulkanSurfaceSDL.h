@@ -19,12 +19,14 @@ namespace wtv
 	{
 	public:
 		VulkanSurfaceSDL(const ISurface::CreationParams& params);
+		~VulkanSurfaceSDL();
 		void* GetNativeHandle() override;
 		void GetRequiredExtensions(VkInstance instance, std::vector<const char*>& outExtensions) override;
 		bool Initialize(VkInstance instance) override;
-		bool Deinitialize(VkInstance instance) override;
+		bool Deinitialize() override;
 	private:
 		VkSurfaceKHR m_surface;
 		RefPtr<IWindow> m_window;
+		VkInstance m_instance;
 	};
 }

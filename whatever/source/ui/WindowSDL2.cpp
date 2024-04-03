@@ -22,4 +22,19 @@ namespace wtv
 	{
 		return true;
 	}
+	void WindowSDL2::Update()
+	{
+		SDL_Event e;
+		while (SDL_PollEvent(&e) > 0)
+		{
+			switch (e.type)
+			{
+			case SDL_QUIT:
+				m_keepOpen = false;
+				break;
+			}
+
+			SDL_UpdateWindowSurface(m_window);
+		}
+	}
 }

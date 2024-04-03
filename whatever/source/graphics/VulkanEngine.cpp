@@ -3,6 +3,8 @@
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanConstantTranslator.h"
+#include "VulkanSwapchain.h"
+#include "util/RefPtr.h"
 
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
@@ -29,98 +31,19 @@ namespace wtv
 
 	bool VulkanEngine::CreateSwapChain()
 	{
-		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
-
-
-		AvailableSwapchainCapabilities caps = GetAvailableSwapchainCapabilities();
-		VkSurfaceFormatKHR surfaceFmt{};
-
-		IImage::CreationParams swapchainImageParams{};
-
-		if (auto surfaceFmtIter = std::find_if(
-			caps.availableFormats.begin(), caps.availableFormats.end(),
-			[](const VkSurfaceFormatKHR& fmt) { return fmt.format == VK_FORMAT_B8G8R8A8_SRGB; });
-			surfaceFmtIter != caps.availableFormats.end())
-		{
-			surfaceFmt = *surfaceFmtIter;
-		}
-		else
-		{
-			assert(false);
-			surfaceFmt = caps.availableFormats[0];
-		}
-		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		swapchainCreateInfo.pNext = nullptr;
-		swapchainCreateInfo.flags = 0;
-		swapchainCreateInfo.surface = (VkSurfaceKHR)m_surface->GetNativeHandle();
-		swapchainCreateInfo.minImageCount = 3;
-		swapchainCreateInfo.imageFormat = m_swapchainFormat = surfaceFmt.format;
-		swapchainCreateInfo.imageColorSpace = surfaceFmt.colorSpace;
-		swapchainCreateInfo.imageExtent = caps.surfaceCaps.currentExtent;
-		swapchainCreateInfo.imageArrayLayers = 1;
-		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		
-		swapchainImageParams.width = swapchainCreateInfo.imageExtent.width;
-		swapchainImageParams.height = swapchainCreateInfo.imageExtent.height;
-		swapchainImageParams.arraySize = swapchainCreateInfo.imageArrayLayers;
-		swapchainImageParams.format = VulkanConstantTranslator::GetEngineImageFormat(swapchainCreateInfo.imageFormat);
-
-		if (m_queueFamilyIndices.graphicsFamilyIndex.value() != m_queueFamilyIndices.computeFamilyIndex.value())
-		{
-			uint32_t queuefamilyIndices[2] = {
-				m_queueFamilyIndices.graphicsFamilyIndex.value(),
-				m_queueFamilyIndices.computeFamilyIndex.value()
-			};
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			swapchainCreateInfo.queueFamilyIndexCount = 2;
-			swapchainCreateInfo.pQueueFamilyIndices = queuefamilyIndices;
-		}
-		else
-		{
-			uint32_t queueFamilyIndex = m_queueFamilyIndices.graphicsFamilyIndex.value();
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			swapchainCreateInfo.queueFamilyIndexCount = 1;
-			swapchainCreateInfo.pQueueFamilyIndices = &queueFamilyIndex;
-		}
-		swapchainCreateInfo.preTransform = caps.surfaceCaps.currentTransform;
-		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		swapchainCreateInfo.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-		swapchainCreateInfo.clipped = VK_TRUE;
-		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &m_swapchain));
-
-		return CreateSwapchainImages(swapchainImageParams);
-
+		m_swapchain = MakeRef<VulkanSwapchain>(this, m_surface.get());
+		return true;
 	}
-	bool VulkanEngine::CreateCommandPool()
+	bool VulkanEngine::CreateCommandPools()
 	{
-		assert(m_queueFamilyIndices.graphicsFamilyIndex.value() == m_queueFamilyIndices.computeFamilyIndex.value());
-		VkCommandPoolCreateInfo commandPoolInfo{};
-		commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		commandPoolInfo.pNext = nullptr;
-		commandPoolInfo.queueFamilyIndex = m_queueFamilyIndices.graphicsFamilyIndex.value();
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateCommandPool(m_device, &commandPoolInfo, nullptr, &m_commandPool));
+		for (int i = 0; i < m_swapchain->GetImageCount(); ++i)
+			m_commandPools.push_back(VulkanCommandPool(this));
 		return true;
 	}       
 	bool VulkanEngine::CreateCommandQueues()
 	{
 		m_graphicsQueue = MakeRef<VulkanQueue>(this, m_queueFamilyIndices.graphicsFamilyIndex.value(), 0);
-		return true;
-	}
-	bool VulkanEngine::CreateSwapchainImages(const IImage::CreationParams& params)
-	{
-		uint32_t imageCount{};
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, nullptr));
-		std::vector<VkImage> rawSwapchainImages;
-		rawSwapchainImages.resize(imageCount);
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, rawSwapchainImages.data()));
-
-		m_swapchainImages.resize(imageCount);
-		for (int i = 0; i < m_swapchainImages.size(); ++i)
-		{
-			m_swapchainImages[i] = MakeRef<VulkanGPUImage>(m_device, params, rawSwapchainImages[i]);
-		}
+		m_presentQueue = MakeRef<VulkanPresentQueue>(this, m_queueFamilyIndices.graphicsFamilyIndex.value(), 0);
 		return true;
 	}
 
@@ -130,20 +53,21 @@ namespace wtv
 		{
 			if (!CreateInstance(m_creationParams.appName))
 				break;
+			if (!InitSurface())
+				break;
 			if (!SelectPhysicalDevice())
 				break;
 			if (!CreateLogicalDevice())
 				break;
 			if (!CreateAllocator())
 				break;
-			if (!InitSurface())
-				break;
 			if (!CreateSwapChain())
 				break;
-			if (!CreateCommandPool())
+			if (!CreateCommandPools())
 				break;
 			if (!CreateCommandQueues())
 				break;
+			m_swapchain->GetNextImage();
 			return true;
 		} while (false);
 		return false;
@@ -219,6 +143,10 @@ namespace wtv
 			if (!m_queueFamilyIndices.computeFamilyIndex.has_value() && family.queueFlags | VK_QUEUE_COMPUTE_BIT)
 				m_queueFamilyIndices.computeFamilyIndex = familyIndex;
 
+			VkBool32 presentSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, familyIndex, (VkSurfaceKHR)m_surface->GetNativeHandle(), &presentSupport);
+			if (presentSupport)
+				m_queueFamilyIndices.presentFamilyIndex = familyIndex;
 			familyIndex++;
 		}
 
@@ -301,23 +229,6 @@ namespace wtv
 
 	}
 
-	VulkanEngine::AvailableSwapchainCapabilities VulkanEngine::GetAvailableSwapchainCapabilities()
-	{
-		AvailableSwapchainCapabilities caps{};
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &caps.surfaceCaps);
-
-		uint32_t formatCount = 0;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &formatCount, nullptr);
-		caps.availableFormats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &formatCount, caps.availableFormats.data());
-
-		uint32_t modeCount = 0;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, nullptr);
-		caps.presentModes.resize(modeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, caps.presentModes.data());
-		return caps;
-	}
-
 	RefPtr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
 	{
 		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params);
@@ -326,7 +237,7 @@ namespace wtv
 
 	RefPtr<ICommandBuffer> VulkanEngine::CreateCommandBuffer()
 	{
-		return MakeRef<VulkanCommandBuffer>(m_device, m_commandPool);
+		return m_commandPools[m_swapchain->GetImageIndex()].CreateCommandBuffer();
 	}
 
 	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass)
@@ -343,19 +254,14 @@ namespace wtv
 		return framebuffer;
 	}
 
-	std::vector<RefPtr<IGPUImage>> VulkanEngine::GetSwapchainImages()
+	RefPtr<IGPUImage> VulkanEngine::GetBackbuffer()
 	{
-		std::vector<RefPtr<IGPUImage>> result(m_swapchainImages.size());
-		for (int i = 0; i < m_swapchainImages.size(); ++i)
-		{
-			result[i] = m_swapchainImages[i];
-		}
-		return result;
+		return m_swapchain->GetBackBuffer();
 	}
 
 	ImageFormat VulkanEngine::GetSwapchainFormat()
 	{
-		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchainFormat);
+		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchain->GetFormat());
 	}
 
 	void VulkanEngine::Submit(ICommandBuffer* cb)
@@ -363,11 +269,22 @@ namespace wtv
 		m_graphicsQueue->Submit(cb);
 	}
 
+	void VulkanEngine::Present()
+	{
+		m_presentQueue->PresentSwapchainImage(m_swapchain.get(), m_graphicsQueue.get());
+		m_swapchain->GetNextImage();
+	}
+
+	void VulkanEngine::BeginFrame()
+	{
+		m_commandPools[m_swapchain->GetImageIndex()].WaitCommandBuffersAndClear();
+		//m_graphicsQueue->Wait
+		//vkResetCommandPool(m_device, m_commandPools[m_swapchain->GetImageIndex()], VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+	}
+
 
 	bool VulkanEngine::Deinit()
 	{
-		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
-		m_surface->Deinitialize(m_instance);
 
 		vkDestroyDevice(m_device, nullptr);
 		vkDestroyInstance(m_instance, nullptr);

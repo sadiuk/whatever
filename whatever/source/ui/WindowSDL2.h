@@ -10,9 +10,10 @@ namespace wtv
 		WindowSDL2(const CreationParams& params);
 		void* GetNativeHandle() override;
 		bool IsOpen() override;
+		void Update() override;
 		WindowLib GetWindowingLib() { return SDL2; }
 	private:
-
+		bool m_keepOpen = true;
 		SDL_Window* m_window;
 	};
 }

@@ -5,6 +5,7 @@ namespace wtv
 {
 	struct ICommandBuffer : public IReferenceCounted
 	{
+		virtual void Reset() = 0;
 		virtual void Begin() = 0;
 		virtual void End() = 0;
 		virtual void SetViewport(const ViewportInfo& viewport) = 0;

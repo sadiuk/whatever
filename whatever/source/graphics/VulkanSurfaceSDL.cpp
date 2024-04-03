@@ -10,6 +10,11 @@ namespace wtv
 		m_window = params.window;
 	}
 
+	VulkanSurfaceSDL::~VulkanSurfaceSDL()
+	{
+		Deinitialize();
+	}
+
 	void* VulkanSurfaceSDL::GetNativeHandle()
 	{
 		return m_surface;
@@ -30,9 +35,9 @@ namespace wtv
 		return res;
 	}
 
-	bool VulkanSurfaceSDL::Deinitialize(VkInstance instance)
+	bool VulkanSurfaceSDL::Deinitialize()
 	{
-		vkDestroySurfaceKHR(instance, m_surface, nullptr);
+		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		return true;
 	}
 

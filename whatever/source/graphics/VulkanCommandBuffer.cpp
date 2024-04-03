@@ -1,11 +1,15 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanFramebuffer.h"
+#include "VulkanEngine.h"
 #include "VkMakros.h"
 
-wtv::VulkanCommandBuffer::VulkanCommandBuffer(VkDevice device, VkCommandPool commandPool) :
-	m_device(device),
-	m_commandPool(commandPool)
+wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanEngine* engine, VkCommandPool commandPool) :
+	m_device(engine->GetDevice()),
+	m_commandPool(commandPool),
+	m_queueWaitSemaphore(engine),
+	m_queueSignalSemaphore(engine),
+	m_queueSignalFence(engine)
 {
 	VkCommandBufferAllocateInfo bufferAllocInfo{};
 	bufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -13,12 +17,17 @@ wtv::VulkanCommandBuffer::VulkanCommandBuffer(VkDevice device, VkCommandPool com
 	bufferAllocInfo.commandPool = commandPool;
 	bufferAllocInfo.commandBufferCount = 1;
 	bufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	ASSERT_VK_SUCCESS(vkAllocateCommandBuffers(device, &bufferAllocInfo, &m_commandBuffer));
+	ASSERT_VK_SUCCESS(vkAllocateCommandBuffers(m_device, &bufferAllocInfo, &m_commandBuffer));
 }
 
 wtv::VulkanCommandBuffer::~VulkanCommandBuffer()
 {
 	vkFreeCommandBuffers(m_device, m_commandPool, 1, &m_commandBuffer);
+}
+
+void wtv::VulkanCommandBuffer::Reset()
+{
+	vkResetCommandBuffer(m_commandBuffer, 0);
 }
 
 void wtv::VulkanCommandBuffer::Begin()
@@ -40,10 +49,10 @@ void wtv::VulkanCommandBuffer::End()
 void wtv::VulkanCommandBuffer::SetViewport(const ViewportInfo& viewport)
 {
 	VkViewport vkViewport{};
-	vkViewport.x = viewport.x;
-	vkViewport.y = viewport.y;
-	vkViewport.width = viewport.width;
-	vkViewport.height = viewport.height;
+	vkViewport.x = (float)viewport.x;
+	vkViewport.y = (float)viewport.y;
+	vkViewport.width = (float)viewport.width;
+	vkViewport.height = (float)viewport.height;
 	vkViewport.minDepth = 1;
 	vkViewport.maxDepth = 0;
 	

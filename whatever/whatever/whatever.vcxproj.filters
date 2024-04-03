@@ -57,6 +57,21 @@
     <ClCompile Include="..\source\graphics\VulkanFramebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanCommandBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanSync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanSwapchain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanCommandPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -92,7 +107,7 @@
     <ClInclude Include="..\source\ui\WindowSDL2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\ISwapChain.h">
+    <ClInclude Include="..\source\graphics\ISwapchain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h">
@@ -144,6 +159,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\graphics\IImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\ICommandBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\GraphicsStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanCommandBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\IQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanSync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanSwapchain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanCommandPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

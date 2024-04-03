@@ -4,6 +4,8 @@
 #include "VulkanGPUImage.h"
 #include <ui/IWindow.h>
 #include "VulkanQueue.h"
+#include "VulkanSwapchain.h"
+#include "VulkanCommandPool.h"
 
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
@@ -25,19 +27,14 @@ namespace wtv
 		{
 			std::optional<uint32_t> graphicsFamilyIndex{};
 			std::optional<uint32_t> computeFamilyIndex{};
-			bool IsValid() { return graphicsFamilyIndex.has_value() && computeFamilyIndex.has_value(); }
+			std::optional<uint32_t> presentFamilyIndex{};
+			bool IsValid() { return graphicsFamilyIndex.has_value() && computeFamilyIndex.has_value() && presentFamilyIndex.has_value(); }
 		};
-		struct AvailableSwapchainCapabilities
-		{
-			VkSurfaceCapabilitiesKHR surfaceCaps;
-			std::vector<VkSurfaceFormatKHR> availableFormats;
-			std::vector<VkPresentModeKHR> presentModes;
-		};
+
 	public:
 		VulkanEngine(const IEngine::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory);
 		~VulkanEngine();
 		GraphicsAPI GetAPI() override { return Vulkan; }
-		VkDevice GetNativeDeviceHandle() { return m_device; }
 	private:
 		bool Init();
 		bool Deinit();
@@ -47,35 +44,34 @@ namespace wtv
 		bool CreateAllocator();
 		bool InitSurface();
 		bool CreateSwapChain();
-		bool CreateCommandPool();
+		bool CreateCommandPools();
 		bool CreateCommandQueues();
-		bool CreateSwapchainImages(const IImage::CreationParams& params);
 		bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
-		AvailableSwapchainCapabilities GetAvailableSwapchainCapabilities();
+		
 	public: // override from IEngine
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
 		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
-		std::vector<RefPtr<IGPUImage>> GetSwapchainImages() override;
+		RefPtr<IGPUImage> GetBackbuffer() override;
 		ImageFormat GetSwapchainFormat() override;
 		void Submit(ICommandBuffer* cb) override;
-
+		void Present() override;
+		void BeginFrame() override;
 	public:
 		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass);
 		VkDevice GetDevice() const { return m_device; }
+		VkPhysicalDevice GetPhysicalDevice() const { return m_physicalDevice; }
+		QueueFamilyIndices GetQueueFamilyIndices() { return m_queueFamilyIndices; }
+		VulkanQueue* GetGraphicsQueue() { return m_graphicsQueue.get(); }
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;
 		VkDevice m_device;
-		VkSwapchainKHR m_swapchain;
-		VkFormat m_swapchainFormat;
 		VmaAllocator m_allocator;
-		VkCommandPool m_commandPool;
+		std::vector<VulkanCommandPool> m_commandPools;
 		RefPtr<IVulkanSurface> m_surface;
-
+		RefPtr<VulkanSwapchain> m_swapchain;
 		RefPtr<VulkanQueue> m_graphicsQueue;
-
-		std::vector<RefPtr<VulkanGPUImage>>  m_swapchainImages;
-
+		RefPtr<VulkanPresentQueue> m_presentQueue;
 
 		QueueFamilyIndices m_queueFamilyIndices;
 		CreationParams m_creationParams;

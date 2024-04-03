@@ -10,6 +10,7 @@ namespace wtv
 	public:
 		uint32_t AddRef() { return m_refCount++; }
 		uint32_t Release() { return m_refCount--; }
+		uint32_t RefCount() { return m_refCount; }
 		virtual ~IReferenceCounted() {}
 	};
 

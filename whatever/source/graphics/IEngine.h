@@ -24,17 +24,17 @@ namespace wtv
 			GraphicsAPI api;
 			std::string appName;
 			RefPtr<IWindow> window;
-			ISwapChain::CreateInfo swapchainInfo;
 		};
 		static RefPtr<IEngine> Create(const CreationParams& params, IServiceProvider* services);
 		virtual GraphicsAPI GetAPI() = 0;
 
 		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
 		virtual RefPtr<ICommandBuffer> CreateCommandBuffer() = 0;
-		virtual std::vector<RefPtr<IGPUImage>> GetSwapchainImages() = 0;
+		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
+		virtual void BeginFrame() = 0;
 		virtual void Submit(ICommandBuffer* cb) = 0;
-
+		virtual void Present() = 0;
 		virtual ~IEngine() {}
 	protected:
 		IServiceProvider* m_services;

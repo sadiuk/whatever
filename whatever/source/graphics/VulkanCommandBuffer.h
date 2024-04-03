@@ -1,5 +1,6 @@
 #pragma once
 #include "ICommandBuffer.h"
+#include "VulkanSync.h"
 
 #include "vulkan/vulkan.h"
 #include "glm/glm.hpp"
@@ -10,14 +11,16 @@
 
 namespace wtv
 {
+	class VulkanEngine;
 	class VulkanCommandBuffer : public ICommandBuffer
 	{
 		static constexpr uint32_t CLEAR_COLOR_SIZE = 16;
 	public:
-		VulkanCommandBuffer(VkDevice device, VkCommandPool commandPool);
+		VulkanCommandBuffer(VulkanEngine* engine, VkCommandPool commandPool);
 		~VulkanCommandBuffer();
 		VkCommandBuffer GetNativeHandle() { return m_commandBuffer; }
-	private:
+	public:
+		void Reset() override;
 		void Begin() override;
 		void End() override;
 		void SetViewport(const ViewportInfo& viewport) override;
@@ -26,7 +29,10 @@ namespace wtv
 		void SetClearColorValue(uint32_t colorAttachmentIndex, void* clearColor) override;
 		void SetClearDepthStencilValue(float depth, uint32_t stencil = 0) override;
 		void Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount = 0, uint32_t firstInstance = 0) override;
+	public: 
+		const VulkanFence& GetFence() const { return m_queueSignalFence; }
 	private:
+		VulkanEngine* m_engine;
 		std::vector<std::pair<uint32_t, std::array<std::byte, CLEAR_COLOR_SIZE>>> m_clearColorValues;
 		std::optional<std::pair<float, uint32_t>> m_clearDepthStencil;
 		std::optional<VkRect2D> m_scissor;
@@ -35,6 +41,7 @@ namespace wtv
 		VkCommandBuffer m_commandBuffer;
 		VkCommandPool m_commandPool;
 
-		VkSemaphore m_queueWaitSemaphore, m_queueSignalSemaphore;
+		VulkanSemaphore m_queueWaitSemaphore, m_queueSignalSemaphore;
+		VulkanFence m_queueSignalFence;
 	};
 }

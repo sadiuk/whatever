@@ -15,13 +15,10 @@ void App::Init()
 	windowParams.size = m_windowSize;
 	m_window = MakeRef<WindowSDL2>(windowParams);
 
-	ISwapChain::CreateInfo swapchainParams{};
-	swapchainParams.extent = m_windowSize;
 	IEngine::CreationParams engineParams{};
 	engineParams.api = IEngine::GraphicsAPI::Vulkan;
 	engineParams.appName = "EngineTest";
 	engineParams.window = m_window;
-	engineParams.swapchainInfo = swapchainParams;
 	m_graphicsEngine = IEngine::Create(engineParams, m_services.get());
 }
 
@@ -73,21 +70,31 @@ void App::Run()
 	auto graphPipeline = m_graphicsEngine->CreateGraphicsPipeline(pipelineInfo);
 
 	IFramebuffer::CreateInfo framebufferInfo{};
-	IImage::View swapchainImageView(m_graphicsEngine->GetSwapchainImages()[0].get());
+	IImage::View swapchainImageView(m_graphicsEngine->GetBackbuffer().get());
 	framebufferInfo.colorBuffers = { swapchainImageView };
 	framebufferInfo.layout = framebufferLayout;
 	auto framebuffer = graphPipeline->CreateFramebuffer(framebufferInfo);
 
-	auto commandBuffer = m_graphicsEngine->CreateCommandBuffer();
 
-	glm::vec4 clearColor(0, 1, 0, 1);
-	commandBuffer->Begin();
-	commandBuffer->SetClearColorValue(0, &clearColor.x);
-	commandBuffer->SetViewport(viewport);
-	commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
-	commandBuffer->BindPipelineAndFramebuffer(graphPipeline.get(), framebuffer.get());
-	commandBuffer->End();
 
-	m_graphicsEngine->Submit(commandBuffer.get());
+	while (m_window->IsOpen())
+	{
+		m_graphicsEngine->BeginFrame();
+		auto commandBuffer = m_graphicsEngine->CreateCommandBuffer();
+		glm::vec4 clearColor(0, 1, 0, 1);
+
+		commandBuffer->Begin();
+		commandBuffer->SetClearColorValue(0, &clearColor.x);
+		commandBuffer->SetViewport(viewport);
+		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
+		commandBuffer->BindPipelineAndFramebuffer(graphPipeline.get(), framebuffer.get());
+		commandBuffer->End();
+
+		m_graphicsEngine->Submit(commandBuffer.get());
+		m_graphicsEngine->Present();
+		m_window->Update();
+
+		//commandBuffer->Reset();
+	}
 	int a = -0;
 }
