@@ -1,5 +1,6 @@
 #pragma once
 #include "ICommandBuffer.h"
+#include "IFence.h"
 #include "util/RefPtr.h"
 
 namespace wtv
@@ -8,5 +9,7 @@ namespace wtv
 	{
 		virtual void Submit(ICommandBuffer* cmdBuffer) = 0;
 		virtual void Submit(ICommandBuffer* cmdBuffer, IQueue* waitQueue) = 0;
+
+		virtual IFence& GetFence() = 0;
 	};
 }

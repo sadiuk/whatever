@@ -115,7 +115,7 @@ namespace wtv
 	void VulkanSwapchain::GetNextImage()
 	{
 		VulkanFence acquireImageFence(m_engine);
-		vkAcquireNextImageKHR(m_device, m_swapchain, UINT64_MAX, VK_NULL_HANDLE, acquireImageFence.GetNativeHandle(), &m_imageIndex);
+		ASSERT_VK_SUCCESS_ELSE_RET(vkAcquireNextImageKHR(m_device, m_swapchain, UINT64_MAX, VK_NULL_HANDLE, acquireImageFence.GetNativeHandle(), &m_imageIndex));
 		acquireImageFence.Wait();
 	}
 }

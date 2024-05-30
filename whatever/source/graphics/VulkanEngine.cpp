@@ -4,6 +4,9 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanConstantTranslator.h"
 #include "VulkanSwapchain.h"
+#include "VulkanGPUImage.h"
+#include "VulkanGPUBuffer.h"
+#include "VulkanCommandBuffer.h"
 #include "util/RefPtr.h"
 
 #define VMA_IMPLEMENTATION
@@ -11,7 +14,6 @@
 #include "SDL.h"
 
 #include <algorithm>
-#include "VulkanCommandBuffer.h"
 
 namespace wtv
 {
@@ -67,7 +69,6 @@ namespace wtv
 				break;
 			if (!CreateCommandQueues())
 				break;
-			m_swapchain->GetNextImage();
 			return true;
 		} while (false);
 		return false;
@@ -171,6 +172,7 @@ namespace wtv
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.geometryShader = VK_TRUE;
 		VkDeviceCreateInfo deviceInfo = {};
 		deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceInfo.pNext = nullptr;
@@ -254,9 +256,34 @@ namespace wtv
 		return framebuffer;
 	}
 
+	uint32_t VulkanEngine::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	{
+		VkPhysicalDeviceMemoryProperties memProps{};
+		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProps);
+
+		for (int i = 0; i < memProps.memoryTypeCount; ++i)
+		{
+			if ((typeFilter & (1 << i)) && (memProps.memoryTypes[i].propertyFlags & properties == properties))
+			{
+				return i;
+			}
+		}
+	}
+
 	RefPtr<IGPUImage> VulkanEngine::GetBackbuffer()
 	{
 		return m_swapchain->GetBackBuffer();
+	}
+
+	RefPtr<IFence> VulkanEngine::CreateFence(bool createSignaled)
+	{
+		return MakeRef<VulkanFence>(this, createSignaled);
+	}
+
+	RefPtr<IGPUBuffer> VulkanEngine::CreateBuffer(const IGPUBuffer::CreationParams params)
+	{
+		auto buffer = MakeRef<VulkanGPUBuffer>(this, params);
+		return buffer;
 	}
 
 	ImageFormat VulkanEngine::GetSwapchainFormat()
@@ -272,14 +299,14 @@ namespace wtv
 	void VulkanEngine::Present()
 	{
 		m_presentQueue->PresentSwapchainImage(m_swapchain.get(), m_graphicsQueue.get());
-		m_swapchain->GetNextImage();
 	}
 
 	void VulkanEngine::BeginFrame()
 	{
+		m_graphicsQueue->GetFence().Wait();
+		m_graphicsQueue->GetFence().Reset();
 		m_commandPools[m_swapchain->GetImageIndex()].WaitCommandBuffersAndClear();
-		//m_graphicsQueue->Wait
-		//vkResetCommandPool(m_device, m_commandPools[m_swapchain->GetImageIndex()], VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+		m_swapchain->GetNextImage();
 	}
 
 

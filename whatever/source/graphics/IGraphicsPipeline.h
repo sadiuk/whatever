@@ -11,12 +11,12 @@ namespace wtv
 {
 	struct IGraphicsPipeline : public IReferenceCounted
 	{
-		using VerterBufferLayout = std::vector<VertexAtributeType>;
+		using VertexBufferLayout = std::vector<VertexAtributeType>;
 		using StagesDescription = std::vector<StageDesc>;
 
 		struct CreateInfo
 		{
-			VerterBufferLayout vertexBufferLayout;
+			VertexBufferLayout vertexBufferLayout;
 			StagesDescription stagesDescription;
 			PrimitiveTopology vertexTopology;
 			ViewportInfo viewportInfo;

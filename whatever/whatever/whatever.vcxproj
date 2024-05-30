@@ -157,6 +157,7 @@
     <ClCompile Include="..\source\graphics\VulkanConstantTranslator.cpp" />
     <ClCompile Include="..\source\graphics\VulkanEngine.cpp" />
     <ClCompile Include="..\source\graphics\VulkanFramebuffer.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanGPUBuffer.cpp" />
     <ClCompile Include="..\source\graphics\VulkanGPUImage.cpp" />
     <ClCompile Include="..\source\graphics\VulkanGraphicsPipeline.cpp" />
     <ClCompile Include="..\source\graphics\VulkanQueue.cpp" />
@@ -173,9 +174,12 @@
     <ClInclude Include="..\source\App.h" />
     <ClInclude Include="..\source\graphics\GraphicsConstants.h" />
     <ClInclude Include="..\source\graphics\GraphicsStructs.h" />
+    <ClInclude Include="..\source\graphics\IBuffer.h" />
     <ClInclude Include="..\source\graphics\ICommandBuffer.h" />
     <ClInclude Include="..\source\graphics\IEngine.h" />
+    <ClInclude Include="..\source\graphics\IFence.h" />
     <ClInclude Include="..\source\graphics\IFramebuffer.h" />
+    <ClInclude Include="..\source\graphics\IGPUBuffer.h" />
     <ClInclude Include="..\source\graphics\IGPUImage.h" />
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h" />
     <ClInclude Include="..\source\graphics\IImage.h" />
@@ -191,6 +195,7 @@
     <ClInclude Include="..\source\graphics\VulkanConstantTranslator.h" />
     <ClInclude Include="..\source\graphics\VulkanEngine.h" />
     <ClInclude Include="..\source\graphics\VulkanFramebuffer.h" />
+    <ClInclude Include="..\source\graphics\VulkanGPUBuffer.h" />
     <ClInclude Include="..\source\graphics\VulkanGPUImage.h" />
     <ClInclude Include="..\source\graphics\VulkanGraphicsPipeline.h" />
     <ClInclude Include="..\source\graphics\VulkanQueue.h" />

@@ -249,6 +249,7 @@ namespace wtv
 			attachmentStates[i].srcAlphaBlendFactor = VulkanConstantTranslator::GetVkBlendFactor(s.srcAlphaBlendFactor);
 			attachmentStates[i].dstAlphaBlendFactor = VulkanConstantTranslator::GetVkBlendFactor(s.dstAlphaBlendFactor);
 			attachmentStates[i].alphaBlendOp = VulkanConstantTranslator::GetVkBlendOp(s.alphaBlendOperation);
+			attachmentStates[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 		}
 
 		float blendConstants[4] = { 0, 0, 0, 0 };

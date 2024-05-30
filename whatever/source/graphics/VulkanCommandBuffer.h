@@ -26,9 +26,11 @@ namespace wtv
 		void SetViewport(const ViewportInfo& viewport) override;
 		void SetScissor(const Rect2D& scissor) override;
 		void BindPipelineAndFramebuffer(IGraphicsPipeline* pipeline, IFramebuffer* framebuffer) override;
+		void BindVertexBuffers(IGPUBuffer** buffers, uint32_t count, size_t* offsets) override;
 		void SetClearColorValue(uint32_t colorAttachmentIndex, void* clearColor) override;
 		void SetClearDepthStencilValue(float depth, uint32_t stencil = 0) override;
 		void Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount = 0, uint32_t firstInstance = 0) override;
+		void UpdateBuffer(IGPUBuffer* buffer, size_t offset, size_t size, const void* data) override;
 	public: 
 		const VulkanFence& GetFence() const { return m_queueSignalFence; }
 	private:

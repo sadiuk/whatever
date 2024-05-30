@@ -29,10 +29,10 @@ namespace wtv
 	{
 		bool blendEnable = true;
 		BlendFactor srcColorBlendFactor = BlendFactor::One;
-		BlendFactor dstColorBlendFactor = BlendFactor::Zero;
+		BlendFactor dstColorBlendFactor = BlendFactor::One;
 		BlendOperation colorBlendOperation = BlendOperation::Add;
 		BlendFactor srcAlphaBlendFactor = BlendFactor::One;
-		BlendFactor dstAlphaBlendFactor = BlendFactor::Zero;
+		BlendFactor dstAlphaBlendFactor = BlendFactor::One;
 		BlendOperation alphaBlendOperation = BlendOperation::Add;
 	};
 	struct BlendStateInfo

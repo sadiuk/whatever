@@ -14,7 +14,8 @@ namespace wtv
 	}
 	wtv::VulkanSemaphore::~VulkanSemaphore()
 	{
-		vkDestroySemaphore(m_engine->GetDevice(), m_semaphore, nullptr);
+		if(m_engine)
+			vkDestroySemaphore(m_engine->GetDevice(), m_semaphore, nullptr);
 	}
 	void VulkanSemaphore::Signal()
 	{
@@ -24,12 +25,12 @@ namespace wtv
 		signalInfo.semaphore = m_semaphore;
 		//.value
 	}
-	VulkanFence::VulkanFence(VulkanEngine* engine) : m_engine(engine)
+	VulkanFence::VulkanFence(VulkanEngine* engine, bool createSignaled) : m_engine(engine)
 	{
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.pNext = nullptr;
-		fenceCreateInfo.flags = 0;
+		fenceCreateInfo.flags = createSignaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 		ASSERT_VK_SUCCESS(vkCreateFence(m_engine->GetDevice(), &fenceCreateInfo, nullptr, &m_fence));
 	}
 	VulkanFence::~VulkanFence()

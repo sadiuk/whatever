@@ -20,5 +20,6 @@ namespace wtv
 		static VkImageType GetVkImageType(ImageDimension dim);
 		static ImageFormat GetEngineImageFormat(VkFormat imageFormat);
 		static uint32_t GetVkImageUsageMask(std::underlying_type_t<ImageUsage> usageBits);
+		static VkBufferUsageFlags GetVkBufferUsageFlags(std::underlying_type_t<BufferUsage> usageBits);
 	};
 }

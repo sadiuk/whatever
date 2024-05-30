@@ -1,23 +1,18 @@
 
 struct VS_INPUT
 {
-	uint vertexId : SV_VertexID;
+	[[vk::location(0)]] float4 position : POSITION0;
 };
 struct VS_OUTPUT
 {
 	float4 pos : SV_POSITION;
 };
 
-static float4 positions[3] =
-{
-    float4(-0.5, -0.5, 0, 1),
-	float4(0, 0.5, 0, 1),
-	float4(0.5, -0.5, 0, 1)
-};
+
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	output.pos = positions[input.vertexId];
+	output.pos = input.position;
 	return output;
 }
 

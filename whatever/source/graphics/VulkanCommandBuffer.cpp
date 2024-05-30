@@ -3,6 +3,7 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanEngine.h"
 #include "VkMakros.h"
+#include "VulkanGPUBuffer.h"
 
 wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanEngine* engine, VkCommandPool commandPool) :
 	m_device(engine->GetDevice()),
@@ -75,9 +76,10 @@ void wtv::VulkanCommandBuffer::BindPipelineAndFramebuffer(IGraphicsPipeline* pip
 	auto vkFramebuffer = static_cast<VulkanFramebuffer*>(framebuffer);
 	auto allAttachments = vkFramebuffer->GetAttachments();
 	std::vector<VkClearValue> clearValues(allAttachments.size());
+	uint32_t colorAttachmentCount = m_clearDepthStencil.has_value() ? allAttachments.size() - 1 : allAttachments.size();
 	for (uint32_t i = 0; i < allAttachments.size(); ++i)
 	{
-		if (i < allAttachments.size() - 1)
+		if (i < colorAttachmentCount)
 		{
 			if (auto cc = std::find_if(m_clearColorValues.begin(), m_clearColorValues.end(), [i](const auto& at) { return at.first == i; }); cc != m_clearColorValues.end())
 			{
@@ -102,9 +104,17 @@ void wtv::VulkanCommandBuffer::BindPipelineAndFramebuffer(IGraphicsPipeline* pip
 	rpInfo.pClearValues = clearValues.data();
 	assert(m_scissor.has_value());
 	rpInfo.renderArea = m_scissor.value();
-	vkCmdBeginRenderPass(m_commandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetPipeline());
+	vkCmdBeginRenderPass(m_commandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+}
+
+void wtv::VulkanCommandBuffer::BindVertexBuffers(IGPUBuffer** buffers, uint32_t count, size_t* offsets)
+{
+	std::vector<VkBuffer> rawBuffers(count);
+	for (int i = 0; i < rawBuffers.size(); ++i)
+		rawBuffers[i] = static_cast<VulkanGPUBuffer*>(buffers[i])->GetNativeHandle();
+	vkCmdBindVertexBuffers(m_commandBuffer, 0, count, rawBuffers.data(), offsets);
 }
 
 void wtv::VulkanCommandBuffer::SetClearColorValue(uint32_t colorAttachmentIndex, void* color)
@@ -122,5 +132,11 @@ void wtv::VulkanCommandBuffer::SetClearDepthStencilValue(float depth, uint32_t s
 void wtv::VulkanCommandBuffer::Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance)
 {
 	vkCmdDraw(m_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+}
+
+void wtv::VulkanCommandBuffer::UpdateBuffer(IGPUBuffer* buffer, size_t offset, size_t size, const void* data)
+{
+	VulkanGPUBuffer* buf = static_cast<VulkanGPUBuffer*>(buffer);
+	vkCmdUpdateBuffer(m_commandBuffer, buf->GetNativeHandle(), offset, size, data);
 }
 

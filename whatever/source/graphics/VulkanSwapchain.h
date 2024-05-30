@@ -16,7 +16,7 @@ namespace wtv
 		uint32_t GetImageIndex() { return m_imageIndex; }
 		void GetNextImage();
 		VkFormat GetFormat() { return m_format; }
-		uint32_t GetImageCount() { return m_images.size(); }
+		uint32_t GetImageCount() { return (uint32_t)m_images.size(); }
 	private:
 		VulkanEngine* m_engine;
 		IVulkanSurface* m_surface;

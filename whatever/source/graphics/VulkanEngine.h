@@ -11,6 +11,7 @@
 #include "vma/vk_mem_alloc.h"
 
 #include <optional>
+#include <algorithm>
 
 #ifdef _DEBUG
 #define USE_VALIDATION_LAYERS true
@@ -29,6 +30,18 @@ namespace wtv
 			std::optional<uint32_t> computeFamilyIndex{};
 			std::optional<uint32_t> presentFamilyIndex{};
 			bool IsValid() { return graphicsFamilyIndex.has_value() && computeFamilyIndex.has_value() && presentFamilyIndex.has_value(); }
+			std::vector<uint32_t> Vector() {
+				std::vector<uint32_t> res;
+				if (graphicsFamilyIndex.has_value())
+					res.push_back(graphicsFamilyIndex.value());
+				if (computeFamilyIndex.has_value())
+					res.push_back(computeFamilyIndex.value());
+				if (presentFamilyIndex.has_value())
+					res.push_back(presentFamilyIndex.value());
+				auto last = std::unique(res.begin(), res.end()); // remove duplicate indices
+				res.erase(last, res.end());
+				return res;
+			}
 		};
 
 	public:
@@ -52,6 +65,8 @@ namespace wtv
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
 		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
 		RefPtr<IGPUImage> GetBackbuffer() override;
+		RefPtr<IFence> CreateFence(bool createSignaled) override;
+		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams params) override;
 		ImageFormat GetSwapchainFormat() override;
 		void Submit(ICommandBuffer* cb) override;
 		void Present() override;
@@ -62,6 +77,7 @@ namespace wtv
 		VkPhysicalDevice GetPhysicalDevice() const { return m_physicalDevice; }
 		QueueFamilyIndices GetQueueFamilyIndices() { return m_queueFamilyIndices; }
 		VulkanQueue* GetGraphicsQueue() { return m_graphicsQueue.get(); }
+		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;

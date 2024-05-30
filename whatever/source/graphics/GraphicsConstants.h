@@ -268,6 +268,18 @@ namespace wtv
         DepthStencilAttachment = ColorAttachment << 1,
         SubpassInput = DepthStencilAttachment << 1
     };
+
+    enum class BufferUsage : uint32_t
+    {
+        Undefined = 0,
+        UniformBuffer = 1,
+        StorageBuffer = 2,
+        IndexBuffer = 4,
+        VertexBuffer = 8,
+        IndirectBuffer = 16,
+        CPU
+    };
+
     inline uint32_t GetAttributeSize(VertexAtributeType attributeType) {
         switch (attributeType) {
         case VertexAtributeType::int1:

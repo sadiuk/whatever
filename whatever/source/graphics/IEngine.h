@@ -5,6 +5,8 @@
 #include "ISwapChain.h"
 #include "IGraphicsPipeline.h"
 #include "ICommandBuffer.h"
+#include "IGPUBuffer.h"
+#include "IFence.h"
 #include "IServiceProvider.h"
 #include "util/RefPtr.h"
 #define ENGINE_VERSION 0
@@ -31,6 +33,8 @@ namespace wtv
 		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
 		virtual RefPtr<ICommandBuffer> CreateCommandBuffer() = 0;
 		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
+		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
+		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams params) = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 		virtual void BeginFrame() = 0;
 		virtual void Submit(ICommandBuffer* cb) = 0;

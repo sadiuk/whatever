@@ -26,12 +26,12 @@ namespace wtv
 
 	void wtv::VulkanCommandPool::WaitCommandBuffersAndClear()
 	{
-		for (auto& cb : m_commandBuffers)
-		{
-			uint32_t refCount = cb->RefCount();
-			assert(refCount == 1);
-			cb->GetFence().Wait();
-		}
+		//for (auto& cb : m_commandBuffers)
+		//{
+		//	uint32_t refCount = cb->RefCount();
+		//	assert(refCount == 1);
+		//	cb->GetFence().Wait();
+		//}
 		m_commandBuffers.clear();
 		vkResetCommandPool(m_engine->GetDevice(), m_commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	}

@@ -722,6 +722,22 @@ namespace wtv
         return result;
     }
 
+    VkBufferUsageFlags VulkanConstantTranslator::GetVkBufferUsageFlags(std::underlying_type_t<BufferUsage> usageBits)
+    {
+        VkBufferUsageFlags result = 0;
+        if (usageBits & (uint32_t)BufferUsage::UniformBuffer)
+            result |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        if(usageBits & (uint32_t)BufferUsage::StorageBuffer)
+            result |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        if(usageBits & (uint32_t)BufferUsage::IndexBuffer)
+            result |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        if(usageBits & (uint32_t)BufferUsage::VertexBuffer)
+            result |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        if(usageBits & (uint32_t)BufferUsage::IndirectBuffer)
+            result |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+        return result;
+    }
+
     VkBlendFactor VulkanConstantTranslator::GetVkBlendFactor(BlendFactor blendFactor)
     {
         switch (blendFactor) {
