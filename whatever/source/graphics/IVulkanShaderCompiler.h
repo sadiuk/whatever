@@ -3,6 +3,7 @@
 #include "GraphicsConstants.h"
 #include "IService.h"
 #include <util/RefPtr.h>
+#include "VulkanEngine.h"
 
 #include <memory>
 #include <filesystem>
@@ -15,7 +16,7 @@ namespace wtv
 
 		struct CompilationParams
 		{
-			VkDevice device;
+			VulkanEngine* engine;
 			std::string entryPoint;
 			ShaderStage stage;
 			std::filesystem::path sourcePath;

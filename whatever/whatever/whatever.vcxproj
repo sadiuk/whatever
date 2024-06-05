@@ -167,6 +167,7 @@
     <ClCompile Include="..\source\graphics\VulkanSwapchain.cpp" />
     <ClCompile Include="..\source\graphics\VulkanSync.cpp" />
     <ClCompile Include="..\source\ui\WindowSDL2.cpp" />
+    <ClCompile Include="..\source\util\ConsoleLogger.cpp" />
     <ClCompile Include="..\source\VulkanAppServiceProvider.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

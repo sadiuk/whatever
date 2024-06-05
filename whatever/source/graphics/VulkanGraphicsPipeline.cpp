@@ -5,13 +5,11 @@
 #include "IVulkanShaderCompiler.h"
 namespace wtv
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(IEngine* engine, IServiceProvider* services, const CreateInfo& params) :
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanEngine* engine, IServiceProvider* services, const CreateInfo& params) :
 		IGraphicsPipeline(params),
 		m_engine(engine),
 		m_services(services)
 	{
-		m_device = static_cast<VulkanEngine*>(m_engine)->GetDevice();
-
 		m_pipelineCache = CreatePipelineCache();
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages = CreateShaderStages();
 
@@ -63,7 +61,7 @@ namespace wtv
 		pipelineInfo.basePipelineHandle = nullptr;
 		pipelineInfo.basePipelineIndex = 0;
 
-		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_device, m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
+		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_engine->GetDevice(), m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
 	RefPtr<IFramebuffer> VulkanGraphicsPipeline::CreateFramebuffer(const IFramebuffer::CreateInfo& params)
@@ -73,11 +71,16 @@ namespace wtv
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
-		vkDestroyPipeline(m_device, m_pipeline, nullptr);
-		vkDestroyRenderPass(m_device, m_renderPass, nullptr);
-		vkDestroyPipelineCache(m_device, m_pipelineCache, nullptr);
-		vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
+		vkDestroyPipeline(m_engine->GetDevice(), m_pipeline, nullptr);
+		vkDestroyRenderPass(m_engine->GetDevice(), m_renderPass, nullptr);
+		vkDestroyPipelineCache(m_engine->GetDevice(), m_pipelineCache, nullptr);
+		vkDestroyPipelineLayout(m_engine->GetDevice(), m_pipelineLayout, nullptr);
 
+	}
+
+	IServiceProvider* VulkanGraphicsPipeline::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
 	}
 
 	VkPipelineCache VulkanGraphicsPipeline::CreatePipelineCache()
@@ -89,7 +92,7 @@ namespace wtv
 		cacheInfo.flags = 0;
 		cacheInfo.initialDataSize = 0;
 		cacheInfo.pInitialData = nullptr;
-		ASSERT_VK_SUCCESS(vkCreatePipelineCache(m_device, &cacheInfo, nullptr, &cache));
+		ASSERT_VK_SUCCESS(vkCreatePipelineCache(m_engine->GetDevice(), &cacheInfo, nullptr, &cache));
 		return cache;
 	}
 
@@ -104,7 +107,7 @@ namespace wtv
 			std::string shaderPath = m_params.stagesDescription[i].path;
 			std::string entryPoint = m_params.stagesDescription[i].entryPoint;
 			IVulkanShaderCompiler::CompilationParams shaderParams{};
-			shaderParams.device = m_device;
+			shaderParams.engine = m_engine;
 			shaderParams.entryPoint = entryPoint;
 			shaderParams.stage = stage;
 			shaderParams.sourcePath = shaderPath;
@@ -289,7 +292,7 @@ namespace wtv
 		layoutCreateInfo.setLayoutCount = (uint32_t)m_descSetLayouts.size();
 		layoutCreateInfo.pSetLayouts = m_descSetLayouts.data();
 
-		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_device, &layoutCreateInfo, nullptr, &layout));
+		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_engine->GetDevice(), &layoutCreateInfo, nullptr, &layout));
 		return layout;
 	}
 
@@ -330,7 +333,7 @@ namespace wtv
 		rpInfo.subpassCount = 1;
 		rpInfo.pSubpasses = &subpassDesc;
 
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateRenderPass(m_device, &rpInfo, nullptr, &m_renderPass));
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateRenderPass(m_engine->GetDevice(), &rpInfo, nullptr, &m_renderPass));
 		return m_renderPass;
 	}
 

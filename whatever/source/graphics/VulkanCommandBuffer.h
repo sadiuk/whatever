@@ -1,6 +1,7 @@
 #pragma once
 #include "ICommandBuffer.h"
 #include "VulkanSync.h"
+#include "IServiceProvider.h"
 
 #include "vulkan/vulkan.h"
 #include "glm/glm.hpp"
@@ -12,7 +13,7 @@
 namespace wtv
 {
 	class VulkanEngine;
-	class VulkanCommandBuffer : public ICommandBuffer
+	class VulkanCommandBuffer : public ICommandBuffer, public IServiceProviderHolder
 	{
 		static constexpr uint32_t CLEAR_COLOR_SIZE = 16;
 	public:
@@ -33,6 +34,7 @@ namespace wtv
 		void UpdateBuffer(IGPUBuffer* buffer, size_t offset, size_t size, const void* data) override;
 	public: 
 		const VulkanFence& GetFence() const { return m_queueSignalFence; }
+		IServiceProvider* GetServiceProvider() override;
 	private:
 		VulkanEngine* m_engine;
 		std::vector<std::pair<uint32_t, std::array<std::byte, CLEAR_COLOR_SIZE>>> m_clearColorValues;

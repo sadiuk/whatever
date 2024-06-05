@@ -1,18 +1,20 @@
 #pragma once
 #include "IShader.h"
 #include "GraphicsConstants.h"
+#include "IServiceProvider.h"
 
 #include "vulkan/vulkan.h"
 
 #include <vector>
 namespace wtv
 {
-	class VulkanShader : public IShader
+	class VulkanEngine;
+	class VulkanShader : public IShader, public IServiceProviderHolder
 	{
 	public:
 		struct CreationParams
 		{
-			VkDevice device;
+			VulkanEngine* engine;
 			uint32_t* spirvCode;
 			size_t codeLength;
 			ShaderStage stage;
@@ -22,6 +24,8 @@ namespace wtv
 		VulkanShader(const CreationParams& params);
 
 		VkShaderModule GetNativeHandle() { return m_module; }
+
+		IServiceProvider* GetServiceProvider() override;
 	private:
 		CreationParams m_params;
 		VkShaderModule m_module;

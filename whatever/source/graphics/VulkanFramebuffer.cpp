@@ -4,9 +4,9 @@
 
 namespace wtv
 {
-	VulkanFramebuffer::VulkanFramebuffer(const CreateInfo& params, VkDevice device, VkRenderPass renderpass) :
+	VulkanFramebuffer::VulkanFramebuffer(const CreateInfo& params, VulkanEngine* engine, VkRenderPass renderpass) :
 		IFramebuffer(params),
-		m_device(device)
+		m_engine(engine)
 	{
 		m_attachments.reserve(params.colorBuffers.size() + params.depthBuffers.size());
 		bool extentInitialized = false;
@@ -48,6 +48,10 @@ namespace wtv
 		createInfo.attachmentCount = (uint32_t)m_attachments.size();
 		createInfo.pAttachments = m_attachments.data();
 		createInfo.renderPass = renderpass;
-		ASSERT_VK_SUCCESS(vkCreateFramebuffer(m_device, &createInfo, nullptr, &m_framebuffer));
+		ASSERT_VK_SUCCESS(vkCreateFramebuffer(m_engine->GetDevice(), &createInfo, nullptr, &m_framebuffer));
+	}
+	IServiceProvider* VulkanFramebuffer::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
 	}
 }

@@ -140,3 +140,8 @@ void wtv::VulkanCommandBuffer::UpdateBuffer(IGPUBuffer* buffer, size_t offset, s
 	vkCmdUpdateBuffer(m_commandBuffer, buf->GetNativeHandle(), offset, size, data);
 }
 
+wtv::IServiceProvider* wtv::VulkanCommandBuffer::GetServiceProvider()
+{
+	return m_engine->GetServiceProvider();
+}
+

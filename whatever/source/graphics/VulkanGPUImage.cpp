@@ -1,11 +1,12 @@
 #include "VulkanGPUImage.h"
 #include "VulkanConstantTranslator.h"
 #include "VkMakros.h"
+#include "VulkanEngine.h"
 namespace wtv
 {
-	VulkanGPUImage::VulkanGPUImage(VkDevice device, const CreationParams& params) :
+	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params) :
 		IGPUImage(params),
-		m_device(device)
+		m_engine(engine)	
 	{
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -25,11 +26,11 @@ namespace wtv
 		imageInfo.pQueueFamilyIndices = nullptr;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-		ASSERT_VK_SUCCESS(vkCreateImage(m_device, &imageInfo, nullptr, &m_image));
+		ASSERT_VK_SUCCESS(vkCreateImage(m_engine->GetDevice(), &imageInfo, nullptr, &m_image));
 	}
-	VulkanGPUImage::VulkanGPUImage(VkDevice device, const CreationParams& params, VkImage rawHandle) :
+	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params, VkImage rawHandle) :
 		IGPUImage(params),
-		m_device(device),
+		m_engine(engine),
 		m_image(rawHandle)
 	{
 	}
@@ -37,9 +38,9 @@ namespace wtv
 	{
 		for (auto view : m_cachedViews)
 		{
-			vkDestroyImageView(m_device, view.second, nullptr);
+			vkDestroyImageView(m_engine->GetDevice(), view.second, nullptr);
 		}
-		vkDestroyImage(m_device, m_image, nullptr);
+		vkDestroyImage(m_engine->GetDevice(), m_image, nullptr);
 	}
 	VkImageView VulkanGPUImage::GetImageView(const IImage::View& view)
 	{
@@ -72,10 +73,14 @@ namespace wtv
 		viewInfo.subresourceRange.levelCount = view.mipCount;
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_device, &viewInfo, nullptr, &newImageView));
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_engine->GetDevice(), &viewInfo, nullptr, &newImageView));
 
 		m_cachedViews.push_back({ view, newImageView });
 
 		return newImageView;
+	}
+	IServiceProvider* VulkanGPUImage::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
 	}
 }

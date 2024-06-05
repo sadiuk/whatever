@@ -14,7 +14,7 @@
 
 namespace wtv
 {
-	struct IEngine : public IReferenceCounted
+	struct IEngine : public IReferenceCounted, IServiceProviderHolder
 	{
 		IEngine(IServiceProvider* services) : m_services(services) {}
 		enum GraphicsAPI
@@ -40,6 +40,9 @@ namespace wtv
 		virtual void Submit(ICommandBuffer* cb) = 0;
 		virtual void Present() = 0;
 		virtual ~IEngine() {}
+
+		//Derived from IServiceProviderHolder
+		IServiceProvider* GetServiceProvider() override{ return m_services; }
 	protected:
 		IServiceProvider* m_services;
 	};

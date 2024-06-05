@@ -29,4 +29,9 @@ namespace wtv
 		std::unordered_map<std::string, std::shared_ptr<IService>> m_services;
 	};
 
+
+	struct IServiceProviderHolder
+	{
+		virtual IServiceProvider* GetServiceProvider() = 0;
+	};
 }

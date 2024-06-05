@@ -109,7 +109,7 @@ namespace wtv
 		m_images.resize(imageCount);
 		for (int i = 0; i < m_images.size(); ++i)
 		{
-			m_images[i] = MakeRef<VulkanGPUImage>(m_device, params, rawSwapchainImages[i]);
+			m_images[i] = MakeRef<VulkanGPUImage>(m_engine, params, rawSwapchainImages[i]);
 		}
 	}
 	void VulkanSwapchain::GetNextImage()
@@ -117,5 +117,9 @@ namespace wtv
 		VulkanFence acquireImageFence(m_engine);
 		ASSERT_VK_SUCCESS_ELSE_RET(vkAcquireNextImageKHR(m_device, m_swapchain, UINT64_MAX, VK_NULL_HANDLE, acquireImageFence.GetNativeHandle(), &m_imageIndex));
 		acquireImageFence.Wait();
+	}
+	IServiceProvider* VulkanSwapchain::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
 	}
 }

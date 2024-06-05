@@ -1,13 +1,14 @@
 #pragma once
 #include "util/RefPtr.h"
 #include "IFence.h"
+#include "IServiceProvider.h"
 
 #include "vulkan/vulkan.h"
 
 namespace wtv
 {
 	class VulkanEngine;
-	struct VulkanSemaphore : public IReferenceCounted
+	struct VulkanSemaphore : public IReferenceCounted, public IServiceProviderHolder
 	{
 	public:
 		VulkanSemaphore(const VulkanSemaphore& other) = delete;
@@ -16,7 +17,7 @@ namespace wtv
 			other.m_semaphore = VK_NULL_HANDLE;
 			other.m_engine = nullptr;
 		}
-		VulkanSemaphore& operator=(VulkanSemaphore&& other)
+		VulkanSemaphore& operator=(VulkanSemaphore&& other) noexcept
 		{
 			m_semaphore = other.m_semaphore;
 			m_engine = other.m_engine;
@@ -28,12 +29,14 @@ namespace wtv
 		~VulkanSemaphore();
 		VkSemaphore GetNativeHandle() { return m_semaphore; }
 		void Signal();
+
+		IServiceProvider* GetServiceProvider() override;
 	private:
 		VkSemaphore m_semaphore;
 		VulkanEngine* m_engine;
 	};
 
-	struct VulkanFence : public IFence
+	struct VulkanFence : public IFence, public IServiceProviderHolder
 	{
 	public:
 		VulkanFence(const VulkanFence& other) = delete;
@@ -42,6 +45,8 @@ namespace wtv
 		VkFence GetNativeHandle() { return m_fence; }
 		void Wait() const override;
 		void Reset() override;
+
+		IServiceProvider* GetServiceProvider() override;
 	private:
 		VkFence m_fence;
 		VulkanEngine* m_engine;

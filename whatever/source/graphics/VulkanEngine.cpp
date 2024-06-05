@@ -252,7 +252,7 @@ namespace wtv
 				// Log that all image views must have same extent
 			}
 		}
-		auto framebuffer = MakeRef<VulkanFramebuffer>(params, m_device, renderpass);
+		auto framebuffer = MakeRef<VulkanFramebuffer>(params, this, renderpass);
 		return framebuffer;
 	}
 

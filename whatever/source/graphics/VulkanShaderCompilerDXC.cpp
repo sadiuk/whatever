@@ -110,7 +110,7 @@ namespace wtv
 		shaderParams.stage = params.stage;
 		shaderParams.spirvCode = (uint32_t*)code->GetBufferPointer();
 		shaderParams.codeLength = code->GetBufferSize();
-		shaderParams.device = params.device;
+		shaderParams.engine = params.engine;
 		shaderParams.shaderName = params.sourcePath.filename().string();
 		return MakeRef<VulkanShader>(shaderParams);
 	}

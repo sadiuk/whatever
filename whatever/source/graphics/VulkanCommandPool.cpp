@@ -36,4 +36,9 @@ namespace wtv
 		vkResetCommandPool(m_engine->GetDevice(), m_commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	}
 
+	IServiceProvider* VulkanCommandPool::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
+	}
+
 }

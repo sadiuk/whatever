@@ -6,7 +6,7 @@
 namespace wtv
 {
 	class VulkanEngine;
-	class VulkanSwapchain : public ISwapchain
+	class VulkanSwapchain : public ISwapchain, public IServiceProviderHolder
 	{
 	public:
 		VulkanSwapchain(VulkanEngine* engine, IVulkanSurface* surface);
@@ -17,6 +17,8 @@ namespace wtv
 		void GetNextImage();
 		VkFormat GetFormat() { return m_format; }
 		uint32_t GetImageCount() { return (uint32_t)m_images.size(); }
+
+		IServiceProvider* GetServiceProvider() override;
 	private:
 		VulkanEngine* m_engine;
 		IVulkanSurface* m_surface;

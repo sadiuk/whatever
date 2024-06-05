@@ -25,6 +25,10 @@ namespace wtv
 		signalInfo.semaphore = m_semaphore;
 		//.value
 	}
+	IServiceProvider* VulkanSemaphore::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
+	}
 	VulkanFence::VulkanFence(VulkanEngine* engine, bool createSignaled) : m_engine(engine)
 	{
 		VkFenceCreateInfo fenceCreateInfo{};
@@ -44,5 +48,9 @@ namespace wtv
 	void VulkanFence::Reset()
 	{
 		vkResetFences(m_engine->GetDevice(), 1, &m_fence);
+	}
+	IServiceProvider* VulkanFence::GetServiceProvider()
+	{
+		return m_engine->GetServiceProvider();
 	}
 }

@@ -1,16 +1,20 @@
 #pragma once
 #include "IFramebuffer.h"
+#include "IServiceProvider.h"
+#include "VulkanEngine.h"
+
 #include "vulkan/vulkan.h"
 namespace wtv
 {
-	class VulkanFramebuffer : public IFramebuffer
+	class VulkanFramebuffer : public IFramebuffer, public IServiceProviderHolder
 	{
 	public:
-		VulkanFramebuffer(const CreateInfo& params, VkDevice device, VkRenderPass renderpass);
+		VulkanFramebuffer(const CreateInfo& params, VulkanEngine* engine, VkRenderPass renderpass);
 		VkFramebuffer GetNativeHandle() { return m_framebuffer; }
 		const std::vector<VkImageView>& GetAttachments() const { return m_attachments; }
+		IServiceProvider* GetServiceProvider() override;
 	private:
-		VkDevice m_device;
+		VulkanEngine* m_engine;
 		VkFramebuffer m_framebuffer;
 		std::vector<VkImageView> m_attachments;
 
