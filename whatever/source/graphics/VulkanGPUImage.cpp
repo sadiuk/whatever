@@ -2,6 +2,7 @@
 #include "VulkanConstantTranslator.h"
 #include "VkMakros.h"
 #include "VulkanEngine.h"
+#include "FormatUtils.h"
 namespace wtv
 {
 	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params) :
@@ -27,6 +28,19 @@ namespace wtv
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 		ASSERT_VK_SUCCESS(vkCreateImage(m_engine->GetDevice(), &imageInfo, nullptr, &m_image));
+
+		VkMemoryRequirements memRequirements{};
+		vkGetImageMemoryRequirements(m_engine->GetDevice(), m_image, &memRequirements);
+
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.pNext = nullptr;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = m_engine->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		ASSERT_VK_SUCCESS(vkAllocateMemory(m_engine->GetDevice(), &allocInfo, nullptr, &m_memory));
+
+		ASSERT_VK_SUCCESS(vkBindImageMemory(m_engine->GetDevice(), m_image, m_memory, 0));
 	}
 	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params, VkImage rawHandle) :
 		IGPUImage(params),

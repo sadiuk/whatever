@@ -131,7 +131,7 @@ namespace wtv
 
     enum class ImageFormat
     {
-        R4G4_UNORM_PACK8,
+        R4G4_UNORM_PACK8 = 1,
         R4G4B4A4_UNORM_PACK16,
         B4G4R4A4_UNORM_PACK16,
         R5G6B5_UNORM_PACK16,
