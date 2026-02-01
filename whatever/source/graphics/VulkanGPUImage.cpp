@@ -5,7 +5,7 @@
 #include "FormatUtils.h"
 namespace wtv
 {
-	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params) :
+	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params) :
 		IGPUImage(params),
 		m_engine(engine)	
 	{
@@ -42,7 +42,7 @@ namespace wtv
 
 		ASSERT_VK_SUCCESS(vkBindImageMemory(m_engine->GetDevice(), m_image, m_memory, 0));
 	}
-	VulkanGPUImage::VulkanGPUImage(VulkanEngine* engine, const CreationParams& params, VkImage rawHandle) :
+	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, VkImage rawHandle) :
 		IGPUImage(params),
 		m_engine(engine),
 		m_image(rawHandle)

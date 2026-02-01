@@ -3,7 +3,7 @@
 #include "VulkanEngine.h"
 namespace wtv
 {
-	VulkanSemaphore::VulkanSemaphore(VulkanEngine* engine) : 
+	VulkanSemaphore::VulkanSemaphore(VulkanDevice* engine) : 
 		m_engine(engine)
 	{
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};
@@ -29,7 +29,7 @@ namespace wtv
 	{
 		return m_engine->GetServiceProvider();
 	}
-	VulkanFence::VulkanFence(VulkanEngine* engine, bool createSignaled) : m_engine(engine)
+	VulkanFence::VulkanFence(VulkanDevice* engine, bool createSignaled) : m_engine(engine)
 	{
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;

@@ -6,14 +6,15 @@
 #include "VkMakros.h"
 namespace wtv
 {
-	class VulkanGPUBuffer : public IGPUBuffer
+	class VulkanGPUBuffer : public IGPUBuffer, public IServiceProviderHolder
 	{
 	public:
-		VulkanGPUBuffer(VulkanEngine* engine, const CreationParams& params);
+		VulkanGPUBuffer(VulkanDevice* engine, const CreationParams& params);
 		~VulkanGPUBuffer();
 		VkBuffer GetNativeHandle() { return m_buffer; }
+		IServiceProvider* GetServiceProvider() { return m_engine->GetServiceProvider(); }
 	private:
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 		VkBuffer m_buffer;
 		VkDeviceMemory m_memory;
 	};

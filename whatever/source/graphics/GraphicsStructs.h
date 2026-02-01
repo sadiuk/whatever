@@ -65,7 +65,16 @@ namespace wtv
 		CullMode cullMode;
 		PolygonMode polygonMode;
 	};
-	struct DescriptorSetLayout
+	struct DescriptorSetLayoutEntry
 	{
+		uint32_t binding;
+		DescriptorType type;
+		uint32_t descriptorCount = 1;
+		ShaderStageFlags stageFlags;
 	};
+	using DescriptorSetLayout = std::vector<DescriptorSetLayoutEntry>;
+	//struct DescriptorSetLayout
+	//{
+	//	std::
+	//};
 }

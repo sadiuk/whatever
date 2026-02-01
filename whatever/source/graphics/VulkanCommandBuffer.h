@@ -12,12 +12,12 @@
 
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	class VulkanCommandBuffer : public ICommandBuffer, public IServiceProviderHolder
 	{
 		static constexpr uint32_t CLEAR_COLOR_SIZE = 16;
 	public:
-		VulkanCommandBuffer(VulkanEngine* engine, VkCommandPool commandPool);
+		VulkanCommandBuffer(VulkanDevice* engine, VkCommandPool commandPool);
 		~VulkanCommandBuffer();
 		VkCommandBuffer GetNativeHandle() { return m_commandBuffer; }
 	public:
@@ -36,7 +36,7 @@ namespace wtv
 		const VulkanFence& GetFence() const { return m_queueSignalFence; }
 		IServiceProvider* GetServiceProvider() override;
 	private:
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 		std::vector<std::pair<uint32_t, std::array<std::byte, CLEAR_COLOR_SIZE>>> m_clearColorValues;
 		std::optional<std::pair<float, uint32_t>> m_clearDepthStencil;
 		std::optional<VkRect2D> m_scissor;

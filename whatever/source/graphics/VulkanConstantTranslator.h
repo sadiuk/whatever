@@ -8,6 +8,7 @@ namespace wtv
 	{
 		static VkFormat GetVkFormatForAttribute(VertexAtributeType attributeType);
 		static VkShaderStageFlagBits GetVkShaderStage(ShaderStage stage);
+		static int GetVkShaderStageFlags(ShaderStageFlags stage);
 		static VkPrimitiveTopology GetVkPrimitiveTopology(PrimitiveTopology topology);
 		static VkFrontFace GetVkFrontFace(FrontFace frontFaceEnum);
 		static VkCullModeFlags GetVkCullMode(CullMode cullMode);
@@ -21,5 +22,8 @@ namespace wtv
 		static ImageFormat GetEngineImageFormat(VkFormat imageFormat);
 		static uint32_t GetVkImageUsageMask(std::underlying_type_t<ImageUsage> usageBits);
 		static VkBufferUsageFlags GetVkBufferUsageFlags(std::underlying_type_t<BufferUsage> usageBits);
+		static VkDescriptorType GetVKDescriptorType(DescriptorType dsType);
 	};
+
+
 }

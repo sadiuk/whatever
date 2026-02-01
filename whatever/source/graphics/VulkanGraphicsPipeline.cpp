@@ -5,7 +5,7 @@
 #include "IVulkanShaderCompiler.h"
 namespace wtv
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanEngine* engine, IServiceProvider* services, const CreateInfo& params) :
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params) :
 		IGraphicsPipeline(params),
 		m_engine(engine),
 		m_services(services)
@@ -64,9 +64,9 @@ namespace wtv
 		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_engine->GetDevice(), m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
-	RefPtr<IFramebuffer> VulkanGraphicsPipeline::CreateFramebuffer(const IFramebuffer::CreateInfo& params)
+	RefPtr<IFramebuffer> VulkanGraphicsPipeline::CreateFramebuffer(IFramebuffer::CreateInfo&& params)
 	{
-		return static_cast<VulkanEngine*>(m_engine)->CreateFramebuffer(params, m_renderPass);
+		return static_cast<VulkanDevice*>(m_engine)->CreateFramebuffer(std::move(params));
 	}
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
@@ -369,7 +369,7 @@ namespace wtv
 
 	std::vector<VkPushConstantRange> VulkanGraphicsPipeline::CreatePushConstantRanges()
 	{
-		return std::vector<VkPushConstantRange>();
+		return std::vector<VkPushConstantRange>(); 
 	}
 
 	std::vector<VkDescriptorSetLayout> VulkanGraphicsPipeline::CreateDescriptorSetLayouts()
@@ -379,7 +379,23 @@ namespace wtv
 		dslInfo.pNext = nullptr;
 		dslInfo.bindingCount = 0;
 		dslInfo.pBindings = nullptr;
-
+		std::vector<VkDescriptorSetLayoutCreateInfo> dslCreateInfos(m_params.descriptorSetLayouts.size());
+		std::vector<std::vector<VkDescriptorSetLayoutBinding>> pipelineBindings(m_params.descriptorSetLayouts.size());
+		for (int dsIndex = 0; dsIndex < m_params.descriptorSetLayouts.size(); ++dsIndex)
+		{
+			pipelineBindings[dsIndex].resize(m_params.descriptorSetLayouts[dsIndex].size());
+			for (int dsEntryIndex = 0; dsEntryIndex < m_params.descriptorSetLayouts[dsIndex].size(); ++dsEntryIndex)
+			{
+				const auto& bindingInfo = m_params.descriptorSetLayouts[dsIndex][dsEntryIndex];
+				pipelineBindings[dsIndex][dsEntryIndex].binding = bindingInfo.binding;
+				pipelineBindings[dsIndex][dsEntryIndex].descriptorType = 
+					VulkanConstantTranslator::GetVKDescriptorType(bindingInfo.type);
+				pipelineBindings[dsIndex][dsEntryIndex].stageFlags =
+					VulkanConstantTranslator::GetVkShaderStageFlags(bindingInfo.stageFlags);
+				pipelineBindings[dsIndex][dsEntryIndex].descriptorCount = bindingInfo.descriptorCount;
+				pipelineBindings[dsIndex][dsEntryIndex].pImmutableSamplers = nullptr;
+			}
+		}
 
 		return std::vector<VkDescriptorSetLayout>();
 	}

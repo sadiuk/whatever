@@ -16,7 +16,7 @@ private:
 
 
 
-	wtv::RefPtr<wtv::IEngine> m_graphicsEngine;
+	wtv::RefPtr<wtv::IDevice> m_device;
 	wtv::RefPtr<wtv::IWindow> m_window;
 	wtv::RefPtr<wtv::IServiceProvider> m_services;
 	glm::uvec2 m_windowSize;

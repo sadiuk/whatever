@@ -5,11 +5,11 @@
 
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	class VulkanSwapchain : public ISwapchain, public IServiceProviderHolder
 	{
 	public:
-		VulkanSwapchain(VulkanEngine* engine, IVulkanSurface* surface);
+		VulkanSwapchain(VulkanDevice* engine, IVulkanSurface* surface);
 		~VulkanSwapchain();
 		RefPtr<IGPUImage> GetBackBuffer() override;
 		VkSwapchainKHR GetNativeHandle() { return m_swapchain; }
@@ -20,7 +20,7 @@ namespace wtv
 
 		IServiceProvider* GetServiceProvider() override;
 	private:
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 		IVulkanSurface* m_surface;
 		VkFormat m_format;
 		VkSwapchainKHR m_swapchain;

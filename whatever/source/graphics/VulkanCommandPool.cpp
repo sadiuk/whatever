@@ -5,7 +5,7 @@
 #include <cassert>
 namespace wtv
 {
-	wtv::VulkanCommandPool::VulkanCommandPool(VulkanEngine* engine) :
+	wtv::VulkanCommandPool::VulkanCommandPool(VulkanDevice* engine) :
 		m_engine(engine)
 	{
 		assert(m_engine->GetQueueFamilyIndices().graphicsFamilyIndex.value() == m_engine->GetQueueFamilyIndices().computeFamilyIndex.value());

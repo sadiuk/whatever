@@ -12,8 +12,8 @@ namespace wtv
 	{
 
 	public:
-		VulkanGraphicsPipeline(VulkanEngine* engine, IServiceProvider* services, const CreateInfo& params);
-		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) override;
+		VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params);
+		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params) override;
 		VkRenderPass GetRenderPass() { return m_renderPass; }
 		VkPipeline GetPipeline() { return m_pipeline; }
 		~VulkanGraphicsPipeline();
@@ -46,7 +46,7 @@ namespace wtv
 		std::vector<VkPushConstantRange> CreatePushConstantRanges();
 		std::vector< VkDescriptorSetLayout> CreateDescriptorSetLayouts();
 	private:
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 		IServiceProvider* m_services;
 		VkPipeline m_pipeline{};
 		VkDevice m_device{};

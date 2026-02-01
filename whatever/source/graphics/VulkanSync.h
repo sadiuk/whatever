@@ -7,7 +7,7 @@
 
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	struct VulkanSemaphore : public IReferenceCounted, public IServiceProviderHolder
 	{
 	public:
@@ -25,7 +25,7 @@ namespace wtv
 			other.m_engine = nullptr;
 			return *this;
 		}
-		VulkanSemaphore(VulkanEngine* engine);
+		VulkanSemaphore(VulkanDevice* engine);
 		~VulkanSemaphore();
 		VkSemaphore GetNativeHandle() { return m_semaphore; }
 		void Signal();
@@ -33,14 +33,14 @@ namespace wtv
 		IServiceProvider* GetServiceProvider() override;
 	private:
 		VkSemaphore m_semaphore;
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 	};
 
 	struct VulkanFence : public IFence, public IServiceProviderHolder
 	{
 	public:
 		VulkanFence(const VulkanFence& other) = delete;
-		VulkanFence(VulkanEngine* engine, bool createSignaled = false);
+		VulkanFence(VulkanDevice* engine, bool createSignaled = false);
 		~VulkanFence();
 		VkFence GetNativeHandle() { return m_fence; }
 		void Wait() const override;
@@ -49,6 +49,6 @@ namespace wtv
 		IServiceProvider* GetServiceProvider() override;
 	private:
 		VkFence m_fence;
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 	};
 }

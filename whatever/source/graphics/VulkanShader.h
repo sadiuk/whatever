@@ -8,13 +8,13 @@
 #include <vector>
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	class VulkanShader : public IShader, public IServiceProviderHolder
 	{
 	public:
 		struct CreationParams
 		{
-			VulkanEngine* engine;
+			VulkanDevice* engine;
 			uint32_t* spirvCode;
 			size_t codeLength;
 			ShaderStage stage;

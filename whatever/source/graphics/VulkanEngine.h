@@ -20,7 +20,7 @@
 #endif
 namespace wtv
 {
-	class VulkanEngine : public IEngine
+	class VulkanDevice : public IDevice
 	{
 		static constexpr uint32_t VULKAN_VERSION = VK_API_VERSION_1_2;
 
@@ -45,8 +45,8 @@ namespace wtv
 		};
 
 	public:
-		VulkanEngine(const IEngine::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory);
-		~VulkanEngine();
+		VulkanDevice(const IDevice::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory);
+		~VulkanDevice();
 		GraphicsAPI GetAPI() override { return Vulkan; }
 	private:
 		bool Init();
@@ -72,7 +72,7 @@ namespace wtv
 		void Present() override;
 		void BeginFrame() override;
 	public:
-		RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass);
+		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params);
 		VkDevice GetDevice() const { return m_device; }
 		VkPhysicalDevice GetPhysicalDevice() const { return m_physicalDevice; }
 		QueueFamilyIndices GetQueueFamilyIndices() { return m_queueFamilyIndices; }

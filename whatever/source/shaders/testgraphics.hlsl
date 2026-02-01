@@ -25,6 +25,6 @@ struct PS_OUTPUT
 PS_OUTPUT PS(VS_OUTPUT input)
 {
     PS_OUTPUT output;
-    output.color = float4(1, 0, 0, 1);
+    output.color = float4(1, 0,0.8, 1);
     return output;
 }

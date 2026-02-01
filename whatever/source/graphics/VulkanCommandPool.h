@@ -3,16 +3,16 @@
 #include <vulkan/vulkan.h>
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	class VulkanCommandPool : public IServiceProviderHolder
 	{
 	public:
-		VulkanCommandPool(VulkanEngine* engine);
+		VulkanCommandPool(VulkanDevice* engine);
 		RefPtr<VulkanCommandBuffer> CreateCommandBuffer();
 		void WaitCommandBuffersAndClear();
 		IServiceProvider* GetServiceProvider() override;
 	private:
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 		std::vector<RefPtr<VulkanCommandBuffer>> m_commandBuffers;
 		VkCommandPool m_commandPool;
 	};

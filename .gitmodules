@@ -7,3 +7,6 @@
 [submodule "whatever/third-party/imgui"]
 	path = whatever/third-party/imgui
 	url = https://github.com/sadiuk/imgui
+[submodule "whatever/third-party/stb"]
+	path = whatever/third-party/stb
+	url = https://github.com/nothings/stb.git

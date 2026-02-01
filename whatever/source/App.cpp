@@ -3,6 +3,12 @@
 #include "vulkan/vulkan.h"
 #include "graphics/ISurface.h"
 #include "VulkanAppServiceProvider.h"
+#include <scene/Camera.h>
+
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_vulkan.h"
+
 using namespace wtv;
 
 void App::Init()
@@ -15,11 +21,18 @@ void App::Init()
 	windowParams.size = m_windowSize;
 	m_window = MakeRef<WindowSDL2>(windowParams);
 
-	IEngine::CreationParams engineParams{};
-	engineParams.api = IEngine::GraphicsAPI::Vulkan;
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	ImGui_ImplSDL2_InitForVulkan((SDL_Window*)m_window->GetNativeHandle());
+
+
+	IDevice::CreationParams engineParams{};
+	engineParams.api = IDevice::GraphicsAPI::Vulkan;
 	engineParams.appName = "EngineTest";
 	engineParams.window = m_window;
-	m_graphicsEngine = IEngine::Create(engineParams, m_services.get());
+	m_device = IDevice::Create(engineParams, m_services.get());
 }
 
 App::App()
@@ -32,6 +45,9 @@ App::App()
 void App::Run()
 {
 	IGraphicsPipeline::CreateInfo pipelineInfo{};
+
+	DescriptorSetLayout dsLayout;
+	//pipelineInfo.
 	pipelineInfo.blendStateInfo.attachmentBlendStates.resize(1);
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].blendEnable = true;
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].srcColorBlendFactor = BlendFactor::SrcAlpha;
@@ -52,7 +68,7 @@ void App::Run()
 	IFramebuffer::Layout framebufferLayout{};
 	framebufferLayout.colorBuffers.emplace_back();
 	framebufferLayout.colorBuffers[0].clearBeforeWrite = true;
-	framebufferLayout.colorBuffers[0].format = m_graphicsEngine->GetSwapchainFormat();
+	framebufferLayout.colorBuffers[0].format = m_device->GetSwapchainFormat();
 	pipelineInfo.framebufferLayout = framebufferLayout;
 
 	pipelineInfo.stagesDescription.resize(2);
@@ -73,7 +89,26 @@ void App::Run()
 	viewport.height = m_windowSize.y;
 	pipelineInfo.viewportInfo = viewport;
 
-	auto graphPipeline = m_graphicsEngine->CreateGraphicsPipeline(pipelineInfo);
+	auto graphPipeline = m_device->CreateGraphicsPipeline(pipelineInfo);
+
+
+
+	Camera camera(Camera::CreationParams{
+		.position = glm::vec3(0, 0, 0),
+		.normalizedDirection = glm::vec3(1, 0, 0),
+		.up = glm::vec3(0, 1, 0),
+		.fovYInDegrees = 60,
+		.widthToHeightRatio = (float)m_windowSize.x / m_windowSize.y,
+		.near = 0.01,
+		.far = 1000,
+		});
+
+	auto ubData = camera.GetConstantData();
+	auto cameraUB = m_device->CreateBuffer(IGPUBuffer::CreationParams{
+		.bufferSize = sizeof(ubData),
+		.usageFlags = (uint32_t)BufferUsage::UniformBuffer,
+		.name = "CameraCB"
+	});
 
 	static float vbData[] =
 	{
@@ -81,31 +116,34 @@ void App::Run()
 		0.5, -0.5, 0, 1,
 		0, 0.5, 0, 1
 	};
-	auto vertexBuffer = m_graphicsEngine->CreateBuffer(IGPUBuffer::CreationParams{
+	auto vertexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
 		.bufferSize = sizeof(vbData),
 		.usageFlags = (uint32_t)BufferUsage::VertexBuffer, 
 		.name = "FirstVB"});
 
-	auto vbUpdateCB = m_graphicsEngine->CreateCommandBuffer();
+	auto vbUpdateCB = m_device->CreateCommandBuffer();
 	vbUpdateCB->Begin();
 	vbUpdateCB->UpdateBuffer(vertexBuffer.get(), 0, sizeof(vbData), vbData);
+
 	vbUpdateCB->End();
-	m_graphicsEngine->Submit(vbUpdateCB.get());
+	m_device->Submit(vbUpdateCB.get());
 	while (m_window->IsOpen())
 	{
-		m_graphicsEngine->BeginFrame();
-		auto commandBuffer = m_graphicsEngine->CreateCommandBuffer();
+		m_device->BeginFrame();
+
+		auto commandBuffer = m_device->CreateCommandBuffer();
 		glm::vec4 clearColor(0, 1, 0, 1);
 
 		IFramebuffer::CreateInfo framebufferInfo{};
-		IImage::View swapchainImageView(m_graphicsEngine->GetBackbuffer().get());
+		IImage::View swapchainImageView(m_device->GetBackbuffer().get());
 		framebufferInfo.colorBuffers = { swapchainImageView };
 		framebufferInfo.layout = framebufferLayout;
-		auto framebuffer = graphPipeline->CreateFramebuffer(framebufferInfo);
+		auto framebuffer = graphPipeline->CreateFramebuffer(std::move(framebufferInfo));
 
 		size_t vbOffset = 0;
 		IGPUBuffer* vertexBuffers[] = { vertexBuffer.get() };
 		commandBuffer->Begin();
+		commandBuffer->UpdateBuffer(cameraUB.get(), 0, sizeof(ubData), &ubData);
 		commandBuffer->SetClearColorValue(0, &clearColor.x);
 		commandBuffer->SetViewport(viewport);
 		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
@@ -114,8 +152,8 @@ void App::Run()
 		commandBuffer->Draw(3, 0, 1);
 		commandBuffer->End();
 
-		m_graphicsEngine->Submit(commandBuffer.get());
-		m_graphicsEngine->Present();
+		m_device->Submit(commandBuffer.get());
+		m_device->Present();
 		m_window->Update();
 
 		//commandBuffer->Reset();

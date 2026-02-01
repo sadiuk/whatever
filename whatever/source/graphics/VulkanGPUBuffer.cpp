@@ -2,7 +2,7 @@
 
 namespace wtv
 {
-	VulkanGPUBuffer::VulkanGPUBuffer(VulkanEngine* engine, const CreationParams& params) : IGPUBuffer(params), m_engine(engine)
+	VulkanGPUBuffer::VulkanGPUBuffer(VulkanDevice* engine, const CreationParams& params) : IGPUBuffer(params), m_engine(engine)
 	{
 		auto device = engine->GetDevice();
 		auto physDevice = engine->GetPhysicalDevice();

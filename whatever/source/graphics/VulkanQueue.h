@@ -7,11 +7,11 @@
 
 namespace wtv
 {
-	class VulkanEngine;
+	class VulkanDevice;
 	class VulkanQueue : public IQueue
 	{
 	public:
-		VulkanQueue(VulkanEngine* engine, uint32_t queueFamilyIndex, uint32_t queueIndex);
+		VulkanQueue(VulkanDevice* engine, uint32_t queueFamilyIndex, uint32_t queueIndex);
 		~VulkanQueue() {}
 		void Submit(ICommandBuffer* cmdBuffer) override;
 		void Submit(ICommandBuffer* cmdBuffer, IQueue* waitQueue) override;
@@ -22,12 +22,12 @@ namespace wtv
 		VkDevice m_device;
 		VulkanSemaphore m_signalSemaphore;
 		VulkanFence m_fence;
-		VulkanEngine* m_engine;
+		VulkanDevice* m_engine;
 	};
 	class VulkanPresentQueue : public VulkanQueue
 	{
 	public:
-		VulkanPresentQueue(VulkanEngine* engine, uint32_t queueFamilyIndex, uint32_t queueIndex) :
+		VulkanPresentQueue(VulkanDevice* engine, uint32_t queueFamilyIndex, uint32_t queueIndex) :
 			VulkanQueue(engine, queueFamilyIndex, queueIndex) {}
 		void PresentSwapchainImage(VulkanSwapchain* swapchain, VulkanQueue* waitQueue);
 	};

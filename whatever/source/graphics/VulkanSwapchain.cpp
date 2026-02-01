@@ -8,7 +8,7 @@
 
 namespace wtv
 {
-	VulkanSwapchain::VulkanSwapchain(VulkanEngine* engine, IVulkanSurface* surface)
+	VulkanSwapchain::VulkanSwapchain(VulkanDevice* engine, IVulkanSurface* surface)
 		: m_engine(engine), m_surface(surface), m_device(engine->GetDevice())
 	{
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};

@@ -14,9 +14,9 @@
 
 namespace wtv
 {
-	struct IEngine : public IReferenceCounted, IServiceProviderHolder
+	struct IDevice : public IReferenceCounted, IServiceProviderHolder
 	{
-		IEngine(IServiceProvider* services) : m_services(services) {}
+		IDevice(IServiceProvider* services) : m_services(services) {}
 		enum GraphicsAPI
 		{
 			Vulkan
@@ -27,7 +27,7 @@ namespace wtv
 			std::string appName;
 			RefPtr<IWindow> window;
 		};
-		static RefPtr<IEngine> Create(const CreationParams& params, IServiceProvider* services);
+		static RefPtr<IDevice> Create(const CreationParams& params, IServiceProvider* services);
 		virtual GraphicsAPI GetAPI() = 0;
 
 		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
@@ -39,7 +39,7 @@ namespace wtv
 		virtual void BeginFrame() = 0;
 		virtual void Submit(ICommandBuffer* cb) = 0;
 		virtual void Present() = 0;
-		virtual ~IEngine() {}
+		virtual ~IDevice() {}
 
 		//Derived from IServiceProviderHolder
 		IServiceProvider* GetServiceProvider() override{ return m_services; }

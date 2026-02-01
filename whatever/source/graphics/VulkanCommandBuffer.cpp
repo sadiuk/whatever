@@ -5,7 +5,7 @@
 #include "VkMakros.h"
 #include "VulkanGPUBuffer.h"
 
-wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanEngine* engine, VkCommandPool commandPool) :
+wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* engine, VkCommandPool commandPool) :
 	m_device(engine->GetDevice()),
 	m_commandPool(commandPool),
 	m_queueWaitSemaphore(engine),

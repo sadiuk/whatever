@@ -16,7 +16,7 @@ namespace wtv
 
 		struct CompilationParams
 		{
-			VulkanEngine* engine;
+			VulkanDevice* engine;
 			std::string entryPoint;
 			ShaderStage stage;
 			std::filesystem::path sourcePath;

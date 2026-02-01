@@ -128,4 +128,19 @@ namespace wtv
             return 0;
 		}
 	}
+
+    inline bool IsDepthFormat(ImageFormat format)
+    {
+        switch (format)
+        {
+        case ImageFormat::D16_UNORM:
+        case ImageFormat::D32_SFLOAT:
+        case ImageFormat::D16_UNORM_S8_UINT:
+        case ImageFormat::D24_UNORM_S8_UINT:
+        case ImageFormat::D32_SFLOAT_S8_UINT:
+            return true;
+        default:
+            return false;
+        }
+	}
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <cassert>
 #include <cstdint>
+#include <climits>
+
 namespace wtv
 {
     enum class ShaderStage : uint16_t
@@ -13,6 +15,15 @@ namespace wtv
 
         Compute = GraphicsStageCount,
         Count
+    };
+
+    enum ShaderStageFlags
+    {
+        Vertex = 1,
+        Geometry = 2,
+        Fragment = 4,
+
+        All = INT_MAX
     };
 
     enum class VertexAtributeType : uint16_t
@@ -121,7 +132,7 @@ namespace wtv
 
     enum class BlendOperation
     {
-        Add = 0,
+        Add = 1,
         Subtract,
         ReverseSubtract,
         Min,
@@ -278,6 +289,22 @@ namespace wtv
         VertexBuffer = 8,
         IndirectBuffer = 16,
         CPU
+    };
+
+    enum class DescriptorType : uint32_t
+    {
+        Undefined = 0,
+        Sampler = 1,
+        CombinedImageSampler = 2,
+        SampledImage = 3,
+        StorageImage = 4,
+        UniformTexelBuffer = 5,
+        StorageTexelBuffer = 6,
+        UniformBuffer = 7,
+        StorageBuffer = 8,
+        UniformBufferDynamic = 9,
+        StorageBufferDynamic = 10,
+        InputAttachment = 11,
     };
 
     inline uint32_t GetAttributeSize(VertexAtributeType attributeType) {

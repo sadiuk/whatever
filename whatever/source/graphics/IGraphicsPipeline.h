@@ -24,12 +24,13 @@ namespace wtv
 			DepthStencilInfo depthStencilInfo;
 			BlendStateInfo blendStateInfo;
 			IFramebuffer::Layout framebufferLayout;
+			std::vector<DescriptorSetLayout> descriptorSetLayouts;
 		};
 
 
 		IGraphicsPipeline(const CreateInfo& params) : m_params(params) {}
 		virtual ~IGraphicsPipeline() {}
-		virtual RefPtr<IFramebuffer> CreateFramebuffer(const IFramebuffer::CreateInfo& params) = 0;
+		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params) = 0;
 	protected:
 		CreateInfo m_params;
 

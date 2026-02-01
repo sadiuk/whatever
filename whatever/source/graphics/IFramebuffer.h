@@ -4,7 +4,7 @@
 #include "util/RefPtr.h"
 
 #include <vector>
-#include <unordered_map>
+#include <optional>
 
 namespace wtv
 {
@@ -24,10 +24,26 @@ namespace wtv
 		{
 			Layout layout;
 			std::vector<IImage::View> colorBuffers;
-			std::vector<IImage::View> depthBuffers;
+			std::optional<IImage::View> depthBuffer;
+
+			int GetAttachmentCount() const
+			{
+				int count = (int)colorBuffers.size();
+				if (depthBuffer.has_value())
+					count += 1;
+				return count;
+			}
+			RenderTargetInfo& GetRTInfo(int index)
+			{
+				assert(index >= 0 && index < GetAttachmentCount());
+				if (index < colorBuffers.size())
+					return layout.colorBuffers[index];
+				else
+					return layout.depthBuffers[index - (int)colorBuffers.size()];
+			}
 		};
-		IFramebuffer(const CreateInfo& params) : m_params(params) {}
-	private:
+		IFramebuffer(CreateInfo&& params) : m_params(std::move(params)) {}
+	protected:
 		CreateInfo m_params;
 
 	};

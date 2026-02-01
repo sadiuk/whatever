@@ -17,8 +17,8 @@
 
 namespace wtv
 {
-	VulkanEngine::VulkanEngine(const IEngine::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory) :
-		IEngine(services),
+	VulkanDevice::VulkanDevice(const IDevice::CreationParams& params, IServiceProvider* services, ISurfaceFactory* factory) :
+		IDevice(services),
 		m_creationParams(params)
 	{
 		m_surface = StaticRefCast<IVulkanSurface>(factory->Create());
@@ -26,30 +26,30 @@ namespace wtv
 
 	}
 
-	VulkanEngine::~VulkanEngine()
+	VulkanDevice::~VulkanDevice()
 	{
 		Deinit();
 	}
 
-	bool VulkanEngine::CreateSwapChain()
+	bool VulkanDevice::CreateSwapChain()
 	{
 		m_swapchain = MakeRef<VulkanSwapchain>(this, m_surface.get());
 		return true;
 	}
-	bool VulkanEngine::CreateCommandPools()
+	bool VulkanDevice::CreateCommandPools()
 	{
 		for (int i = 0; i < m_swapchain->GetImageCount(); ++i)
 			m_commandPools.push_back(VulkanCommandPool(this));
 		return true;
 	}       
-	bool VulkanEngine::CreateCommandQueues()
+	bool VulkanDevice::CreateCommandQueues()
 	{
 		m_graphicsQueue = MakeRef<VulkanQueue>(this, m_queueFamilyIndices.graphicsFamilyIndex.value(), 0);
 		m_presentQueue = MakeRef<VulkanPresentQueue>(this, m_queueFamilyIndices.graphicsFamilyIndex.value(), 0);
 		return true;
 	}
 
-	bool VulkanEngine::Init()
+	bool VulkanDevice::Init()
 	{
 		do
 		{
@@ -74,7 +74,7 @@ namespace wtv
 		return false;
 	}
 
-	bool VulkanEngine::CreateInstance(const std::string& appName)
+	bool VulkanDevice::CreateInstance(const std::string& appName)
 	{
 		uint32_t appVersion = 0;
 
@@ -113,7 +113,7 @@ namespace wtv
 		return true;
 	}
 
-	bool VulkanEngine::SelectPhysicalDevice()
+	bool VulkanDevice::SelectPhysicalDevice()
 	{
 		uint32_t deviceCount;
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
@@ -157,7 +157,7 @@ namespace wtv
 		return true;
 	}
 
-	bool VulkanEngine::CreateLogicalDevice()
+	bool VulkanDevice::CreateLogicalDevice()
 	{
 		float queuePriority = 1.;
 		VkDeviceQueueCreateInfo queueInfos[1] = {};
@@ -189,7 +189,7 @@ namespace wtv
 		return true;
 	}
 
-	bool VulkanEngine::CreateAllocator()
+	bool VulkanDevice::CreateAllocator()
 	{
 		VmaAllocatorCreateInfo allocatorInfo{};
 		allocatorInfo.device = m_device;
@@ -202,12 +202,12 @@ namespace wtv
 		return true;
 	}
 
-	bool VulkanEngine::InitSurface()
+	bool VulkanDevice::InitSurface()
 	{
 		return m_surface->Initialize(m_instance);
 	}
 
-	bool VulkanEngine::EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers)
+	bool VulkanDevice::EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers)
 	{
 		uint32_t layersCount = 0;
 		vkEnumerateInstanceLayerProperties(&layersCount, nullptr);
@@ -231,77 +231,78 @@ namespace wtv
 
 	}
 
-	RefPtr<IGraphicsPipeline> VulkanEngine::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
+	RefPtr<IGraphicsPipeline> VulkanDevice::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
 	{
 		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params);
 		return pipeline;
 	}
 
-	RefPtr<ICommandBuffer> VulkanEngine::CreateCommandBuffer()
+	RefPtr<ICommandBuffer> VulkanDevice::CreateCommandBuffer()
 	{
 		return m_commandPools[m_swapchain->GetImageIndex()].CreateCommandBuffer();
 	}
 
-	RefPtr<IFramebuffer> VulkanEngine::CreateFramebuffer(const IFramebuffer::CreateInfo& params, VkRenderPass renderpass)
+	RefPtr<IFramebuffer> VulkanDevice::CreateFramebuffer(IFramebuffer::CreateInfo&& params)
 	{
 		if (params.colorBuffers.size() > 1)
 		{
 			for (int i = 1; i < params.colorBuffers.size(); ++i)
 			{
-				if (!params.colorBuffers[i].HasSameExtent(params.colorBuffers[i - 1])) return nullptr;
+				if (!params.colorBuffers[i].HasSameExtent(params.colorBuffers[i - 1])) 
+					return nullptr;
 				// Log that all image views must have same extent
 			}
 		}
-		auto framebuffer = MakeRef<VulkanFramebuffer>(params, this, renderpass);
+		auto framebuffer = MakeRef<VulkanFramebuffer>(std::move(params), this);
 		return framebuffer;
 	}
 
-	uint32_t VulkanEngine::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProps{};
 		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProps);
 
 		for (int i = 0; i < memProps.memoryTypeCount; ++i)
 		{
-			if ((typeFilter & (1 << i)) && (memProps.memoryTypes[i].propertyFlags & properties == properties))
+			if ((typeFilter & (1 << i)) && ((memProps.memoryTypes[i].propertyFlags & properties) == properties))
 			{
 				return i;
 			}
 		}
 	}
 
-	RefPtr<IGPUImage> VulkanEngine::GetBackbuffer()
+	RefPtr<IGPUImage> VulkanDevice::GetBackbuffer()
 	{
 		return m_swapchain->GetBackBuffer();
 	}
 
-	RefPtr<IFence> VulkanEngine::CreateFence(bool createSignaled)
+	RefPtr<IFence> VulkanDevice::CreateFence(bool createSignaled)
 	{
 		return MakeRef<VulkanFence>(this, createSignaled);
 	}
 
-	RefPtr<IGPUBuffer> VulkanEngine::CreateBuffer(const IGPUBuffer::CreationParams params)
+	RefPtr<IGPUBuffer> VulkanDevice::CreateBuffer(const IGPUBuffer::CreationParams params)
 	{
 		auto buffer = MakeRef<VulkanGPUBuffer>(this, params);
 		return buffer;
 	}
 
-	ImageFormat VulkanEngine::GetSwapchainFormat()
+	ImageFormat VulkanDevice::GetSwapchainFormat()
 	{
 		return VulkanConstantTranslator::GetEngineImageFormat(m_swapchain->GetFormat());
 	}
 
-	void VulkanEngine::Submit(ICommandBuffer* cb)
+	void VulkanDevice::Submit(ICommandBuffer* cb)
 	{
 		m_graphicsQueue->Submit(cb);
 	}
 
-	void VulkanEngine::Present()
+	void VulkanDevice::Present()
 	{
 		m_presentQueue->PresentSwapchainImage(m_swapchain.get(), m_graphicsQueue.get());
 	}
 
-	void VulkanEngine::BeginFrame()
+	void VulkanDevice::BeginFrame()
 	{
 		m_graphicsQueue->GetFence().Wait();
 		m_graphicsQueue->GetFence().Reset();
@@ -310,7 +311,7 @@ namespace wtv
 	}
 
 
-	bool VulkanEngine::Deinit()
+	bool VulkanDevice::Deinit()
 	{
 
 		vkDestroyDevice(m_device, nullptr);
