@@ -1,7 +1,7 @@
 #pragma once
 #include "IGraphicsPipeline.h"
 #include "vulkan/vulkan.h"
-#include "IEngine.h"
+#include "IDevice.h"
 #include "VulkanShader.h"
 #include "IServiceProvider.h"
 

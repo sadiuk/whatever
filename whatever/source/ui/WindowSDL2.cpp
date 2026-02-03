@@ -1,4 +1,7 @@
 #include "WindowSDL2.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_vulkan.h"
+#include "imgui.h"
 
 namespace wtv
 {
@@ -27,6 +30,8 @@ namespace wtv
 		SDL_Event e;
 		while (SDL_PollEvent(&e) > 0)
 		{
+			ImGui_ImplSDL2_ProcessEvent(&e);
+
 			switch (e.type)
 			{
 			case SDL_QUIT:
@@ -34,7 +39,9 @@ namespace wtv
 				break;
 			}
 
+
 			SDL_UpdateWindowSurface(m_window);
+
 		}
 	}
 }

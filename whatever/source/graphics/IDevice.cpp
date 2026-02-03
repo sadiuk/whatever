@@ -1,5 +1,5 @@
-#include "IEngine.h"
-#include "VulkanEngine.h"
+#include "IDevice.h"
+#include "VulkanDevice.h"
 #include "VulkanSurfaceSDL.h"
 #include <IServiceProvider.h>
 #include "util/RefPtr.h"

@@ -9,6 +9,7 @@
 #include "IFence.h"
 #include "IGPURenderPass.h"
 #include "IServiceProvider.h"
+#include "IDescriptorPool.h"
 #include "util/RefPtr.h"
 #define ENGINE_VERSION 0
 
@@ -37,7 +38,8 @@ namespace wtv
 		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
 		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params) = 0;
 		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) = 0;
-		virtual RefPtr<IGPURenderPass> CreateRenderPass(const IFramebuffer::Layout& params) = 0;
+		virtual RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) = 0;
+		virtual RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 
 		virtual void BeginFrame() = 0;

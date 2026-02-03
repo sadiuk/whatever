@@ -17,6 +17,7 @@ namespace wtv
 		void Submit(ICommandBuffer* cmdBuffer, IQueue* waitQueue) override;
 		IFence& GetFence() override;
 		VulkanSemaphore& GetRenderFinishedSemaphore() { return m_signalSemaphore; }
+		VkQueue GetNativeHandle() { return m_queue; }
 	protected:
 		VkQueue m_queue;
 		VkDevice m_device;

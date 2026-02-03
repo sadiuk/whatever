@@ -1,7 +1,7 @@
 #pragma once
 #include "IFramebuffer.h"
 #include "IServiceProvider.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 
 #include "vulkan/vulkan.h"
 namespace wtv

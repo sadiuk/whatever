@@ -1,5 +1,5 @@
 #pragma once
-#include "IEngine.h"
+#include "IDevice.h"
 #include "IVulkanSurface.h" 
 #include "VulkanGPUImage.h"
 #include <ui/IWindow.h>
@@ -72,7 +72,8 @@ namespace wtv
 		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params) override;
 		ImageFormat GetSwapchainFormat() override;
 		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) override;
-		RefPtr<IGPURenderPass> CreateRenderPass(const IFramebuffer::Layout& params) override;
+		RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) override;
+		RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) override;
 		void Submit(ICommandBuffer* cb) override;
 		void Present() override;
 		void BeginFrame() override;
@@ -83,6 +84,9 @@ namespace wtv
 		VulkanQueue* GetGraphicsQueue() { return m_graphicsQueue.get(); }
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 		VulkanRenderPass* ObtainDummyRenderPass(const IFramebuffer::Layout& layout);
+		VkInstance GetInstance() { return m_instance; }
+		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
+		VulkanSwapchain* GetSwapchain() { return m_swapchain.get(); }
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;

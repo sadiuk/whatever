@@ -1,13 +1,13 @@
 #include "VulkanRenderPass.h"
 #include "FormatUtils.h"
 #include "VulkanConstantTranslator.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 
 namespace wtv
 {
-VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const IFramebuffer::Layout& params) :
+VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const RenderPassParams& params) :
 	m_device(device),
-	m_fbLayout(params)
+	m_properties(params)
 {
 	std::vector<VkAttachmentDescription> attachmentDescs(params.GetAttachmentCount());
 	for (int i = 0; i < attachmentDescs.size(); ++i)
@@ -19,8 +19,8 @@ VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const IFramebuffer::Lay
 		attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		attachmentDescs[i].initialLayout = VulkanConstantTranslator::GetVkImageLayout(params.GetRTInfo(i).layoutBefore);
+		attachmentDescs[i].finalLayout = VulkanConstantTranslator::GetVkImageLayout(params.GetRTInfo(i).layoutAfter);
 		attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
 	}
 

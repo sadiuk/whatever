@@ -290,23 +290,6 @@ namespace wtv
         IndirectBuffer = 16,
         CPU
     };
-
-    enum class DescriptorType : uint32_t
-    {
-        Undefined = 0,
-        Sampler = 1,
-        CombinedImageSampler = 2,
-        SampledImage = 3,
-        StorageImage = 4,
-        UniformTexelBuffer = 5,
-        StorageTexelBuffer = 6,
-        UniformBuffer = 7,
-        StorageBuffer = 8,
-        UniformBufferDynamic = 9,
-        StorageBufferDynamic = 10,
-        InputAttachment = 11,
-    };
-
     enum class AttachmentLoadOp
     {
         Load,
@@ -321,6 +304,66 @@ namespace wtv
         Discard,
         Undefined = -1
 	};
+
+    enum class DescriptorType
+    {
+        Sampler = 0,
+        CombinedImageSampler = 1,
+        SampledImage = 2,
+        StorageImage = 3,
+        UniformTexelBuffer = 4,
+        StorageTexelBuffer = 5,
+        UniformBuffer = 6,
+        StorageBuffer = 7,
+        UniformBufferDynamic = 8,
+        StorageBufferDynamic = 9,
+        InputAttachment = 10,
+        InlineUniformBlock = 11,
+        AccelerationStructureKhr = 12,
+        AccelerationStructureNv = 13,
+        SampleWeightImageQcom = 14,
+        BlockMatchImageQcom = 15,
+        MutableExt = 16,  
+        Count,
+        Undefined = 0x7FFFFFFF ,
+
+    };
+
+    enum class ImageLayout : uint32_t
+    {
+        Undefined = 0,
+        General,
+        ColorAttachmentOptimal,
+        DepthStencilAttachmentOptimal,
+        DepthStencilReadOnlyOptimal,
+        ShaderReadOnlyOptimal,
+        TransferSrcOptimal,
+        TransferDstOptimal,
+        Preinitialized,
+        DepthReadOnlyStencilAttachmentOptimal,
+        DepthAttachmentStencilReadOnlyOptimal,
+        DepthAttachmentOptimal,
+        DepthReadOnlyOptimal,
+        StencilAttachmentOptimal,
+        StencilReadOnlyOptimal,
+        ReadOnlyOptimal,
+        AttachmentOptimal,
+        RenderingLocalRead,
+        PresentSrcKhr,
+        VideoDecodeDstKhr,
+        VideoDecodeSrcKhr,
+        VideoDecodeDpbKhr,
+        SharedPresentKhr,
+        FragmentDensityMapOptimalExt,
+        FragmentShadingRateAttachmentOptimalKhr,
+        VideoEncodeDstKhr,
+        VideoEncodeSrcKhr,
+        VideoEncodeDpbKhr,
+        AttachmentFeedbackLoopOptimalExt,
+        TensorAliasingArm,
+        VideoEncodeQuantizationMapKhr,
+        ZeroInitializedExt
+    };
 
     inline uint32_t GetAttributeSize(VertexAtributeType attributeType) {
         switch (attributeType) {

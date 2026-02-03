@@ -3,7 +3,7 @@
 #include "GraphicsConstants.h"
 #include "IService.h"
 #include <util/RefPtr.h>
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 
 #include <memory>
 #include <filesystem>

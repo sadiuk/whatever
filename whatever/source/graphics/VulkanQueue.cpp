@@ -1,6 +1,6 @@
 #include "VulkanQueue.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 
 namespace wtv
 {

@@ -152,12 +152,12 @@
     <ClCompile Include="..\source\App.cpp" />
     <ClCompile Include="..\source\asset\STBCPUImage.cpp" />
     <ClCompile Include="..\source\asset\STBCPUImageLoader.cpp" />
-    <ClCompile Include="..\source\graphics\IEngine.cpp" />
+    <ClCompile Include="..\source\graphics\IDevice.cpp" />
     <ClCompile Include="..\source\graphics\ISurface.cpp" />
     <ClCompile Include="..\source\graphics\VulkanCommandBuffer.cpp" />
     <ClCompile Include="..\source\graphics\VulkanCommandPool.cpp" />
     <ClCompile Include="..\source\graphics\VulkanConstantTranslator.cpp" />
-    <ClCompile Include="..\source\graphics\VulkanEngine.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanDevice.cpp" />
     <ClCompile Include="..\source\graphics\VulkanFramebuffer.cpp" />
     <ClCompile Include="..\source\graphics\VulkanGPUBuffer.cpp" />
     <ClCompile Include="..\source\graphics\VulkanGPUImage.cpp" />
@@ -184,7 +184,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h" />
-    <ClInclude Include="..\source\asset\IAssetLoader.h" />
     <ClInclude Include="..\source\asset\ICPUImage.h" />
     <ClInclude Include="..\source\asset\ICPUImageLoader.h" />
     <ClInclude Include="..\source\asset\STBCPUImage.h" />
@@ -194,7 +193,8 @@
     <ClInclude Include="..\source\graphics\GraphicsStructs.h" />
     <ClInclude Include="..\source\graphics\IBuffer.h" />
     <ClInclude Include="..\source\graphics\ICommandBuffer.h" />
-    <ClInclude Include="..\source\graphics\IEngine.h" />
+    <ClInclude Include="..\source\graphics\IDescriptorPool.h" />
+    <ClInclude Include="..\source\graphics\IDevice.h" />
     <ClInclude Include="..\source\graphics\IFence.h" />
     <ClInclude Include="..\source\graphics\IFramebuffer.h" />
     <ClInclude Include="..\source\graphics\IGPUBuffer.h" />
@@ -212,7 +212,8 @@
     <ClInclude Include="..\source\graphics\VulkanCommandBuffer.h" />
     <ClInclude Include="..\source\graphics\VulkanCommandPool.h" />
     <ClInclude Include="..\source\graphics\VulkanConstantTranslator.h" />
-    <ClInclude Include="..\source\graphics\VulkanEngine.h" />
+    <ClInclude Include="..\source\graphics\VulkanDescriptorPool.h" />
+    <ClInclude Include="..\source\graphics\VulkanDevice.h" />
     <ClInclude Include="..\source\graphics\VulkanFramebuffer.h" />
     <ClInclude Include="..\source\graphics\VulkanGPUBuffer.h" />
     <ClInclude Include="..\source\graphics\VulkanGPUImage.h" />

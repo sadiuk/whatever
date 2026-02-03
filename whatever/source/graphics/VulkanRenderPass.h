@@ -9,13 +9,18 @@ namespace wtv
 	{
 		VkRenderPass m_renderPass;
 		VulkanDevice* m_device;
-		IFramebuffer::Layout m_fbLayout;
 	public:
-		VulkanRenderPass(VulkanDevice* device, const IFramebuffer::Layout& params);
+		VulkanRenderPass(VulkanDevice* device, const RenderPassParams& params);
 		~VulkanRenderPass();
 		VkRenderPass GetNativeHandle() const
 		{
 			return m_renderPass;
 		}
+		const RenderPassParams& GetProperties() const override
+		{
+			return m_properties;
+		}
+	private:
+		RenderPassParams m_properties;
 	};
 }

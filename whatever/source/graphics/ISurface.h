@@ -1,6 +1,6 @@
 #pragma once
 #include "ui/IWindow.h"
-#include "IEngine.h"
+#include "IDevice.h"
 #include <util/RefPtr.h>
 
 #include <memory>

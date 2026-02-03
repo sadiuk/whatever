@@ -1,7 +1,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanFramebuffer.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "VkMakros.h"
 #include "VulkanGPUBuffer.h"
 
@@ -50,11 +50,11 @@ void wtv::VulkanCommandBuffer::End()
 void wtv::VulkanCommandBuffer::BeginRenderPass(IGPURenderPass* rp, IFramebuffer* fb)
 {
 	VulkanRenderPass* vulkanRP = static_cast<VulkanRenderPass*>(rp);
-	
+	const RenderPassParams& rpParams = vulkanRP->GetProperties();
 	std::vector<VkClearValue> clearValues;
-	for (int i = 0; i < fb->GetProperties().layout.colorBuffers.size(); i++)
+	for (int i = 0; i < rpParams.colorAttachments.size(); i++)
 	{
-		const auto& entry = fb->GetProperties().layout.colorBuffers[i];
+		const auto& entry = rpParams.colorAttachments[i];
 		if (entry.clearColor.has_value())
 		{
 			glm::vec4 value = entry.clearColor.value();
@@ -63,9 +63,9 @@ void wtv::VulkanCommandBuffer::BeginRenderPass(IGPURenderPass* rp, IFramebuffer*
 		else
 			clearValues.push_back(VkClearValue(VkClearColorValue{ 0.0f, 0.0f, 0.0f, 0.0f }));
 	}
-	if (fb->GetProperties().layout.depthBuffer.has_value())
+	if (rpParams.depthAttachment.has_value())
 	{
-		const auto& entry = fb->GetProperties().layout.depthBuffer.value();
+		const auto& entry = rpParams.depthAttachment.value();
 		glm::vec4 value = entry.clearColor.value();
 		clearValues.push_back(VkClearValue{ .depthStencil = VkClearDepthStencilValue{ value.x, (uint32_t)value.y } });
 	}

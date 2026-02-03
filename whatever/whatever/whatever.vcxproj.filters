@@ -27,10 +27,7 @@
     <ClCompile Include="..\source\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\graphics\VulkanEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\graphics\IEngine.cpp">
+    <ClCompile Include="..\source\graphics\VulkanDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\source\ui\WindowSDL2.cpp">
@@ -117,6 +114,9 @@
     <ClCompile Include="..\source\graphics\VulkanRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\graphics\IDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -131,7 +131,7 @@
     <ClInclude Include="..\source\graphics\ISurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\IEngine.h">
+    <ClInclude Include="..\source\graphics\IDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\util\ConsoleLogger.h">
@@ -146,7 +146,7 @@
     <ClInclude Include="..\source\graphics\VkMakros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\graphics\VulkanEngine.h">
+    <ClInclude Include="..\source\graphics\VulkanDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\ui\WindowSDL2.h">
@@ -248,9 +248,6 @@
     <ClInclude Include="..\source\scene\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\asset\IAssetLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\source\asset\ICPUImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -291,6 +288,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\graphics\VulkanRenderPass.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanDescriptorPool.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\IDescriptorPool.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

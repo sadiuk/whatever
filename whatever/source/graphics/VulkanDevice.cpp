@@ -1,4 +1,4 @@
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "VkMakros.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanFramebuffer.h"
@@ -7,6 +7,7 @@
 #include "VulkanGPUImage.h"
 #include "VulkanGPUBuffer.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanDescriptorPool.h"
 #include "VulkanRenderPass.h"
 #include "util/RefPtr.h"
 
@@ -258,9 +259,14 @@ namespace wtv
 		return framebuffer;
 	}
 
-	RefPtr<IGPURenderPass> VulkanDevice::CreateRenderPass(const IFramebuffer::Layout& params)
+	RefPtr<IGPURenderPass> VulkanDevice::CreateRenderPass(const RenderPassParams& params)
 	{
 		return MakeRef<VulkanRenderPass>(this, params);
+	}
+
+	RefPtr<IDescriptorPool> VulkanDevice::CreateDescriptorPool(const DescriptorPoolParams& params)
+	{
+		return MakeRef<VulkanDescriptorPool>(this, params);
 	}
 
 	uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -287,7 +293,12 @@ namespace wtv
 		std::unique_lock uniqueLock(m_dummyRPsMutex);
 		if (m_dummyRPs.find(layout) != m_dummyRPs.end())
 			return m_dummyRPs[layout].get();
-		auto rp = MakeRef<VulkanRenderPass>(this, layout);
+		RenderPassParams rpParams(layout);
+		for (int i = 0; i < layout.colorBuffers.size(); i++)
+			rpParams.SetColorAttachmentInfo(i, AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::ColorAttachmentOptimal);
+		if(layout.depthBuffer.has_value())
+			rpParams.SetDepthAttachmentInfo(AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::ColorAttachmentOptimal);
+		auto rp = MakeRef<VulkanRenderPass>(this, rpParams);
 		m_dummyRPs[layout] = rp;
 		return rp.get();
 	}

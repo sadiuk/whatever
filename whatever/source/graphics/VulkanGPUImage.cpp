@@ -1,7 +1,7 @@
 #include "VulkanGPUImage.h"
 #include "VulkanConstantTranslator.h"
 #include "VkMakros.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "FormatUtils.h"
 namespace wtv
 {

@@ -752,39 +752,6 @@ namespace wtv
         return result;
     }
 
-    VkDescriptorType VulkanConstantTranslator::GetVKDescriptorType(DescriptorType dsType)
-    {
-        switch (dsType)
-        {
-        case DescriptorType::Sampler:
-            return VK_DESCRIPTOR_TYPE_SAMPLER;
-        case DescriptorType::CombinedImageSampler:
-            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        case DescriptorType::SampledImage:
-            return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        case DescriptorType::StorageImage:
-            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        case DescriptorType::UniformTexelBuffer:
-            return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-        case DescriptorType::StorageTexelBuffer:
-            return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-        case DescriptorType::UniformBuffer:
-            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        case DescriptorType::StorageBuffer:
-            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        case DescriptorType::UniformBufferDynamic:
-            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        case DescriptorType::StorageBufferDynamic:
-            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-        case DescriptorType::InputAttachment:
-            return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-        case DescriptorType::Undefined:
-        default:
-            assert(false);
-            return VK_DESCRIPTOR_TYPE_MAX_ENUM; // Undefined or invalid type
-        }
-    }
-
     VkAttachmentStoreOp VulkanConstantTranslator::GetVkAttachmentStoreOp(AttachmentStoreOp storeOp)
     {
         switch (storeOp)
@@ -811,6 +778,162 @@ namespace wtv
         }
         assert(false);
 		return VK_ATTACHMENT_LOAD_OP_MAX_ENUM;
+    }
+
+    VkDescriptorType VulkanConstantTranslator::GetVkDescriptorType(DescriptorType type)
+    {
+        switch (type)
+        {
+        case DescriptorType::Sampler:
+            return VK_DESCRIPTOR_TYPE_SAMPLER;
+        case DescriptorType::CombinedImageSampler:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case DescriptorType::SampledImage:
+            return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case DescriptorType::StorageImage:
+            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        case DescriptorType::UniformTexelBuffer:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+        case DescriptorType::StorageTexelBuffer:
+            return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+        case DescriptorType::UniformBuffer:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case DescriptorType::StorageBuffer:
+            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case DescriptorType::UniformBufferDynamic:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        case DescriptorType::StorageBufferDynamic:
+            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+        case DescriptorType::InputAttachment:
+            return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+
+        case DescriptorType::InlineUniformBlock:
+            // Inline uniform block may be core or an EXT enum depending on header version.
+#if defined(VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK)
+            return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK;
+#elif defined(VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK_EXT)
+            return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK_EXT;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::AccelerationStructureKhr:
+#if defined(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR)
+            return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+#elif defined(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV)
+            // Fallback to NV if KHR not present (numeric values differ historically).
+            return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::AccelerationStructureNv:
+#if defined(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV)
+            return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV;
+#elif defined(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR)
+            return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::SampleWeightImageQcom:
+#if defined(VK_DESCRIPTOR_TYPE_SAMPLE_WEIGHT_IMAGE_QCOM)
+            return VK_DESCRIPTOR_TYPE_SAMPLE_WEIGHT_IMAGE_QCOM;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::BlockMatchImageQcom:
+#if defined(VK_DESCRIPTOR_TYPE_BLOCK_MATCH_IMAGE_QCOM)
+            return VK_DESCRIPTOR_TYPE_BLOCK_MATCH_IMAGE_QCOM;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::MutableExt:
+#if defined(VK_DESCRIPTOR_TYPE_MUTABLE_EXT)
+            return VK_DESCRIPTOR_TYPE_MUTABLE_EXT;
+#else
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+#endif
+
+        case DescriptorType::Undefined:
+        default:
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+        }
+    }
+
+    VkImageLayout VulkanConstantTranslator::GetVkImageLayout(ImageLayout layout)
+    {
+        switch (layout)
+        {
+        case ImageLayout::Undefined:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        case ImageLayout::General:
+            return VK_IMAGE_LAYOUT_GENERAL;
+        case ImageLayout::ColorAttachmentOptimal:
+            return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        case ImageLayout::DepthStencilAttachmentOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        case ImageLayout::DepthStencilReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        case ImageLayout::ShaderReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        case ImageLayout::TransferSrcOptimal:
+            return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        case ImageLayout::TransferDstOptimal:
+            return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        case ImageLayout::Preinitialized:
+            return VK_IMAGE_LAYOUT_PREINITIALIZED;
+        case ImageLayout::DepthReadOnlyStencilAttachmentOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+        case ImageLayout::DepthAttachmentStencilReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+        case ImageLayout::DepthAttachmentOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        case ImageLayout::DepthReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+        case ImageLayout::StencilAttachmentOptimal:
+            return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+        case ImageLayout::StencilReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+        case ImageLayout::ReadOnlyOptimal:
+            return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+        case ImageLayout::AttachmentOptimal:
+            return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+        case ImageLayout::RenderingLocalRead:
+            return VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR;
+        case ImageLayout::PresentSrcKhr:
+            return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        case ImageLayout::VideoDecodeDstKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR;
+        case ImageLayout::VideoDecodeSrcKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_DECODE_SRC_KHR;
+        case ImageLayout::VideoDecodeDpbKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR;
+        case ImageLayout::SharedPresentKhr:
+            return VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR;
+        case ImageLayout::FragmentDensityMapOptimalExt:
+            return VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT;
+        case ImageLayout::FragmentShadingRateAttachmentOptimalKhr:
+            return VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR;
+        case ImageLayout::VideoEncodeDstKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_ENCODE_DST_KHR;
+        case ImageLayout::VideoEncodeSrcKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_ENCODE_SRC_KHR;
+        case ImageLayout::VideoEncodeDpbKhr:
+            return VK_IMAGE_LAYOUT_VIDEO_ENCODE_DPB_KHR;
+        case ImageLayout::AttachmentFeedbackLoopOptimalExt:
+            return VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT;
+        case ImageLayout::TensorAliasingArm:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        case ImageLayout::VideoEncodeQuantizationMapKhr:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        case ImageLayout::ZeroInitializedExt:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        default:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        }
     }
 
     VkBlendFactor VulkanConstantTranslator::GetVkBlendFactor(BlendFactor blendFactor)

@@ -1,6 +1,6 @@
 #pragma once
 #include "IGPUBuffer.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "vulkan/vulkan.h"
 #include "VulkanConstantTranslator.h"
 #include "VkMakros.h"

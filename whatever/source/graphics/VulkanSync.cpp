@@ -1,6 +1,6 @@
 #include "VulkanSync.h"
 #include "VkMakros.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 namespace wtv
 {
 	VulkanSemaphore::VulkanSemaphore(VulkanDevice* engine) : 

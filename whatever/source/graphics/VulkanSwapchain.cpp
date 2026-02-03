@@ -1,7 +1,7 @@
 #pragma once
 #include "VulkanSwapchain.h"
 #include "VulkanConstantTranslator.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "VkMakros.h"
 
 #include "vulkan/vulkan.h"

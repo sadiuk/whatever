@@ -1,5 +1,5 @@
 #include "VulkanGraphicsPipeline.h"
-#include "VulkanEngine.h"
+#include "VulkanDevice.h"
 #include "VulkanRenderPass.h"
 #include "VkMakros.h"
 #include "VulkanConstantTranslator.h"
@@ -344,7 +344,7 @@ namespace wtv
 				const auto& bindingInfo = m_params.descriptorSetLayouts[dsIndex][dsEntryIndex];
 				pipelineBindings[dsIndex][dsEntryIndex].binding = bindingInfo.binding;
 				pipelineBindings[dsIndex][dsEntryIndex].descriptorType = 
-					VulkanConstantTranslator::GetVKDescriptorType(bindingInfo.type);
+					VulkanConstantTranslator::GetVkDescriptorType(bindingInfo.type);
 				pipelineBindings[dsIndex][dsEntryIndex].stageFlags =
 					VulkanConstantTranslator::GetVkShaderStageFlags(bindingInfo.stageFlags);
 				pipelineBindings[dsIndex][dsEntryIndex].descriptorCount = bindingInfo.descriptorCount;

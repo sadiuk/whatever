@@ -73,8 +73,4 @@ namespace wtv
 		ShaderStageFlags stageFlags;
 	};
 	using DescriptorSetLayout = std::vector<DescriptorSetLayoutEntry>;
-	//struct DescriptorSetLayout
-	//{
-	//	std::
-	//};
 }
