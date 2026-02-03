@@ -785,6 +785,34 @@ namespace wtv
         }
     }
 
+    VkAttachmentStoreOp VulkanConstantTranslator::GetVkAttachmentStoreOp(AttachmentStoreOp storeOp)
+    {
+        switch (storeOp)
+        {
+            case AttachmentStoreOp::Store:
+				return VK_ATTACHMENT_STORE_OP_STORE;
+			case AttachmentStoreOp::DontCare:
+                return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			case AttachmentStoreOp::Discard:
+				return VK_ATTACHMENT_STORE_OP_NONE;
+        }
+        assert(false);
+		return VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+    }
+
+    VkAttachmentLoadOp VulkanConstantTranslator::GetVkAttachmentLoadOp(AttachmentLoadOp loadOp)
+    {
+        switch (loadOp)
+        {
+            case AttachmentLoadOp::Load:
+			    return VK_ATTACHMENT_LOAD_OP_LOAD;
+            case AttachmentLoadOp::Clear:
+				return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        }
+        assert(false);
+		return VK_ATTACHMENT_LOAD_OP_MAX_ENUM;
+    }
+
     VkBlendFactor VulkanConstantTranslator::GetVkBlendFactor(BlendFactor blendFactor)
     {
         switch (blendFactor) {

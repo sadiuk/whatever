@@ -6,12 +6,15 @@
 #include "VulkanQueue.h"
 #include "VulkanSwapchain.h"
 #include "VulkanCommandPool.h"
+#include "VulkanRenderPass.h"
 
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
 
 #include <optional>
 #include <algorithm>
+#include <shared_mutex>
+#include <unordered_map>
 
 #ifdef _DEBUG
 #define USE_VALIDATION_LAYERS true
@@ -66,18 +69,20 @@ namespace wtv
 		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
 		RefPtr<IGPUImage> GetBackbuffer() override;
 		RefPtr<IFence> CreateFence(bool createSignaled) override;
-		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams params) override;
+		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params) override;
 		ImageFormat GetSwapchainFormat() override;
+		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) override;
+		RefPtr<IGPURenderPass> CreateRenderPass(const IFramebuffer::Layout& params) override;
 		void Submit(ICommandBuffer* cb) override;
 		void Present() override;
 		void BeginFrame() override;
 	public:
-		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params);
 		VkDevice GetDevice() const { return m_device; }
 		VkPhysicalDevice GetPhysicalDevice() const { return m_physicalDevice; }
 		QueueFamilyIndices GetQueueFamilyIndices() { return m_queueFamilyIndices; }
 		VulkanQueue* GetGraphicsQueue() { return m_graphicsQueue.get(); }
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+		VulkanRenderPass* ObtainDummyRenderPass(const IFramebuffer::Layout& layout);
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;
@@ -91,5 +96,8 @@ namespace wtv
 
 		QueueFamilyIndices m_queueFamilyIndices;
 		CreationParams m_creationParams;
+
+		std::unordered_map<IFramebuffer::Layout, RefPtr<VulkanRenderPass>> m_dummyRPs;
+		std::shared_mutex m_dummyRPsMutex;
 	};
 }

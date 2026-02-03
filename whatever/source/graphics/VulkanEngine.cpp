@@ -7,6 +7,7 @@
 #include "VulkanGPUImage.h"
 #include "VulkanGPUBuffer.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanRenderPass.h"
 #include "util/RefPtr.h"
 
 #define VMA_IMPLEMENTATION
@@ -242,7 +243,7 @@ namespace wtv
 		return m_commandPools[m_swapchain->GetImageIndex()].CreateCommandBuffer();
 	}
 
-	RefPtr<IFramebuffer> VulkanDevice::CreateFramebuffer(IFramebuffer::CreateInfo&& params)
+	RefPtr<IFramebuffer> VulkanDevice::CreateFramebuffer(IFramebuffer::Properties&& params)
 	{
 		if (params.colorBuffers.size() > 1)
 		{
@@ -255,6 +256,11 @@ namespace wtv
 		}
 		auto framebuffer = MakeRef<VulkanFramebuffer>(std::move(params), this);
 		return framebuffer;
+	}
+
+	RefPtr<IGPURenderPass> VulkanDevice::CreateRenderPass(const IFramebuffer::Layout& params)
+	{
+		return MakeRef<VulkanRenderPass>(this, params);
 	}
 
 	uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -271,6 +277,21 @@ namespace wtv
 		}
 	}
 
+	VulkanRenderPass* VulkanDevice::ObtainDummyRenderPass(const IFramebuffer::Layout& layout)
+	{
+		{
+			std::shared_lock lock(m_dummyRPsMutex);
+			if (m_dummyRPs.find(layout) != m_dummyRPs.end())
+				return m_dummyRPs[layout].get();
+		}
+		std::unique_lock uniqueLock(m_dummyRPsMutex);
+		if (m_dummyRPs.find(layout) != m_dummyRPs.end())
+			return m_dummyRPs[layout].get();
+		auto rp = MakeRef<VulkanRenderPass>(this, layout);
+		m_dummyRPs[layout] = rp;
+		return rp.get();
+	}
+
 	RefPtr<IGPUImage> VulkanDevice::GetBackbuffer()
 	{
 		return m_swapchain->GetBackBuffer();
@@ -281,7 +302,7 @@ namespace wtv
 		return MakeRef<VulkanFence>(this, createSignaled);
 	}
 
-	RefPtr<IGPUBuffer> VulkanDevice::CreateBuffer(const IGPUBuffer::CreationParams params)
+	RefPtr<IGPUBuffer> VulkanDevice::CreateBuffer(const IGPUBuffer::CreationParams& params)
 	{
 		auto buffer = MakeRef<VulkanGPUBuffer>(this, params);
 		return buffer;

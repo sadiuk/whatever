@@ -67,8 +67,9 @@ void App::Run()
 
 	IFramebuffer::Layout framebufferLayout{};
 	framebufferLayout.colorBuffers.emplace_back();
-	framebufferLayout.colorBuffers[0].clearBeforeWrite = true;
+	framebufferLayout.colorBuffers[0].loadOp = AttachmentLoadOp::Clear;
 	framebufferLayout.colorBuffers[0].format = m_device->GetSwapchainFormat();
+	framebufferLayout.colorBuffers[0].clearColor = glm::vec4(0.7, 0.5, 0.4, 1);
 	pipelineInfo.framebufferLayout = framebufferLayout;
 
 	pipelineInfo.stagesDescription.resize(2);
@@ -127,6 +128,8 @@ void App::Run()
 
 	vbUpdateCB->End();
 	m_device->Submit(vbUpdateCB.get());
+
+	auto mainRP = m_device->CreateRenderPass(framebufferLayout);
 	while (m_window->IsOpen())
 	{
 		m_device->BeginFrame();
@@ -134,22 +137,24 @@ void App::Run()
 		auto commandBuffer = m_device->CreateCommandBuffer();
 		glm::vec4 clearColor(0, 1, 0, 1);
 
-		IFramebuffer::CreateInfo framebufferInfo{};
+		IFramebuffer::Properties framebufferInfo{};
 		IImage::View swapchainImageView(m_device->GetBackbuffer().get());
 		framebufferInfo.colorBuffers = { swapchainImageView };
 		framebufferInfo.layout = framebufferLayout;
-		auto framebuffer = graphPipeline->CreateFramebuffer(std::move(framebufferInfo));
+		auto framebuffer = m_device->CreateFramebuffer(std::move(framebufferInfo));
 
 		size_t vbOffset = 0;
 		IGPUBuffer* vertexBuffers[] = { vertexBuffer.get() };
 		commandBuffer->Begin();
+		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
 		commandBuffer->UpdateBuffer(cameraUB.get(), 0, sizeof(ubData), &ubData);
+		commandBuffer->BeginRenderPass(mainRP.get(), framebuffer.get());
 		commandBuffer->SetClearColorValue(0, &clearColor.x);
 		commandBuffer->SetViewport(viewport);
-		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
-		commandBuffer->BindPipelineAndFramebuffer(graphPipeline.get(), framebuffer.get());
+		commandBuffer->BindPipeline(graphPipeline.get());
 		commandBuffer->BindVertexBuffers(vertexBuffers, 1, &vbOffset);
 		commandBuffer->Draw(3, 0, 1);
+		commandBuffer->EndRenderPass();
 		commandBuffer->End();
 
 		m_device->Submit(commandBuffer.get());

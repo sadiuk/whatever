@@ -307,6 +307,21 @@ namespace wtv
         InputAttachment = 11,
     };
 
+    enum class AttachmentLoadOp
+    {
+        Load,
+        Clear,
+        Undefined = -1
+	};
+
+    enum class AttachmentStoreOp
+    {
+        Store,
+        DontCare,
+        Discard,
+        Undefined = -1
+	};
+
     inline uint32_t GetAttributeSize(VertexAtributeType attributeType) {
         switch (attributeType) {
         case VertexAtributeType::int1:

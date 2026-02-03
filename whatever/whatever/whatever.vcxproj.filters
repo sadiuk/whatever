@@ -114,6 +114,9 @@
     <ClCompile Include="..\third-party\imgui\imgui_widgets.cpp">
       <Filter>third_party\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\graphics\VulkanRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -283,6 +286,12 @@
     </ClInclude>
     <ClInclude Include="..\third-party\imgui\imstb_truetype.h">
       <Filter>third_party\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\IGPURenderPass.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\graphics\VulkanRenderPass.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

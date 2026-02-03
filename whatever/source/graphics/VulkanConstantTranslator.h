@@ -23,6 +23,8 @@ namespace wtv
 		static uint32_t GetVkImageUsageMask(std::underlying_type_t<ImageUsage> usageBits);
 		static VkBufferUsageFlags GetVkBufferUsageFlags(std::underlying_type_t<BufferUsage> usageBits);
 		static VkDescriptorType GetVKDescriptorType(DescriptorType dsType);
+		static VkAttachmentStoreOp GetVkAttachmentStoreOp(AttachmentStoreOp storeOp);
+		static VkAttachmentLoadOp GetVkAttachmentLoadOp(AttachmentLoadOp loadOp);
 	};
 
 

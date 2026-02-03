@@ -24,9 +24,11 @@ namespace wtv
 		void Reset() override;
 		void Begin() override;
 		void End() override;
+		void BeginRenderPass(IGPURenderPass* rp, IFramebuffer* framebuffer);
+		void EndRenderPass();
 		void SetViewport(const ViewportInfo& viewport) override;
 		void SetScissor(const Rect2D& scissor) override;
-		void BindPipelineAndFramebuffer(IGraphicsPipeline* pipeline, IFramebuffer* framebuffer) override;
+		void BindPipeline(IGraphicsPipeline* pipeline) override;
 		void BindVertexBuffers(IGPUBuffer** buffers, uint32_t count, size_t* offsets) override;
 		void SetClearColorValue(uint32_t colorAttachmentIndex, void* clearColor) override;
 		void SetClearDepthStencilValue(float depth, uint32_t stencil = 0) override;

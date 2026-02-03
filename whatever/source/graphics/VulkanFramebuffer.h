@@ -9,12 +9,11 @@ namespace wtv
 	class VulkanFramebuffer : public IFramebuffer, public IServiceProviderHolder
 	{
 	public:
-		VulkanFramebuffer(CreateInfo&& params, VulkanDevice* engine);
+		VulkanFramebuffer(Properties&& params, VulkanDevice* engine);
 		VkFramebuffer GetNativeHandle() { return m_framebuffer; }
 		const std::vector<VkImageView>& GetAttachments() const { return m_attachments; }
 		IServiceProvider* GetServiceProvider() override;
-	private:
-		void CreateDummyRenderPass();
+		VkFramebuffer GetNativeHandle() const { return m_framebuffer; }
 	private:
 		VulkanDevice* m_engine;
 		VkFramebuffer m_framebuffer;

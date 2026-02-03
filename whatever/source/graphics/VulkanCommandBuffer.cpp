@@ -47,6 +47,50 @@ void wtv::VulkanCommandBuffer::End()
 	ASSERT_VK_SUCCESS(vkEndCommandBuffer(m_commandBuffer));
 }
 
+void wtv::VulkanCommandBuffer::BeginRenderPass(IGPURenderPass* rp, IFramebuffer* fb)
+{
+	VulkanRenderPass* vulkanRP = static_cast<VulkanRenderPass*>(rp);
+	
+	std::vector<VkClearValue> clearValues;
+	for (int i = 0; i < fb->GetProperties().layout.colorBuffers.size(); i++)
+	{
+		const auto& entry = fb->GetProperties().layout.colorBuffers[i];
+		if (entry.clearColor.has_value())
+		{
+			glm::vec4 value = entry.clearColor.value();
+			clearValues.push_back(VkClearValue(VkClearColorValue{ value.x, value.y, value.z, value.w }));
+		}
+		else
+			clearValues.push_back(VkClearValue(VkClearColorValue{ 0.0f, 0.0f, 0.0f, 0.0f }));
+	}
+	if (fb->GetProperties().layout.depthBuffer.has_value())
+	{
+		const auto& entry = fb->GetProperties().layout.depthBuffer.value();
+		glm::vec4 value = entry.clearColor.value();
+		clearValues.push_back(VkClearValue{ .depthStencil = VkClearDepthStencilValue{ value.x, (uint32_t)value.y } });
+	}
+	else
+	{
+		clearValues.push_back(VkClearValue{ .depthStencil = VkClearDepthStencilValue{ 0.f, 0u } });
+	}
+
+	VkRenderPassBeginInfo rpInfo{};
+	rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	rpInfo.renderPass = vulkanRP->GetNativeHandle();
+	rpInfo.framebuffer = static_cast<VulkanFramebuffer*>(fb)->GetNativeHandle();
+	rpInfo.clearValueCount = clearValues.size();
+	rpInfo.pClearValues = clearValues.data();	
+	
+	assert(m_scissor.has_value());
+	rpInfo.renderArea = m_scissor.value();
+	vkCmdBeginRenderPass(m_commandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void wtv::VulkanCommandBuffer::EndRenderPass()
+{
+	vkCmdEndRenderPass(m_commandBuffer);
+}
+
 void wtv::VulkanCommandBuffer::SetViewport(const ViewportInfo& viewport)
 {
 	VkViewport vkViewport{};
@@ -69,43 +113,10 @@ void wtv::VulkanCommandBuffer::SetScissor(const Rect2D& scissor)
 	m_scissor = vkScissor;
 }
 
-void wtv::VulkanCommandBuffer::BindPipelineAndFramebuffer(IGraphicsPipeline* pipeline, IFramebuffer* framebuffer)
+void wtv::VulkanCommandBuffer::BindPipeline(IGraphicsPipeline* pipeline)
 {
 	auto vkPipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
-	m_renderpass = vkPipeline->GetRenderPass();
-	auto vkFramebuffer = static_cast<VulkanFramebuffer*>(framebuffer);
-	auto allAttachments = vkFramebuffer->GetAttachments();
-	std::vector<VkClearValue> clearValues(allAttachments.size());
-	uint32_t colorAttachmentCount = m_clearDepthStencil.has_value() ? allAttachments.size() - 1 : allAttachments.size();
-	for (uint32_t i = 0; i < allAttachments.size(); ++i)
-	{
-		if (i < colorAttachmentCount)
-		{
-			if (auto cc = std::find_if(m_clearColorValues.begin(), m_clearColorValues.end(), [i](const auto& at) { return at.first == i; }); cc != m_clearColorValues.end())
-			{
-				std::memcpy(&clearValues[i], cc->second.data(), CLEAR_COLOR_SIZE);
-			}
-		}
-		else
-		{
-			if (m_clearDepthStencil.has_value())
-			{
-				std::memcpy(&clearValues[i], &m_clearDepthStencil.value(), sizeof(m_clearDepthStencil.value()));
-			}
-		}
-
-	}
-	VkRenderPassBeginInfo rpInfo{};
-	rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	rpInfo.pNext = nullptr;
-	rpInfo.renderPass = m_renderpass.value();
-	rpInfo.framebuffer = vkFramebuffer->GetNativeHandle();
-	rpInfo.clearValueCount = (uint32_t)clearValues.size();
-	rpInfo.pClearValues = clearValues.data();
-	assert(m_scissor.has_value());
-	rpInfo.renderArea = m_scissor.value();
 	vkCmdBindPipeline(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetPipeline());
-	vkCmdBeginRenderPass(m_commandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 }
 

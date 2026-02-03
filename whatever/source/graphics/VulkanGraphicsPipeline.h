@@ -6,6 +6,7 @@
 #include "IServiceProvider.h"
 
 #include <array>
+#include "VulkanRenderPass.h"
 namespace wtv
 {
 	class VulkanGraphicsPipeline : public IGraphicsPipeline, public IServiceProviderHolder
@@ -13,7 +14,6 @@ namespace wtv
 
 	public:
 		VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params);
-		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params) override;
 		VkRenderPass GetRenderPass() { return m_renderPass; }
 		VkPipeline GetPipeline() { return m_pipeline; }
 		~VulkanGraphicsPipeline();
@@ -38,7 +38,6 @@ namespace wtv
 		);
 		VkPipelineDynamicStateCreateInfo CreatePipelineDynamicStateCreateInfo();
 		VkPipelineLayout CreatePipelineLayout();
-		VkRenderPass CreateRenderPass();
 		VkPipelineCache CreatePipelineCache();
 
 		std::vector<VkVertexInputAttributeDescription> CreateAttributeDescriptionList();

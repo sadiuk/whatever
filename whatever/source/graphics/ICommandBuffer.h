@@ -9,9 +9,11 @@ namespace wtv
 		virtual void Reset() = 0;
 		virtual void Begin() = 0;
 		virtual void End() = 0;
+		virtual void BeginRenderPass(IGPURenderPass* rp, IFramebuffer* framebuffer) = 0;
+		virtual void EndRenderPass() = 0;
 		virtual void SetViewport(const ViewportInfo& viewport) = 0;
 		virtual void SetScissor(const Rect2D& scissor) = 0;
-		virtual void BindPipelineAndFramebuffer(IGraphicsPipeline* pipeline, IFramebuffer* framebuffer) = 0;
+		virtual void BindPipeline(IGraphicsPipeline* pipeline) = 0;
 		virtual void BindVertexBuffers(IGPUBuffer** buffers, uint32_t count, size_t* offsets) = 0;
 		virtual void SetClearColorValue(uint32_t colorAttachmentIndex, void* clearColor) = 0;
 		virtual void SetClearDepthStencilValue(float depth, uint32_t stencil = 0) = 0;

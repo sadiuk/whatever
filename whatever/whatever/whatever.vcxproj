@@ -163,6 +163,7 @@
     <ClCompile Include="..\source\graphics\VulkanGPUImage.cpp" />
     <ClCompile Include="..\source\graphics\VulkanGraphicsPipeline.cpp" />
     <ClCompile Include="..\source\graphics\VulkanQueue.cpp" />
+    <ClCompile Include="..\source\graphics\VulkanRenderPass.cpp" />
     <ClCompile Include="..\source\graphics\VulkanShader.cpp" />
     <ClCompile Include="..\source\graphics\VulkanShaderCompilerDXC.cpp" />
     <ClCompile Include="..\source\graphics\VulkanSurfaceSDL.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="..\source\graphics\IFramebuffer.h" />
     <ClInclude Include="..\source\graphics\IGPUBuffer.h" />
     <ClInclude Include="..\source\graphics\IGPUImage.h" />
+    <ClInclude Include="..\source\graphics\IGPURenderPass.h" />
     <ClInclude Include="..\source\graphics\IGraphicsPipeline.h" />
     <ClInclude Include="..\source\graphics\IImage.h" />
     <ClInclude Include="..\source\graphics\IQueue.h" />
@@ -216,6 +218,7 @@
     <ClInclude Include="..\source\graphics\VulkanGPUImage.h" />
     <ClInclude Include="..\source\graphics\VulkanGraphicsPipeline.h" />
     <ClInclude Include="..\source\graphics\VulkanQueue.h" />
+    <ClInclude Include="..\source\graphics\VulkanRenderPass.h" />
     <ClInclude Include="..\source\graphics\VulkanShader.h" />
     <ClInclude Include="..\source\graphics\VulkanShaderCompilerDXC.h" />
     <ClInclude Include="..\source\graphics\VulkanSurfaceSDL.h" />

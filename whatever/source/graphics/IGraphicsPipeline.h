@@ -2,6 +2,7 @@
 #include "GraphicsConstants.h"
 #include "GraphicsStructs.h"
 #include "IFramebuffer.h"
+#include "IGPURenderPass.h"
 #include "util/RefPtr.h"
 
 #include <vector>
@@ -30,7 +31,6 @@ namespace wtv
 
 		IGraphicsPipeline(const CreateInfo& params) : m_params(params) {}
 		virtual ~IGraphicsPipeline() {}
-		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::CreateInfo&& params) = 0;
 	protected:
 		CreateInfo m_params;
 

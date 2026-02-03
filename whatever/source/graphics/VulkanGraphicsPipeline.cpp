@@ -1,5 +1,6 @@
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanEngine.h"
+#include "VulkanRenderPass.h"
 #include "VkMakros.h"
 #include "VulkanConstantTranslator.h"
 #include "IVulkanShaderCompiler.h"
@@ -38,7 +39,7 @@ namespace wtv
 		VkPipelineColorBlendStateCreateInfo blendStateInfo = CreatePipelineColorBlendStateCreateInfo(attachmentStates);
 		VkPipelineDynamicStateCreateInfo dynamicStateInfo = CreatePipelineDynamicStateCreateInfo();
 		VkPipelineLayout pipelineLayout = CreatePipelineLayout();
-		VkRenderPass renderPass = CreateRenderPass();
+		VulkanRenderPass* dummyRp = m_engine->ObtainDummyRenderPass(m_params.framebufferLayout);
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -56,17 +57,12 @@ namespace wtv
 		pipelineInfo.pColorBlendState = &blendStateInfo;
 		pipelineInfo.pDynamicState = &dynamicStateInfo;
 		pipelineInfo.layout = pipelineLayout;
-		pipelineInfo.renderPass = renderPass;
+		pipelineInfo.renderPass = static_cast<VulkanRenderPass*>(dummyRp)->GetNativeHandle();
 		pipelineInfo.subpass = 0; // TODO;
 		pipelineInfo.basePipelineHandle = nullptr;
 		pipelineInfo.basePipelineIndex = 0;
 
 		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_engine->GetDevice(), m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
-	}
-
-	RefPtr<IFramebuffer> VulkanGraphicsPipeline::CreateFramebuffer(IFramebuffer::CreateInfo&& params)
-	{
-		return static_cast<VulkanDevice*>(m_engine)->CreateFramebuffer(std::move(params));
 	}
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
@@ -294,47 +290,6 @@ namespace wtv
 
 		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_engine->GetDevice(), &layoutCreateInfo, nullptr, &layout));
 		return layout;
-	}
-
-	VkRenderPass VulkanGraphicsPipeline::CreateRenderPass()
-	{
-		std::vector<IFramebuffer::RenderTargetInfo> allRenderTargets(m_params.framebufferLayout.colorBuffers.begin(), m_params.framebufferLayout.colorBuffers.end());
-		allRenderTargets.insert(allRenderTargets.end(), m_params.framebufferLayout.depthBuffers.begin(), m_params.framebufferLayout.depthBuffers.end());
-		std::vector<VkAttachmentDescription> attachmentDescs(allRenderTargets.size());
-		for (int i = 0; i < attachmentDescs.size(); ++i)
-		{
-			// TODO: image layouts, stencil stuff
-			attachmentDescs[i] = {};
-			attachmentDescs[i].format = VulkanConstantTranslator::GetVkFormat(allRenderTargets[i].format);
-			attachmentDescs[i].loadOp = allRenderTargets[i].clearBeforeWrite ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-			attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
-		}
-		VkAttachmentReference attachmentRef{};
-		attachmentRef.attachment = 0;
-		attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		VkSubpassDescription subpassDesc{};
-		subpassDesc.colorAttachmentCount = 1;
-		subpassDesc.pColorAttachments = &attachmentRef;
-		subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-
-		VkRenderPassCreateInfo rpInfo{};
-		rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		rpInfo.pNext = nullptr;
-		rpInfo.attachmentCount = (uint32_t)attachmentDescs.size();
-		rpInfo.pAttachments = attachmentDescs.data();
-		rpInfo.dependencyCount = 0;
-		rpInfo.pDependencies = nullptr;
-		rpInfo.subpassCount = 1;
-		rpInfo.pSubpasses = &subpassDesc;
-
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateRenderPass(m_engine->GetDevice(), &rpInfo, nullptr, &m_renderPass));
-		return m_renderPass;
 	}
 
 	std::vector<VkVertexInputAttributeDescription> VulkanGraphicsPipeline::CreateAttributeDescriptionList()
