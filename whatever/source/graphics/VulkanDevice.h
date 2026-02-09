@@ -65,7 +65,8 @@ namespace wtv
 		bool EnsureValidationLayersAvailable(std::vector<const char*> requestedLayers);
 		
 	public: // override from IEngine
-		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) override;
+		RefPtr<IGraphicsPipelineLayout> CreateGraphicsPipelineLayout(const GraphicsPipelineLayoutCreateInfo& params) override;
+		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params, const RefPtr<const IGraphicsPipelineLayout>& layout) override;
 		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
 		RefPtr<IGPUImage> GetBackbuffer() override;
 		RefPtr<IFence> CreateFence(bool createSignaled) override;
@@ -74,6 +75,7 @@ namespace wtv
 		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) override;
 		RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) override;
 		RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) override;
+		RefPtr<IDescriptorSetLayout> CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params) override;
 		void Submit(ICommandBuffer* cb) override;
 		void Present() override;
 		void BeginFrame() override;

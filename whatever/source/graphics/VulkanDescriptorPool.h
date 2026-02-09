@@ -21,7 +21,7 @@ namespace wtv
 			info.maxSets = params.maxSetCount;
 			std::vector<VkDescriptorPoolSize> sizes;
 			ObtainPoolSizes(sizes);
-			info.poolSizeCount = sizes.size();
+			info.poolSizeCount = (uint32_t)sizes.size();
 			info.pPoolSizes = sizes.data();
 			vkCreateDescriptorPool(m_device->GetDevice(), &info, nullptr, &m_descPool);
 		}
@@ -32,6 +32,8 @@ namespace wtv
 		}
 
 		VkDescriptorPool GetNativeHandle() const { return m_descPool; }
+
+		RefPtr<IDescriptorSet> AllocateDescriptorSet(const RefPtr<IDescriptorSetLayout>& layout) override;
 	private:
 		void ObtainPoolSizes(std::vector<VkDescriptorPoolSize>& sizes)
 		{

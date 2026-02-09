@@ -23,7 +23,7 @@ namespace wtv
 
 	bool WindowSDL2::IsOpen()
 	{
-		return true;
+		return m_keepOpen;
 	}
 	void WindowSDL2::Update()
 	{

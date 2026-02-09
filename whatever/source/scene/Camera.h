@@ -20,8 +20,8 @@ namespace wtv
 			glm::vec3 up;
 			float fovYInDegrees;
 			float widthToHeightRatio;
-			float near;
-			float far;
+			float nearPlane;
+			float farPlane;
 		};
 		Camera(const CreationParams& params);
 

@@ -70,7 +70,10 @@ namespace wtv
 			// Shader target profile
 			L"-T", targetProfile,
 			// Compile to SPIRV
-			L"-spirv"
+			L"-spirv",
+			L"-fspv-debug=vulkan-with-source", // Embeds HLSL source and line info into SPIR-V
+			L"-Zi",                           // Standard "Enable Debug Info" flag
+			L"-Od"
 		};
 
 		// Compile shader

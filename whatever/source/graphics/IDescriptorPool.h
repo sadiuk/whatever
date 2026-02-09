@@ -1,5 +1,7 @@
 #pragma once
 #include "util/RefPtr.h"
+#include "GraphicsConstants.h"
+
 #include <array>
 namespace wtv
 {
@@ -13,8 +15,11 @@ namespace wtv
 		}
 	};
 
+	struct IDescriptorSet;
+	struct IDescriptorSetLayout;
 	struct IDescriptorPool : public IReferenceCounted
 	{
-
+		virtual RefPtr<IDescriptorSet> AllocateDescriptorSet(const RefPtr<IDescriptorSetLayout>& layout) = 0;
+		virtual ~IDescriptorPool() {}
 	};
 }

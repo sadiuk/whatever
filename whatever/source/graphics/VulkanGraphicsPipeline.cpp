@@ -4,12 +4,43 @@
 #include "VkMakros.h"
 #include "VulkanConstantTranslator.h"
 #include "IVulkanShaderCompiler.h"
+#include "VulkanDescriptorSet.h"
 namespace wtv
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params) :
+	VulkanGraphicsPipelineLayout::VulkanGraphicsPipelineLayout(VulkanDevice* device, IServiceProvider* services, const GraphicsPipelineLayoutCreateInfo& params) :
+		m_device(device),
+		m_services(services),
+		m_params(params)
+	{
+		std::vector<VkDescriptorSetLayout> descSetLayouts(params.descriptorSetLayoutCount);
+		for (int i = 0; i < descSetLayouts.size(); ++i)
+		{
+			descSetLayouts[i] = static_cast<VulkanDescriptorSetLayout*>(m_params.descriptorSetLayouts[i])->GetNativeHandle();
+		}
+		std::vector<VkPushConstantRange> pushConstantRanges(params.pushConstantRangeCount);
+		for (int i = 0; i < pushConstantRanges.size(); ++i)
+		{
+			pushConstantRanges[i].offset = params.pcRanges[i].offset;
+			pushConstantRanges[i].size = params.pcRanges[i].size;
+			pushConstantRanges[i].stageFlags = VulkanConstantTranslator::GetVkShaderStageFlags(params.pcRanges[i].stages);
+		}
+
+		VkPipelineLayoutCreateInfo layoutCreateInfo{};
+		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		layoutCreateInfo.pNext = nullptr;
+		layoutCreateInfo.pushConstantRangeCount = (uint32_t)pushConstantRanges.size();
+		layoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
+		layoutCreateInfo.setLayoutCount = (uint32_t)descSetLayouts.size();
+		layoutCreateInfo.pSetLayouts = descSetLayouts.data();
+
+		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_device->GetDevice(), &layoutCreateInfo, nullptr, &m_layout));
+	}
+	
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params, VulkanGraphicsPipelineLayout* layout) :
 		IGraphicsPipeline(params),
 		m_engine(engine),
-		m_services(services)
+		m_services(services),
+		m_layout(layout)
 	{
 		m_pipelineCache = CreatePipelineCache();
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages = CreateShaderStages();
@@ -38,7 +69,6 @@ namespace wtv
 		std::vector<VkPipelineColorBlendAttachmentState> attachmentStates;
 		VkPipelineColorBlendStateCreateInfo blendStateInfo = CreatePipelineColorBlendStateCreateInfo(attachmentStates);
 		VkPipelineDynamicStateCreateInfo dynamicStateInfo = CreatePipelineDynamicStateCreateInfo();
-		VkPipelineLayout pipelineLayout = CreatePipelineLayout();
 		VulkanRenderPass* dummyRp = m_engine->ObtainDummyRenderPass(m_params.framebufferLayout);
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -56,7 +86,7 @@ namespace wtv
 		pipelineInfo.pDepthStencilState = &dsInfo;
 		pipelineInfo.pColorBlendState = &blendStateInfo;
 		pipelineInfo.pDynamicState = &dynamicStateInfo;
-		pipelineInfo.layout = pipelineLayout;
+		pipelineInfo.layout = m_layout->GetNativeHandle();
 		pipelineInfo.renderPass = static_cast<VulkanRenderPass*>(dummyRp)->GetNativeHandle();
 		pipelineInfo.subpass = 0; // TODO;
 		pipelineInfo.basePipelineHandle = nullptr;
@@ -68,9 +98,7 @@ namespace wtv
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
 		vkDestroyPipeline(m_engine->GetDevice(), m_pipeline, nullptr);
-		vkDestroyRenderPass(m_engine->GetDevice(), m_renderPass, nullptr);
 		vkDestroyPipelineCache(m_engine->GetDevice(), m_pipelineCache, nullptr);
-		vkDestroyPipelineLayout(m_engine->GetDevice(), m_pipelineLayout, nullptr);
 
 	}
 
@@ -275,23 +303,6 @@ namespace wtv
 		return dynStateInfo;
 	}
 
-	VkPipelineLayout VulkanGraphicsPipeline::CreatePipelineLayout()
-	{
-		m_pushConstantRanges = CreatePushConstantRanges();
-		m_descSetLayouts = CreateDescriptorSetLayouts();
-		VkPipelineLayout layout{};
-		VkPipelineLayoutCreateInfo layoutCreateInfo{};
-		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		layoutCreateInfo.pNext = nullptr;
-		layoutCreateInfo.pushConstantRangeCount = (uint32_t)m_pushConstantRanges.size();
-		layoutCreateInfo.pPushConstantRanges = m_pushConstantRanges.data();
-		layoutCreateInfo.setLayoutCount = (uint32_t)m_descSetLayouts.size();
-		layoutCreateInfo.pSetLayouts = m_descSetLayouts.data();
-
-		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_engine->GetDevice(), &layoutCreateInfo, nullptr, &layout));
-		return layout;
-	}
-
 	std::vector<VkVertexInputAttributeDescription> VulkanGraphicsPipeline::CreateAttributeDescriptionList()
 	{
 		std::vector<VkVertexInputAttributeDescription> descs(m_params.vertexBufferLayout.size());
@@ -326,33 +337,4 @@ namespace wtv
 	{
 		return std::vector<VkPushConstantRange>(); 
 	}
-
-	std::vector<VkDescriptorSetLayout> VulkanGraphicsPipeline::CreateDescriptorSetLayouts()
-	{
-		VkDescriptorSetLayoutCreateInfo dslInfo{};
-		dslInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		dslInfo.pNext = nullptr;
-		dslInfo.bindingCount = 0;
-		dslInfo.pBindings = nullptr;
-		std::vector<VkDescriptorSetLayoutCreateInfo> dslCreateInfos(m_params.descriptorSetLayouts.size());
-		std::vector<std::vector<VkDescriptorSetLayoutBinding>> pipelineBindings(m_params.descriptorSetLayouts.size());
-		for (int dsIndex = 0; dsIndex < m_params.descriptorSetLayouts.size(); ++dsIndex)
-		{
-			pipelineBindings[dsIndex].resize(m_params.descriptorSetLayouts[dsIndex].size());
-			for (int dsEntryIndex = 0; dsEntryIndex < m_params.descriptorSetLayouts[dsIndex].size(); ++dsEntryIndex)
-			{
-				const auto& bindingInfo = m_params.descriptorSetLayouts[dsIndex][dsEntryIndex];
-				pipelineBindings[dsIndex][dsEntryIndex].binding = bindingInfo.binding;
-				pipelineBindings[dsIndex][dsEntryIndex].descriptorType = 
-					VulkanConstantTranslator::GetVkDescriptorType(bindingInfo.type);
-				pipelineBindings[dsIndex][dsEntryIndex].stageFlags =
-					VulkanConstantTranslator::GetVkShaderStageFlags(bindingInfo.stageFlags);
-				pipelineBindings[dsIndex][dsEntryIndex].descriptorCount = bindingInfo.descriptorCount;
-				pipelineBindings[dsIndex][dsEntryIndex].pImmutableSamplers = nullptr;
-			}
-		}
-
-		return std::vector<VkDescriptorSetLayout>();
-	}
-
 }

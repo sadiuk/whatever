@@ -8,6 +8,6 @@ namespace wtv
 		m_viewMatrix = glm::lookAtRH(params.position, params.position + params.normalizedDirection, params.up);
 
 		float fovYInRadians = glm::radians(params.fovYInDegrees);
-		m_projectionMatrix = glm::perspective(fovYInRadians, params.widthToHeightRatio, params.near, params.far);
+		m_projectionMatrix = glm::perspective(fovYInRadians, params.widthToHeightRatio, params.nearPlane, params.farPlane);
 	}
 }

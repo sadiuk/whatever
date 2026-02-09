@@ -16,6 +16,7 @@
 #include "SDL.h"
 
 #include <algorithm>
+#include "VulkanDescriptorSet.h"
 
 namespace wtv
 {
@@ -233,9 +234,18 @@ namespace wtv
 
 	}
 
-	RefPtr<IGraphicsPipeline> VulkanDevice::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params)
+	RefPtr<IGraphicsPipelineLayout> VulkanDevice::CreateGraphicsPipelineLayout(const GraphicsPipelineLayoutCreateInfo& params)
 	{
-		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params);
+		return MakeRef<VulkanGraphicsPipelineLayout>(this, m_services, params);
+	}
+
+	RefPtr<IGraphicsPipeline> VulkanDevice::CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params, const RefPtr<const IGraphicsPipelineLayout>& layout)
+	{
+		// Cast away const to get non-const pointer - safe because we're just using it for construction
+		auto vulkanLayout = const_cast<VulkanGraphicsPipelineLayout*>(
+			static_cast<const VulkanGraphicsPipelineLayout*>(layout.get())
+		);
+		auto pipeline = MakeRef<VulkanGraphicsPipeline>(this, m_services, params, vulkanLayout);
 		return pipeline;
 	}
 
@@ -267,6 +277,11 @@ namespace wtv
 	RefPtr<IDescriptorPool> VulkanDevice::CreateDescriptorPool(const DescriptorPoolParams& params)
 	{
 		return MakeRef<VulkanDescriptorPool>(this, params);
+	}
+
+	RefPtr<IDescriptorSetLayout> VulkanDevice::CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params)
+	{
+		return MakeRef<VulkanDescriptorSetLayout>(this, params);
 	}
 
 	uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)

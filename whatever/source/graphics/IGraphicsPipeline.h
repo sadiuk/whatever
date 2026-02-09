@@ -2,14 +2,23 @@
 #include "GraphicsConstants.h"
 #include "GraphicsStructs.h"
 #include "IFramebuffer.h"
-#include "IGPURenderPass.h"
+#include "IDescriptorSet.h"
 #include "util/RefPtr.h"
 
 #include <vector>
-#include <string>
-#include <map>
 namespace wtv
 {
+	struct GraphicsPipelineLayoutCreateInfo
+	{
+		IDescriptorSetLayout** descriptorSetLayouts;
+		uint32_t descriptorSetLayoutCount = 0;
+		PushConstantRange* pcRanges;
+		uint32_t pushConstantRangeCount = 0;
+	};
+	struct IGraphicsPipelineLayout : public IReferenceCounted
+	{
+		virtual ~IGraphicsPipelineLayout() {}
+	};
 	struct IGraphicsPipeline : public IReferenceCounted
 	{
 		using VertexBufferLayout = std::vector<VertexAtributeType>;
@@ -25,7 +34,6 @@ namespace wtv
 			DepthStencilInfo depthStencilInfo;
 			BlendStateInfo blendStateInfo;
 			IFramebuffer::Layout framebufferLayout;
-			std::vector<DescriptorSetLayout> descriptorSetLayouts;
 		};
 
 

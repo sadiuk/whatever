@@ -9,12 +9,23 @@
 #include "VulkanRenderPass.h"
 namespace wtv
 {
+	class VulkanGraphicsPipelineLayout : public IGraphicsPipelineLayout
+	{
+		VkPipelineLayout m_layout;
+		VulkanDevice* m_device;
+		IServiceProvider* m_services;
+		GraphicsPipelineLayoutCreateInfo m_params;
+	public:
+		VulkanGraphicsPipelineLayout(VulkanDevice* device, IServiceProvider* services, const GraphicsPipelineLayoutCreateInfo& params);
+		VkPipelineLayout GetNativeHandle() const { return m_layout; }
+		IServiceProvider* GetServiceProvider() { return m_services; }
+	};
+
 	class VulkanGraphicsPipeline : public IGraphicsPipeline, public IServiceProviderHolder
 	{
 
 	public:
-		VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params);
-		VkRenderPass GetRenderPass() { return m_renderPass; }
+		VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params, VulkanGraphicsPipelineLayout* layout);
 		VkPipeline GetPipeline() { return m_pipeline; }
 		~VulkanGraphicsPipeline();
 		IServiceProvider* GetServiceProvider() override;
@@ -37,25 +48,20 @@ namespace wtv
 			std::vector<VkPipelineColorBlendAttachmentState>& attachmentStates
 		);
 		VkPipelineDynamicStateCreateInfo CreatePipelineDynamicStateCreateInfo();
-		VkPipelineLayout CreatePipelineLayout();
 		VkPipelineCache CreatePipelineCache();
 
 		std::vector<VkVertexInputAttributeDescription> CreateAttributeDescriptionList();
 		std::vector<VkVertexInputBindingDescription> CreateBindingDescriptionList();
 		std::vector<VkPushConstantRange> CreatePushConstantRanges();
-		std::vector< VkDescriptorSetLayout> CreateDescriptorSetLayouts();
 	private:
 		VulkanDevice* m_engine;
 		IServiceProvider* m_services;
 		VkPipeline m_pipeline{};
 		VkDevice m_device{};
-		VkRenderPass m_renderPass{};
 		VkPipelineCache m_pipelineCache{};
-		VkPipelineLayout m_pipelineLayout{};
 		std::array<RefPtr<VulkanShader>, (size_t)ShaderStage::GraphicsStageCount> m_shaderStages;
-
+		VulkanGraphicsPipelineLayout* m_layout;
 
 		std::vector<VkPushConstantRange> m_pushConstantRanges;
-		std::vector< VkDescriptorSetLayout> m_descSetLayouts;
 	};
 }

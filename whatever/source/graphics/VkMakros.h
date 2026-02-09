@@ -55,3 +55,5 @@ struct fmt::formatter<VkResult> {
 #define ASSERT_VK_SUCCESS_ELSE_RET(x) if((x) != VK_SUCCESS) {  WTV_LOG_E("Assertion failed: {}\nFile: {}\nLine:{}\nFunction: {}", x, __FILE__, __LINE__, __func__); assert(false); return; }
 
 #define ASSERT_VK_SUCCESS(x) if((x) != VK_SUCCESS) {  WTV_LOG_E("Assertion failed: {}\nFile: {}\nLine:{}\nFunction: {}", x, __FILE__, __LINE__, __func__); assert(false); }
+
+#define ASSERT_TRUE(x) if(!(x)) {  WTV_LOG_E("Assertion failed: {}\nFile: {}\nLine:{}\nFunction: {}", #x, __FILE__, __LINE__, __func__); assert(false); }

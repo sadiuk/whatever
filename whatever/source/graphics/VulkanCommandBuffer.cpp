@@ -4,6 +4,8 @@
 #include "VulkanDevice.h"
 #include "VkMakros.h"
 #include "VulkanGPUBuffer.h"
+#include "VulkanGraphicsPipeline.h"
+#include "VulkanDescriptorSet.h"
 
 wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* engine, VkCommandPool commandPool) :
 	m_device(engine->GetDevice()),
@@ -113,6 +115,11 @@ void wtv::VulkanCommandBuffer::SetScissor(const Rect2D& scissor)
 	m_scissor = vkScissor;
 }
 
+void wtv::VulkanCommandBuffer::SetPipelineLayout(const IGraphicsPipelineLayout* layout)
+{
+	m_pipelineLayout = static_cast<const VulkanGraphicsPipelineLayout*>(layout);
+}
+
 void wtv::VulkanCommandBuffer::BindPipeline(IGraphicsPipeline* pipeline)
 {
 	auto vkPipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
@@ -149,6 +156,16 @@ void wtv::VulkanCommandBuffer::UpdateBuffer(IGPUBuffer* buffer, size_t offset, s
 {
 	VulkanGPUBuffer* buf = static_cast<VulkanGPUBuffer*>(buffer);
 	vkCmdUpdateBuffer(m_commandBuffer, buf->GetNativeHandle(), offset, size, data);
+}
+
+void wtv::VulkanCommandBuffer::BindDescriptorSet(uint32_t setIndex, IDescriptorSet* set)
+{
+	ASSERT_TRUE(m_pipelineLayout != nullptr);
+	auto ds = static_cast<VulkanDescriptorSet*>(set)->GetNativeHandle();
+	vkCmdBindDescriptorSets(m_commandBuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		m_pipelineLayout->GetNativeHandle(),
+		setIndex, 1, &ds, 0, nullptr);
 }
 
 wtv::IServiceProvider* wtv::VulkanCommandBuffer::GetServiceProvider()

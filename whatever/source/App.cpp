@@ -110,10 +110,21 @@ App::App()
 
 void App::Run()
 {
+	DescriptorSetLayoutParams dsLayoutParams(1);
+	dsLayoutParams.DescribeLayoutEntry(0, DescriptorType::UniformBuffer, 1, ShaderStageFlags::Vertex);
+	RefPtr<IDescriptorSetLayout> dsLayout = m_device->CreateDescriptorSetLayout(dsLayoutParams);
+	IDescriptorSetLayout* dsLayoutRaw = dsLayout.get();
+
+	GraphicsPipelineLayoutCreateInfo layoutCreateInfo{};
+	layoutCreateInfo.descriptorSetLayoutCount = 1;
+	layoutCreateInfo.descriptorSetLayouts = &dsLayoutRaw;
+	RefPtr<IGraphicsPipelineLayout> pipelineLayout = m_device->CreateGraphicsPipelineLayout(layoutCreateInfo);
+
 	IGraphicsPipeline::CreateInfo pipelineInfo{};
 
-	DescriptorSetLayout dsLayout;
-	//pipelineInfo.
+
+	RefPtr<IDescriptorSet> ds = m_descPool->AllocateDescriptorSet(dsLayout.get());
+
 	pipelineInfo.blendStateInfo.attachmentBlendStates.resize(1);
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].blendEnable = true;
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].srcColorBlendFactor = BlendFactor::SrcAlpha;
@@ -140,8 +151,6 @@ void App::Run()
 	pipelineInfo.stagesDescription[1].entryPoint = "PS";
 
 	pipelineInfo.framebufferLayout = m_framebufferInfo.layout;
-
-	//pipelineInfo.vertexBufferLayout
 	
 	pipelineInfo.vertexTopology = PrimitiveTopology::TriangleList;
 
@@ -152,7 +161,7 @@ void App::Run()
 	viewport.height = m_windowSize.y;
 	pipelineInfo.viewportInfo = viewport;
 
-	auto graphPipeline = m_device->CreateGraphicsPipeline(pipelineInfo);
+	auto graphPipeline = m_device->CreateGraphicsPipeline(pipelineInfo, pipelineLayout);
 
 
 
@@ -162,11 +171,11 @@ void App::Run()
 		.up = glm::vec3(0, 1, 0),
 		.fovYInDegrees = 60,
 		.widthToHeightRatio = (float)m_windowSize.x / m_windowSize.y,
-		.near = 0.01,
-		.far = 1000,
+		.nearPlane = 0.01f,
+		.farPlane = 1000.0f,
 		});
 
-	auto ubData = camera.GetConstantData();
+	Camera::CameraCBData ubData = camera.GetConstantData();
 	auto cameraUB = m_device->CreateBuffer(IGPUBuffer::CreationParams{
 		.bufferSize = sizeof(ubData),
 		.usageFlags = (uint32_t)BufferUsage::UniformBuffer,
@@ -187,9 +196,10 @@ void App::Run()
 	auto vbUpdateCB = m_device->CreateCommandBuffer();
 	vbUpdateCB->Begin();
 	vbUpdateCB->UpdateBuffer(vertexBuffer.get(), 0, sizeof(vbData), vbData);
-
 	vbUpdateCB->End();
 	m_device->Submit(vbUpdateCB.get());
+
+	ds->SetBinding(0, cameraUB.get(), 0, sizeof(Camera::CameraCBData));
 
 	RenderPassParams mainRPParams(m_framebufferInfo.layout);
 	mainRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::ColorAttachmentOptimal);
@@ -209,12 +219,14 @@ void App::Run()
 		size_t vbOffset = 0;
 		IGPUBuffer* vertexBuffers[] = { vertexBuffer.get() };
 		commandBuffer->Begin();
+		commandBuffer->SetPipelineLayout(pipelineLayout.get());
 		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
 		commandBuffer->UpdateBuffer(cameraUB.get(), 0, sizeof(ubData), &ubData);
 		commandBuffer->BeginRenderPass(mainRP.get(), framebuffer.get());
 		commandBuffer->SetViewport(viewport);
 		commandBuffer->BindPipeline(graphPipeline.get());
 		commandBuffer->BindVertexBuffers(vertexBuffers, 1, &vbOffset);
+		commandBuffer->BindDescriptorSet(0, ds.get());
 		commandBuffer->Draw(3, 0, 1);
 		commandBuffer->EndRenderPass();
 
@@ -237,5 +249,4 @@ void App::Run()
 
 		//commandBuffer->Reset();
 	}
-	int a = -0;
 }

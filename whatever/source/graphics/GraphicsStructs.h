@@ -14,17 +14,20 @@ namespace wtv
 		uint32_t width = 0;
 		uint32_t height = 0;
 	};
+
 	struct StageDesc
 	{
 		ShaderStage stage;
 		std::string entryPoint;
 		std::string path;
 	};
+
 	struct ViewportInfo
 	{
 		uint32_t x = 0, y = 0;
 		uint32_t width, height;
 	};
+
 	struct AttachmentBlendState
 	{
 		bool blendEnable = true;
@@ -35,10 +38,12 @@ namespace wtv
 		BlendFactor dstAlphaBlendFactor = BlendFactor::One;
 		BlendOperation alphaBlendOperation = BlendOperation::Add;
 	};
+
 	struct BlendStateInfo
 	{
 		std::vector<AttachmentBlendState> attachmentBlendStates;
 	};
+
 	struct StencilOperation
 	{
 		StencilTestOperation failOperation = StencilTestOperation::Zero;
@@ -49,6 +54,7 @@ namespace wtv
 		uint32_t writeMask = 0;
 		uint32_t reference = 0;
 	};
+
 	struct DepthStencilInfo
 	{
 		bool depthTestEnable = true;
@@ -58,6 +64,7 @@ namespace wtv
 		StencilOperation backStencilOp;
 		StencilOperation frontStencilOp;
 	};
+
 	struct RasterInfo
 	{
 		bool enableDepthClamp = false;
@@ -65,12 +72,11 @@ namespace wtv
 		CullMode cullMode;
 		PolygonMode polygonMode;
 	};
-	struct DescriptorSetLayoutEntry
+
+	struct PushConstantRange
 	{
-		uint32_t binding;
-		DescriptorType type;
-		uint32_t descriptorCount = 1;
-		ShaderStageFlags stageFlags;
+		uint32_t offset;
+		uint32_t size;
+		ShaderStageFlags stages;
 	};
-	using DescriptorSetLayout = std::vector<DescriptorSetLayoutEntry>;
 }

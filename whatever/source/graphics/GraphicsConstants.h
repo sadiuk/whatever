@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <climits>
 
+#include "Windows.h"
+
 namespace wtv
 {
     enum class ShaderStage : uint16_t
@@ -25,6 +27,8 @@ namespace wtv
 
         All = INT_MAX
     };
+
+	DEFINE_ENUM_FLAG_OPERATORS(ShaderStageFlags);
 
     enum class VertexAtributeType : uint16_t
     {

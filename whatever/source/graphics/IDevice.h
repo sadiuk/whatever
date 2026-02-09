@@ -32,7 +32,8 @@ namespace wtv
 		static RefPtr<IDevice> Create(const CreationParams& params, IServiceProvider* services);
 		virtual GraphicsAPI GetAPI() = 0;
 
-		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params) = 0;
+		virtual RefPtr<IGraphicsPipelineLayout> CreateGraphicsPipelineLayout(const GraphicsPipelineLayoutCreateInfo& params) = 0;
+		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params, const RefPtr<const IGraphicsPipelineLayout>& layout) = 0;
 		virtual RefPtr<ICommandBuffer> CreateCommandBuffer() = 0;
 		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
 		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
@@ -40,6 +41,7 @@ namespace wtv
 		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) = 0;
 		virtual RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) = 0;
 		virtual RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) = 0;
+		virtual RefPtr<IDescriptorSetLayout> CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params) = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 
 		virtual void BeginFrame() = 0;
