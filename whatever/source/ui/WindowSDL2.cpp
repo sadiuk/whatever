@@ -1,7 +1,6 @@
 #include "WindowSDL2.h"
 #include "imgui_impl_sdl2.h"
-#include "imgui_impl_vulkan.h"
-#include "imgui.h"
+#include "SDL2ConstantsTranslator.h"
 
 namespace wtv
 {
@@ -36,12 +35,35 @@ namespace wtv
 			{
 			case SDL_QUIT:
 				m_keepOpen = false;
+				NotifyWindowClose();
 				break;
+			case SDL_MOUSEMOTION:
+				NotifyMouseMove(glm::ivec2(e.motion.x, e.motion.y));
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				NotifyMouseButtonStateChange(SDL2ConstantsTranslator::GetMouseButton(e.button.button), MouseButtonState::Pressed);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				NotifyMouseButtonStateChange(SDL2ConstantsTranslator::GetMouseButton(e.button.button), MouseButtonState::Released);
+				break;
+			case SDL_KEYDOWN:
+				NotifyKeyStateChange(SDL2ConstantsTranslator::GetKey(e.key.keysym.sym), KeyState::Pressed);
+				break;
+			case SDL_KEYUP:
+				NotifyKeyStateChange(SDL2ConstantsTranslator::GetKey(e.key.keysym.sym), KeyState::Released);
+				break;
+
 			}
 
 
 			SDL_UpdateWindowSurface(m_window);
 
 		}
+	}
+	glm::ivec2 WindowSDL2::GetMousePosition()
+	{
+		glm::ivec2 mousePos;
+		SDL_GetMouseState(&mousePos.x, &mousePos.y);
+		return mousePos;
 	}
 }

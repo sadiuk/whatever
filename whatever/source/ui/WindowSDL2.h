@@ -11,7 +11,7 @@ namespace wtv
 		void* GetNativeHandle() override;
 		bool IsOpen() override;
 		void Update() override;
-		WindowLib GetWindowingLib() { return SDL2; }
+		glm::ivec2 GetMousePosition() override;
 	private:
 		bool m_keepOpen = true;
 		SDL_Window* m_window;
