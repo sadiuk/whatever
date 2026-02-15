@@ -6,11 +6,14 @@
 #include "VulkanAppServiceProvider.h"
 #include "graphics/VulkanDescriptorPool.h"
 #include <scene/Camera.h>
+#include "CameraControler.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_vulkan.h"
 #include <graphics/VulkanDevice.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/euler_angles.hpp"
 
 using namespace wtv;
 
@@ -38,7 +41,7 @@ void App::Init()
 			.farPlane = 1000.0f,
 		});
 
-	m_cameraController = MakeRef<CameraController>(m_input, m_camera);
+	m_cameraController = MakeRef<CameraController>(m_services.get(), m_input, m_camera);
 
 	IDevice::CreationParams engineParams{};
 	engineParams.api = IDevice::GraphicsAPI::Vulkan;

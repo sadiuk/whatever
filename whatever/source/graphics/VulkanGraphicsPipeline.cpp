@@ -70,7 +70,7 @@ namespace wtv
 		VkPipelineColorBlendStateCreateInfo blendStateInfo = CreatePipelineColorBlendStateCreateInfo(attachmentStates);
 		VulkanRenderPass* dummyRp = m_engine->ObtainDummyRenderPass(m_params.framebufferLayout);
 		
-		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 		dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateInfo.pNext = nullptr;
 		dynamicStateInfo.dynamicStateCount = 1;

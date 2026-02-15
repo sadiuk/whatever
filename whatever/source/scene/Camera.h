@@ -1,8 +1,9 @@
 #pragma once
+#include "util/RefPtr.h"
 #include <glm/glm.hpp>
 namespace wtv
 {
-	class Camera
+	class Camera : public IReferenceCounted
 	{
 		glm::mat4 m_viewMatrix;
 		glm::mat4 m_projectionMatrix;
@@ -28,6 +29,11 @@ namespace wtv
 		glm::mat4 GetViewMatrix() { return m_viewMatrix; }
 		glm::mat4 GetProjectionMatrix() { return m_projectionMatrix; }
 		glm::mat4 GetViewProjectionMatrix() { return m_projectionMatrix * m_viewMatrix; }
+		glm::vec3 GetPosition() const;
+		glm::vec3 GetForwardVector() const;
+		glm::vec3 GetUpVector() const;
+
+		void LookAt(const glm::vec3& position, const glm::vec3& normalizedDir, const glm::vec3& up);
 
 		CameraCBData GetConstantData()
 		{

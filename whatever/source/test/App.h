@@ -7,8 +7,8 @@
 #include "scene/Camera.h"
 #include "Input.h"
 #include "CameraControler.h"
-
 using namespace wtv;
+
 
 
 class App
@@ -18,6 +18,7 @@ public:
 	void Run();
 private:
 	void Init();
+	void ProcessInput(float dt);
 
 
 	RefPtr<IDevice> m_device;
@@ -25,10 +26,10 @@ private:
 	RefPtr<wtv::IServiceProvider> m_services;
 	RefPtr<IDescriptorPool> m_descPool;
 	RefPtr<Input> m_input;
+	RefPtr<CameraController> m_cameraController;
 	glm::uvec2 m_windowSize;
 	glm::uvec2 m_windowPos;
 	RefPtr<Camera> m_camera;
-	RefPtr<CameraController> m_cameraController;
 
 	RefPtr<IGPURenderPass> m_imguiRenderPass;
 	IFramebuffer::Properties m_framebufferInfo{};
