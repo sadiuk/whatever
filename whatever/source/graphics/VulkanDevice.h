@@ -25,7 +25,7 @@ namespace wtv
 {
 	class VulkanDevice : public IDevice
 	{
-		static constexpr uint32_t VULKAN_VERSION = VK_API_VERSION_1_2;
+		static constexpr uint32_t VULKAN_VERSION = VK_API_VERSION_1_3;
 
 		struct QueueFamilyIndices
 		{
