@@ -97,9 +97,9 @@ void wtv::VulkanCommandBuffer::SetViewport(const ViewportInfo& viewport)
 {
 	VkViewport vkViewport{};
 	vkViewport.x = (float)viewport.x;
-	vkViewport.y = (float)viewport.y;
+	vkViewport.y = viewport.height - (float)viewport.y;
 	vkViewport.width = (float)viewport.width;
-	vkViewport.height = (float)viewport.height;
+	vkViewport.height = -(float)viewport.height;
 	vkViewport.minDepth = 1;
 	vkViewport.maxDepth = 0;
 	

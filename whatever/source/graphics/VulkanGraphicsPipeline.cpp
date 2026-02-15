@@ -68,8 +68,14 @@ namespace wtv
 		VkPipelineDepthStencilStateCreateInfo dsInfo = CreatePipelineDepthStencilStateCreateInfo();
 		std::vector<VkPipelineColorBlendAttachmentState> attachmentStates;
 		VkPipelineColorBlendStateCreateInfo blendStateInfo = CreatePipelineColorBlendStateCreateInfo(attachmentStates);
-		VkPipelineDynamicStateCreateInfo dynamicStateInfo = CreatePipelineDynamicStateCreateInfo();
 		VulkanRenderPass* dummyRp = m_engine->ObtainDummyRenderPass(m_params.framebufferLayout);
+		
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+		dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicStateInfo.pNext = nullptr;
+		dynamicStateInfo.dynamicStateCount = 1;
+		VkDynamicState ds = VK_DYNAMIC_STATE_VIEWPORT;
+		dynamicStateInfo.pDynamicStates = &ds;
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -291,16 +297,6 @@ namespace wtv
 		blendInfo.blendConstants[2] = blendConstants[2];
 		blendInfo.blendConstants[3] = blendConstants[3];
 		return blendInfo;
-	}
-
-	VkPipelineDynamicStateCreateInfo VulkanGraphicsPipeline::CreatePipelineDynamicStateCreateInfo()
-	{
-		VkPipelineDynamicStateCreateInfo dynStateInfo{};
-		dynStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynStateInfo.pNext = nullptr;
-		dynStateInfo.dynamicStateCount = 0;
-
-		return dynStateInfo;
 	}
 
 	std::vector<VkVertexInputAttributeDescription> VulkanGraphicsPipeline::CreateAttributeDescriptionList()

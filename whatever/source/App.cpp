@@ -167,13 +167,19 @@ void App::Run()
 
 	Camera camera(Camera::CreationParams{
 		.position = glm::vec3(0, 0, 0),
-		.normalizedDirection = glm::vec3(1, 0, 0),
-		.up = glm::vec3(0, 1, 0),
+		.normalizedDirection = glm::vec3(-1, 0, 0),
+		.up = glm::vec3(0, 0, 1),
 		.fovYInDegrees = 60,
 		.widthToHeightRatio = (float)m_windowSize.x / m_windowSize.y,
 		.nearPlane = 0.01f,
 		.farPlane = 1000.0f,
 		});
+
+	auto vp = camera.GetViewMatrix() * glm::vec4(-1, 0, 0.5, 0);
+	//(0, 0.5, -1, 1)
+	// r.x, u.x, -f.x   0 0 1
+	// r.y, u.y, -f.y   1 0 0 * (-1 0 0.5) = 0 0.5 -1
+	// r.z, u.z, -f.z   0 1 0
 
 	Camera::CameraCBData ubData = camera.GetConstantData();
 	auto cameraUB = m_device->CreateBuffer(IGPUBuffer::CreationParams{
@@ -184,9 +190,9 @@ void App::Run()
 
 	static float vbData[] =
 	{
-		-0.5, -0.5, 0, 1,
-		0.5, -0.5, 0, 1,
-		0, 0.5, 0, 1
+		-1, -0.5, 0, 1,
+		-1, 0.5, 0, 1,
+		-1, 0, 0.5, 1
 	};
 	auto vertexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
 		.bufferSize = sizeof(vbData),
