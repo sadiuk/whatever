@@ -1,0 +1,10 @@
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\B0304865BE6E61C621AF20E100D643B2\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/dev/pet/whatever/whatever/third-party/vma -BD:/dev/pet/whatever/whatever/third-party/vma/out --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/dev/pet/whatever/whatever/third-party/vma/out/VMA.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

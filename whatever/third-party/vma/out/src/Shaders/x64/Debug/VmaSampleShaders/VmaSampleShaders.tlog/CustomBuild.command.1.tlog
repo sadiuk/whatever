@@ -1,0 +1,78 @@
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\643357DF69B3D85E30509772E53145C6\SHADER.FRAG.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/Shader.frag -o D:/dev/pet/whatever/whatever/third-party/vma/bin/Shader.frag.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\643357DF69B3D85E30509772E53145C6\SHADER.VERT.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/Shader.vert -o D:/dev/pet/whatever/whatever/third-party/vma/bin/Shader.vert.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\643357DF69B3D85E30509772E53145C6\SPARSEBINDINGTEST.COMP.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/SparseBindingTest.comp -o D:/dev/pet/whatever/whatever/third-party/vma/bin/SparseBindingTest.comp.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\FA4FFCB505723C5860D00E3398B1CCD5\SHADER.FRAG.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/Shader.frag -o D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/Shader.frag.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\FA4FFCB505723C5860D00E3398B1CCD5\SHADER.VERT.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/Shader.vert -o D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/Shader.vert.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\FA4FFCB505723C5860D00E3398B1CCD5\SPARSEBINDINGTEST.COMP.SPV.RULE
+setlocal
+C:\VulkanSDK\1.3.280.0\Bin\glslangValidator.exe -V D:/dev/pet/whatever/whatever/third-party/vma/src/Shaders/SparseBindingTest.comp -o D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/SparseBindingTest.comp.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\OUT\CMAKEFILES\067B4681DD05FAD0ED496D51700D1F92\VMASAMPLESHADERS.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\DEV\PET\WHATEVER\WHATEVER\THIRD-PARTY\VMA\SRC\SHADERS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/dev/pet/whatever/whatever/third-party/vma -BD:/dev/pet/whatever/whatever/third-party/vma/out --check-stamp-file D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

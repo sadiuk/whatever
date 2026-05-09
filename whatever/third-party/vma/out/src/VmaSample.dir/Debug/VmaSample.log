@@ -1,0 +1,9 @@
+﻿  Building Custom Rule D:/dev/pet/whatever/whatever/third-party/vma/src/CMakeLists.txt
+  Common.cpp
+  SparseBindingTest.cpp
+  Tests.cpp
+  VmaUsage.cpp
+  VolkUsage.cpp
+  VulkanSample.cpp
+  Generating Code...
+  VmaSample.vcxproj -> D:\dev\pet\whatever\whatever\third-party\vma\out\src\Debug\VmaSample.exe

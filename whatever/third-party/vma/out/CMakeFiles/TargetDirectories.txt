@@ -1,0 +1,7 @@
+D:/dev/pet/whatever/whatever/third-party/vma/out/CMakeFiles/INSTALL.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/CMakeFiles/ALL_BUILD.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/CMakeFiles/ZERO_CHECK.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/src/CMakeFiles/VmaSample.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/src/CMakeFiles/INSTALL.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/CMakeFiles/VmaSampleShaders.dir
+D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/CMakeFiles/INSTALL.dir

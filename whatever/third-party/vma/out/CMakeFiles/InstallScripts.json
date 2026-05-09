@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/dev/pet/whatever/whatever/third-party/vma/out/cmake_install.cmake",
+		"D:/dev/pet/whatever/whatever/third-party/vma/out/src/cmake_install.cmake",
+		"D:/dev/pet/whatever/whatever/third-party/vma/out/src/Shaders/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
