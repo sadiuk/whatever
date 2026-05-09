@@ -1,6 +1,6 @@
 #include "IDevice.h"
-#include "VulkanDevice.h"
-#include "VulkanSurfaceSDL.h"
+#include "Vulkan/VulkanDevice.h"
+#include "Vulkan/VulkanSurfaceSDL.h"
 #include <IServiceProvider.h>
 #include "util/RefPtr.h"
 namespace wtv

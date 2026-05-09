@@ -30,8 +30,24 @@ namespace wtv
 
 	DEFINE_ENUM_FLAG_OPERATORS(ShaderStageFlags);
 
-    enum class VertexAtributeType : uint16_t
+    enum class VertexAttributeType : uint16_t
     {
+        byte1,
+		byte2,
+		byte3,
+		byte4,
+        ubyte1,
+        ubyte2,
+        ubyte3,
+        ubyte4,
+        short1,
+		short2,
+		short3,
+		short4,
+		ushort1,
+		ushort2,
+		ushort3,
+		ushort4,
         int1,
         int2,
         int3,
@@ -44,7 +60,31 @@ namespace wtv
         float2,
         float3,
         float4,
+        Undefined
     };
+
+    enum VertexAttributeSemantic
+    {
+        Position,
+		Normal,
+		Tangent,
+		Color,
+		TexCoord0,
+		TexCoord1,
+		TexCoord2,
+		TexCoord3,
+		TexCoord4,
+        Count,
+		Undefined
+
+    };
+
+    enum class IndexType
+    {
+        UInt16,
+        UInt32,
+        Undefined
+	};
 
     enum class PrimitiveTopology
     {
@@ -294,6 +334,25 @@ namespace wtv
         IndirectBuffer = 16,
         CPU
     };
+
+    enum class MemoryPropertyFlags : uint32_t
+    {
+        Undefined = 0,
+        DeviceLocal = 1,
+        HostVisible = 2,
+        HostCoherent = 4,
+        HostCached = 8,
+        LazilyAllocated = 16
+	};
+    DEFINE_ENUM_FLAG_OPERATORS(MemoryPropertyFlags);
+
+    enum class BufferCreationFlags : uint32_t
+    {
+        None = 0,
+        CommitedResource = 1
+    };
+    DEFINE_ENUM_FLAG_OPERATORS(BufferCreationFlags);
+
     enum class AttachmentLoadOp
     {
         Load,
@@ -369,26 +428,26 @@ namespace wtv
         ZeroInitializedExt
     };
 
-    inline uint32_t GetAttributeSize(VertexAtributeType attributeType) {
+    inline uint32_t GetAttributeSize(VertexAttributeType attributeType) {
         switch (attributeType) {
-        case VertexAtributeType::int1:
-        case VertexAtributeType::uint1:
-        case VertexAtributeType::float1:
+        case VertexAttributeType::int1:
+        case VertexAttributeType::uint1:
+        case VertexAttributeType::float1:
             return (uint32_t)sizeof(int);
 
-        case VertexAtributeType::int2:
-        case VertexAtributeType::uint2:
-        case VertexAtributeType::float2:
+        case VertexAttributeType::int2:
+        case VertexAttributeType::uint2:
+        case VertexAttributeType::float2:
             return (uint32_t)sizeof(int) * 2;
 
-        case VertexAtributeType::int3:
-        case VertexAtributeType::uint3:
-        case VertexAtributeType::float3:
+        case VertexAttributeType::int3:
+        case VertexAttributeType::uint3:
+        case VertexAttributeType::float3:
             return (uint32_t)sizeof(int) * 3;
 
-        case VertexAtributeType::int4:
-        case VertexAtributeType::uint4:
-        case VertexAtributeType::float4:
+        case VertexAttributeType::int4:
+        case VertexAttributeType::uint4:
+        case VertexAttributeType::float4:
             return (uint32_t)sizeof(int) * 4;
 
         default:

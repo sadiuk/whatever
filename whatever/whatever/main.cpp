@@ -1,4 +1,4 @@
-#include "App.h"
+#include "test/App.h"
 #define SDL_MAIN_HANDLED
 int main()
 {

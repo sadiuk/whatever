@@ -12,8 +12,9 @@ namespace wtv
 		struct CreationParams
 		{
 			size_t bufferSize;
-			std::underlying_type_t<BufferUsage> usageFlags;
-			std::string name;
+			size_t alignment = 0;
+			BufferUsage usageFlags = BufferUsage::Undefined;
+			MemoryPropertyFlags memoryFlags = MemoryPropertyFlags::Undefined;
 		};
 		struct View
 		{
@@ -35,11 +36,11 @@ namespace wtv
 			}
 		};
 
-		IBuffer(const CreationParams& params) : m_params(params) {}
+		IBuffer(const CreationParams& params, const std::string& name) : m_params(params), m_name(name) {}
 		virtual ~IBuffer() = default;
 		const CreationParams& GetProperties() const { return m_params; };
 	private:
 		CreationParams m_params;
-
+		std::string m_name;
 	};
 }

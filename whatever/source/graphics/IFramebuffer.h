@@ -40,8 +40,6 @@ namespace wtv
 			Layout layout;
 			std::vector<IImage::View> colorBuffers;
 			std::optional<IImage::View> depthBuffer;
-
-
 		};
 		IFramebuffer(Properties&& params) : m_params(std::move(params)) {}
 		virtual ~IFramebuffer() = default;

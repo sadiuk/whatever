@@ -1,4 +1,4 @@
 #include "ISurface.h"
-#include "VulkanSurfaceSDL.h"
+#include "graphics/Vulkan/VulkanSurfaceSDL.h"
 
 #include <cassert>

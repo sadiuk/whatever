@@ -10,12 +10,14 @@
 #include "IGPURenderPass.h"
 #include "IServiceProvider.h"
 #include "IDescriptorPool.h"
+#include "ISemaphore.h"
 #include "util/RefPtr.h"
 #define ENGINE_VERSION 0
 
 
 namespace wtv
 {
+	class IQueue;
 	struct IDevice : public IReferenceCounted, IServiceProviderHolder
 	{
 		IDevice(IServiceProvider* services) : m_services(services) {}
@@ -37,20 +39,22 @@ namespace wtv
 		virtual RefPtr<ICommandBuffer> CreateCommandBuffer() = 0;
 		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
 		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
-		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params) = 0;
+		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params, const std::string& name) = 0;
 		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) = 0;
 		virtual RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) = 0;
 		virtual RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) = 0;
 		virtual RefPtr<IDescriptorSetLayout> CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params) = 0;
+		virtual RefPtr<IBinarySemaphore> CreateBinarySemaphore() const = 0;
+
+		virtual RefPtr<IQueue> GetGraphicsQueue() const = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 
 		virtual void BeginFrame() = 0;
-		virtual void Submit(ICommandBuffer* cb) = 0;
 		virtual void Present() = 0;
 		virtual ~IDevice() {}
 
 		//Derived from IServiceProviderHolder
-		IServiceProvider* GetServiceProvider() override{ return m_services; }
+		IServiceProvider* GetServiceProvider() const override{ return m_services; }
 	protected:
 		IServiceProvider* m_services;
 	};

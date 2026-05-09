@@ -1,19 +1,18 @@
 #include "App.h"
 #include "ui/WindowSDL2.h"
 #include "vulkan/vulkan.h"
-#include "graphics/ISurface.h"
-#include "graphics/VkMakros.h"
 #include "VulkanAppServiceProvider.h"
-#include "graphics/VulkanDescriptorPool.h"
+#include "graphics/Vulkan/VulkanDescriptorPool.h"
 #include <scene/Camera.h>
 #include "CameraControler.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_vulkan.h"
-#include <graphics/VulkanDevice.h>
+#include <graphics/Vulkan/VulkanDevice.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/euler_angles.hpp"
+#include "asset/GLTFModelLoader.h"
 
 using namespace wtv;
 
@@ -38,7 +37,7 @@ void App::Init()
 			.fovYInDegrees = 60,
 			.widthToHeightRatio = (float)m_windowSize.x / m_windowSize.y,
 			.nearPlane = 0.01f,
-			.farPlane = 1000.0f,
+			.farPlane = 10000.0f,
 		});
 
 	m_cameraController = MakeRef<CameraController>(m_services.get(), m_input, m_camera);
@@ -68,6 +67,8 @@ void App::Init()
 	framebufferLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
 	//framebufferLayout.colorBuffers[0].loadOp = AttachmentLoadOp::Clear;
 	//framebufferLayout.colorBuffers[0].clearColor = glm::vec4(0.7, 0.5, 0.4, 1);
+
+	//auto meshes = loader.LoadModel("../../../media/Sponza/glTF/Sponza.gltf");
 
 	IImage::View swapchainImageView(m_device->GetBackbuffer().get());
 	m_framebufferInfo.colorBuffers = { swapchainImageView };
@@ -138,8 +139,85 @@ void App::Run()
 	layoutCreateInfo.descriptorSetLayouts = &dsLayoutRaw;
 	RefPtr<IGraphicsPipelineLayout> pipelineLayout = m_device->CreateGraphicsPipelineLayout(layoutCreateInfo);
 
+	auto graphicsQueue = m_device->GetGraphicsQueue();
 	IGraphicsPipeline::CreateInfo pipelineInfo{};
 
+	GLTFModelLoader loader;
+	auto meshes = loader.LoadModel("D:/dev/pet/whatever/whatever/media/Sponza/glTF/Sponza.gltf");
+	
+	std::vector<RefPtr<IGPUBuffer>> vertexBuffers;
+	std::vector<RefPtr<IGPUBuffer>> indexBuffers;
+
+	std::vector<uint64_t> meshVertexOffsets;
+	std::vector<uint64_t> meshIndexOffsets;
+	meshVertexOffsets.reserve(meshes.size());
+	meshIndexOffsets.reserve(meshes.size());
+	uint64_t nextVertexOffset = 0;
+	uint64_t nextIndexOffset = 0;
+	for (int meshIdx = 0; meshIdx < meshes.size(); meshIdx++)
+	{
+		meshVertexOffsets.push_back(nextVertexOffset);
+		meshIndexOffsets.push_back(nextIndexOffset);
+		nextVertexOffset = meshVertexOffsets.back() + meshes[meshIdx].GetVertexBuffer().size();
+		nextIndexOffset = meshIndexOffsets.back() + meshes[meshIdx].GetIndexBuffer().size();
+	}
+
+	IBuffer::CreationParams vertexStagingBufferParams{};
+	vertexStagingBufferParams.bufferSize = nextVertexOffset + meshes.back().GetVertexBuffer().size();
+	vertexStagingBufferParams.alignment = 0;
+	vertexStagingBufferParams.memoryFlags = MemoryPropertyFlags::HostVisible | MemoryPropertyFlags::HostCoherent;
+	vertexStagingBufferParams.usageFlags = BufferUsage::CPU;
+	RefPtr<IGPUBuffer> vertexStagingBuffer = m_device->CreateBuffer(vertexStagingBufferParams, "VertexStagingBuffer");
+	
+	IBuffer::CreationParams indexStagingBufferParams{};
+	indexStagingBufferParams.bufferSize = nextIndexOffset + meshes.back().GetIndexBuffer().size();
+	indexStagingBufferParams.alignment = 0;
+	indexStagingBufferParams.memoryFlags = MemoryPropertyFlags::HostVisible | MemoryPropertyFlags::HostCoherent;
+	indexStagingBufferParams.usageFlags = BufferUsage::CPU;
+	RefPtr<IGPUBuffer> indexStagingBuffer = m_device->CreateBuffer(indexStagingBufferParams, "IndexStagingBuffer");
+
+	void* mappedVertexSB = vertexStagingBuffer->Map();
+	void* mappedIndexSB = indexStagingBuffer->Map();
+
+	for (int meshIndex = 0; meshIndex < meshes.size(); meshIndex++)
+	{
+		memcpy((char*)mappedVertexSB + meshVertexOffsets[meshIndex], meshes[meshIndex].GetVertexBuffer().data(), meshes[meshIndex].GetVertexBuffer().size());
+		memcpy((char*)mappedIndexSB + meshIndexOffsets[meshIndex], meshes[meshIndex].GetIndexBuffer().data(), meshes[meshIndex].GetIndexBuffer().size());
+	}
+
+	vertexStagingBuffer->Unmap();
+	indexStagingBuffer->Unmap();
+
+	auto vbUpdateCB = m_device->CreateCommandBuffer();
+	vbUpdateCB->Begin();
+
+	for (int meshIndex = 0; meshIndex < meshes.size(); meshIndex++)
+	{
+		auto& mesh = meshes[meshIndex];
+
+		auto vertexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
+		.bufferSize = mesh.GetVertexBuffer().size(),
+		.usageFlags = BufferUsage::VertexBuffer }, "MeshVB" + std::to_string(meshIndex));
+
+		auto indexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
+		.bufferSize = mesh.GetIndexBuffer().size(),
+		.usageFlags = BufferUsage::IndexBuffer }, "MeshIB" + std::to_string(meshIndex));
+
+		
+		vbUpdateCB->CopyBuffer(vertexStagingBuffer.get(), meshVertexOffsets[meshIndex], vertexBuffer.get(), 0, mesh.GetVertexBuffer().size());
+		vbUpdateCB->CopyBuffer(indexStagingBuffer.get(), meshIndexOffsets[meshIndex], indexBuffer.get(), 0, mesh.GetIndexBuffer().size());
+
+
+		vertexBuffers.emplace_back(vertexBuffer);
+		indexBuffers.emplace_back(indexBuffer);
+
+	}
+	vbUpdateCB->End();
+
+	{
+		QueueSubmitInfo submitInfo(vbUpdateCB.get(), m_device.get());
+		graphicsQueue->Submit(submitInfo);
+	}
 
 	RefPtr<IDescriptorSet> ds = m_descPool->AllocateDescriptorSet(dsLayout.get());
 
@@ -152,13 +230,17 @@ void App::Run()
 	pipelineInfo.depthStencilInfo.depthWriteEnable = false;
 	pipelineInfo.depthStencilInfo.stencilTestEnabled = false;
 
-	pipelineInfo.rasterInfo.frontFace = FrontFace::Clockwise;
+	pipelineInfo.rasterInfo.frontFace = FrontFace::CounterClockwise;
 	pipelineInfo.rasterInfo.cullMode = CullMode::None;
 	pipelineInfo.rasterInfo.polygonMode = PolygonMode::Fill;
 
-	std::vector<VertexAtributeType> vertexAttributes(1);
-	vertexAttributes[0] = VertexAtributeType::float4;
+	std::vector<VertexAttributeType> vertexAttributes(meshes[0].GetMeshInfo().GetAttributeCOunt());
+	for (int i = 0; i < meshes[0].GetMeshInfo().GetAttributeCOunt(); i++)
+	{
+		vertexAttributes[i] = meshes[0].GetMeshInfo().GetAttribute(i).type;
+	}
 	pipelineInfo.vertexBufferLayout = vertexAttributes;
+	
 
 	pipelineInfo.stagesDescription.resize(2);
 	pipelineInfo.stagesDescription[0].stage = ShaderStage::Vertex;
@@ -192,27 +274,10 @@ void App::Run()
 
 	auto cameraUB = m_device->CreateBuffer(IGPUBuffer::CreationParams{
 		.bufferSize = sizeof(Camera::CameraCBData),
-		.usageFlags = (uint32_t)BufferUsage::UniformBuffer,
-		.name = "CameraCB"
-	});
+		.usageFlags = BufferUsage::UniformBuffer
+	}, "CameraCB");
 
-	static float vbData[] =
-	{
-		-1, -0.5, 0, 1,
-		-1, 0.5, 0, 1,
-		-1, 0, 0.5, 1
-	};
-	auto vertexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
-		.bufferSize = sizeof(vbData),
-		.usageFlags = (uint32_t)BufferUsage::VertexBuffer, 
-		.name = "FirstVB"});
-
-	auto vbUpdateCB = m_device->CreateCommandBuffer();
-	vbUpdateCB->Begin();
-	vbUpdateCB->UpdateBuffer(vertexBuffer.get(), 0, sizeof(vbData), vbData);
-	vbUpdateCB->End();
-	m_device->Submit(vbUpdateCB.get());
-
+	
 	ds->SetBinding(0, cameraUB.get(), 0, sizeof(Camera::CameraCBData));
 
 	RenderPassParams mainRPParams(m_framebufferInfo.layout);
@@ -232,7 +297,6 @@ void App::Run()
 
 
 		size_t vbOffset = 0;
-		IGPUBuffer* vertexBuffers[] = { vertexBuffer.get() };
 		commandBuffer->Begin();
 		commandBuffer->SetPipelineLayout(pipelineLayout.get());
 		commandBuffer->SetScissor(Rect2D{ 0, 0, m_windowSize.x, m_windowSize.y });
@@ -241,9 +305,17 @@ void App::Run()
 		commandBuffer->BeginRenderPass(mainRP.get(), framebuffer.get());
 		commandBuffer->SetViewport(viewport);
 		commandBuffer->BindPipeline(graphPipeline.get());
-		commandBuffer->BindVertexBuffers(vertexBuffers, 1, &vbOffset);
 		commandBuffer->BindDescriptorSet(0, ds.get());
-		commandBuffer->Draw(3, 0, 1);
+
+		for (int i = 0; i < vertexBuffers.size(); i++)
+		{
+			IGPUBuffer* vertexBuffer = vertexBuffers[i].get();
+			commandBuffer->BindVertexBuffers(&vertexBuffer, 1, &vbOffset);
+			IGPUBuffer* indexBuffer = indexBuffers[i].get();
+			commandBuffer->BindIndexBuffer(indexBuffer, 0, meshes[i].GetMeshInfo().indexType);
+
+			commandBuffer->DrawIndexed(0, 0, meshes[i].GetIndexBuffer().size() / sizeof(uint32_t), 1, 0);
+		}
 		commandBuffer->EndRenderPass();
 
 		ImGui_ImplVulkan_NewFrame();
@@ -259,7 +331,10 @@ void App::Run()
 		ImGui_ImplVulkan_RenderDrawData(draw_data, static_cast<VulkanCommandBuffer*>(commandBuffer.get())->GetNativeHandle());
 		commandBuffer->EndRenderPass();
 		commandBuffer->End();
-		m_device->Submit(commandBuffer.get());
+		{
+			QueueSubmitInfo submitInfo(commandBuffer.get(), m_device.get());
+			graphicsQueue->Submit(submitInfo);
+		}
 		m_device->Present();
 		m_window->Update();
 	}

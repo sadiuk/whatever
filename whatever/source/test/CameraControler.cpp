@@ -8,7 +8,7 @@ namespace wtv
 	void CameraController::Update(float dt)
 	{
 		float mouseSensitivity = 0.002;
-		float step = dt;
+		float step = dt * 100;
 		auto position = m_camera->GetPosition();
 		auto direction = glm::normalize(m_camera->GetForwardVector());
 		auto right = glm::normalize(glm::cross(direction, m_camera->GetUpVector()));

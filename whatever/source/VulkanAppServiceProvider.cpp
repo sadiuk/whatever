@@ -1,6 +1,6 @@
 #include "VulkanAppServiceProvider.h"
 
-#include "graphics/VulkanShaderCompilerDXC.h"
+#include "graphics/Vulkan/VulkanShaderCompilerDXC.h"
 #include <util/ILogger.h>
 #include <util/ConsoleLogger.h>
 

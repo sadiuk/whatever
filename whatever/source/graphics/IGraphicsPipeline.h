@@ -21,7 +21,7 @@ namespace wtv
 	};
 	struct IGraphicsPipeline : public IReferenceCounted
 	{
-		using VertexBufferLayout = std::vector<VertexAtributeType>;
+		using VertexBufferLayout = std::vector<VertexAttributeType>;
 		using StagesDescription = std::vector<StageDesc>;
 
 		struct CreateInfo

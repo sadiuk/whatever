@@ -1,13 +1,21 @@
 #pragma once
 #include "IBuffer.h"
-#include "VulkanConstantTranslator.h"
+#include "IGPUResource.h"
+#include "Vulkan/VulkanConstantTranslator.h"
 #include <string>
 namespace wtv
 {
-	struct IGPUBuffer : public IBuffer
+	struct IGPUBuffer : public IBuffer, public IGPUResource
 	{
-		IGPUBuffer(const CreationParams& createInfo) : IBuffer(createInfo) {}
+		IGPUBuffer(const CreationParams& createInfo, std::string name) : IBuffer(createInfo, name) {}
+		GPUResourceType GetResourceType() const
+		{
+			return GPUResourceType::Buffer;
+		}
 		virtual ~IGPUBuffer() = default;
+		virtual void* Map() = 0;
+		virtual const void* Map() const = 0;
+		virtual void Unmap() = 0;
 	protected:
 	};
 }

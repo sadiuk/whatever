@@ -32,6 +32,6 @@ namespace wtv
 
 	struct IServiceProviderHolder
 	{
-		virtual IServiceProvider* GetServiceProvider() = 0;
+		virtual IServiceProvider* GetServiceProvider() const = 0;
 	};
 }
