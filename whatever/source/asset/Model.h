@@ -2,5 +2,8 @@
 
 namespace wtv
 {
+	class Model
+	{
 
+	};
 }
