@@ -43,5 +43,7 @@ namespace wtv
 			data.viewProjMatrix = GetViewProjectionMatrix();
 			return data;
 		}
+	private:
+		glm::mat4 InfiniteReversePerspective(float fovY, float aspect, float zNear);
 	};
 }
