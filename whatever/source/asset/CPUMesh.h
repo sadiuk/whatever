@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include <algorithm>
+#include <functional>
 #include "graphics/GraphicsConstants.h"
 
 namespace wtv
@@ -44,7 +45,13 @@ namespace wtv
 			m_vertexCount = vertexCount;
 		}
 
-		void SetVerticesAttribute(VertexAttributeSemantic attribute, const void* data, uint32_t dataSize, uint32_t dataStride, uint32_t elementSize, uint32_t elementCount)
+		void SetVerticesAttribute(VertexAttributeSemantic attribute, 
+			const void* data, 
+			uint32_t dataSize, 
+			uint32_t dataStride, 
+			uint32_t elementSize, 
+			uint32_t elementCount,
+			std::function<void(void*)> transform = [](void*) {})
 		{
 			if (dataStride == 0 || dataStride == elementSize)
 			{
@@ -60,6 +67,10 @@ namespace wtv
 				{
 					memcpy(dst + i * elementSize, src + i * dataStride, elementSize);
 				}
+			}
+			for (int i = 0; i < elementCount; i++)
+			{
+				transform(m_vertexBufferStaging[attribute].data() + i * dataStride);
 			}
 		}
 

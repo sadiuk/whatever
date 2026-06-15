@@ -70,17 +70,47 @@ namespace wtv
 
 					VertexAttributeSemantic semantic = GetVertexAttribSemanticFromTinyGLTF(attrib.first);
 
-					meshes.back().SetVerticesAttribute(
-						semantic,
-						buffer.data.data() + bufferView.byteOffset,
-						bufferView.byteLength,
-						bufferView.byteStride,
-						elementSize,
-						vertexCount
-					);
+					if (semantic != VertexAttributeSemantic::Position)
+					{
+						meshes.back().SetVerticesAttribute(
+							semantic,
+							buffer.data.data() + bufferView.byteOffset,
+							bufferView.byteLength,
+							bufferView.byteStride,
+							elementSize,
+							vertexCount
+
+						);
+					}
+					else
+					{
+						auto convertPosition = [elementSize](void* vertexData) {
+							if (elementSize == 12)
+							{
+								float* pos = static_cast<float*>(vertexData);
+								//std::swap(pos[0], pos[1]);
+								std::swap(pos[1], pos[2]);
+								pos[1] *= -1;
+							}
+							else if (elementSize == 24)
+							{
+								double* pos = static_cast<double*>(vertexData);
+								//std::swap(pos[0], pos[1]);
+								std::swap(pos[1], pos[2]);
+							}
+						};
+						meshes.back().SetVerticesAttribute(
+							semantic,
+							buffer.data.data() + bufferView.byteOffset,
+							bufferView.byteLength,
+							bufferView.byteStride,
+							elementSize,
+							vertexCount,
+							convertPosition
+						);
+					}
 				}
 				meshes.back().FormVertexBuffer();
-				uint32_t* ib = (uint32_t*)meshes.back().GetIndexBuffer().data();
 			}
 		}
 			
