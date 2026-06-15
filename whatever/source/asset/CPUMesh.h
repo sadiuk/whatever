@@ -13,19 +13,34 @@ namespace wtv
 	{
 		VertexAttributeType type;
 		VertexAttributeSemantic semantic;
+		bool operator==(const VertexAttribute&) const = default;\
 	};
+
 
 	struct MeshInfo
 	{
-		std::vector<VertexAttribute> vertexAttributes;
+		static constexpr uint32_t MAX_VERTEX_ATTRIBUTE_COUNT = 16;
+		using VertexLayout = std::array<VertexAttribute, MAX_VERTEX_ATTRIBUTE_COUNT>;
+		VertexLayout vertexAttributes{};
 		IndexType indexType;
-		MeshInfo(VertexAttribute* attributes, uint32_t attributeCount, IndexType indexType) : vertexAttributes(attributeCount), indexType(indexType)
+		uint32_t attributeCount;
+		MeshInfo(VertexAttribute* attributes, uint32_t attributeCount, IndexType indexType) : attributeCount(attributeCount), indexType(indexType)
 		{
+			assert(attributeCount <= MAX_VERTEX_ATTRIBUTE_COUNT);
 			std::memcpy(vertexAttributes.data(), attributes, attributeCount * sizeof(VertexAttribute));
 		}
 
-		uint32_t GetAttributeCOunt() const { return (uint32_t)vertexAttributes.size(); }
+		uint32_t GetAttributeCount() const { return attributeCount; }
 		VertexAttribute GetAttribute(uint32_t index) const { return vertexAttributes[index]; }
+	};
+
+	struct VertexLayoutHash {
+		size_t operator()(const MeshInfo::VertexLayout& l) const {
+			return std::hash<std::string_view>{}({
+				reinterpret_cast<const char*>(&l),
+				sizeof(l)
+				});
+		}
 	};
 
 	class CPUMesh
@@ -82,7 +97,7 @@ namespace wtv
 			uint64_t writeOffset = 0;
 			for (int i = 0; i < m_vertexCount; i++)
 			{
-				for (int attrIndex = 0; attrIndex < m_info.GetAttributeCOunt(); attrIndex++)
+				for (int attrIndex = 0; attrIndex < m_info.GetAttributeCount(); attrIndex++)
 				{
 					const auto& attribute = m_info.GetAttribute(attrIndex);
 					int attrSize = GetAttributeSize(attribute.type);

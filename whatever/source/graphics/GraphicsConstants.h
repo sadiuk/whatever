@@ -65,6 +65,7 @@ namespace wtv
 
     enum VertexAttributeSemantic
     {
+		Undefined,
         Position,
 		Normal,
 		Tangent,
@@ -74,8 +75,7 @@ namespace wtv
 		TexCoord2,
 		TexCoord3,
 		TexCoord4,
-        Count,
-		Undefined
+        Count
 
     };
 
@@ -471,6 +471,20 @@ namespace wtv
         case VertexAttributeType::float4:
             return (uint32_t)sizeof(int) * 4;
 
+        default:
+            assert(false);
+            return 0;
+        }
+    }
+
+    inline uint32_t GetIndexSize(IndexType type)
+    {
+        switch (type)
+        {
+        case IndexType::UInt16:
+            return 2;
+        case IndexType::UInt32:
+            return 4;
         default:
             assert(false);
             return 0;

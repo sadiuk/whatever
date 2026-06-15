@@ -4,6 +4,8 @@
 #include "VulkanAppServiceProvider.h"
 #include "graphics/Vulkan/VulkanDescriptorPool.h"
 #include <scene/Camera.h>
+#include "graphics/GPUMesh.h"
+#include <set>
 #include "CameraControler.h"
 
 #include "imgui.h"
@@ -111,8 +113,8 @@ void App::Init()
 	imguiFBLayout.colorBuffers.emplace_back();
 	imguiFBLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
 
+	m_cpuToGpuConverter = MakeRef<CPUtoGPUConverter>(m_services.get(), m_device.get());
 	
-	//imguiFBLayout.colorBuffers[0].loadOp = AttachmentLoadOp::Load;
 	RenderPassParams imguiRPParams(imguiFBLayout);
 	imguiRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::PresentSrcKhr);
 	m_imguiRenderPass = m_device->CreateRenderPass(imguiRPParams);
@@ -151,131 +153,74 @@ void App::Run()
 	RefPtr<IGraphicsPipelineLayout> pipelineLayout = m_device->CreateGraphicsPipelineLayout(layoutCreateInfo);
 
 	auto graphicsQueue = m_device->GetGraphicsQueue();
-	IGraphicsPipeline::CreateInfo pipelineInfo{};
+
+
 
 	GLTFModelLoader loader;
-	auto meshes = loader.LoadModel("D:/dev/pet/whatever/whatever/media/Sponza/glTF/Sponza.gltf");
+	auto cpuMeshes = loader.LoadModel("D:/dev/pet/whatever/whatever/media/Sponza/glTF/Sponza.gltf");
 	
-	std::vector<RefPtr<IGPUBuffer>> vertexBuffers;
-	std::vector<RefPtr<IGPUBuffer>> indexBuffers;
+	auto gpuMeshes = m_cpuToGpuConverter->ConvertToGPU(cpuMeshes);
 
-	std::vector<uint64_t> meshVertexOffsets;
-	std::vector<uint64_t> meshIndexOffsets;
-	meshVertexOffsets.reserve(meshes.size());
-	meshIndexOffsets.reserve(meshes.size());
-	uint64_t nextVertexOffset = 0;
-	uint64_t nextIndexOffset = 0;
-	for (int meshIdx = 0; meshIdx < meshes.size(); meshIdx++)
-	{
-		meshVertexOffsets.push_back(nextVertexOffset);
-		meshIndexOffsets.push_back(nextIndexOffset);
-		nextVertexOffset = meshVertexOffsets.back() + meshes[meshIdx].GetVertexBuffer().size();
-		nextIndexOffset = meshIndexOffsets.back() + meshes[meshIdx].GetIndexBuffer().size();
+	std::vector<std::vector<VertexAttributeType>> vertexAttributes(gpuMeshes.size());
+	int attrSetIndex = 0;
+	for(auto& meshSet : gpuMeshes)
+	{ 
+		for (auto& attr : meshSet.first)
+		{
+			if(attr.semantic != VertexAttributeSemantic::Undefined)
+				vertexAttributes[attrSetIndex].push_back(attr.type);
+		}
+		attrSetIndex++;
 	}
 
-	IBuffer::CreationParams vertexStagingBufferParams{};
-	vertexStagingBufferParams.bufferSize = nextVertexOffset + meshes.back().GetVertexBuffer().size();
-	vertexStagingBufferParams.alignment = 0;
-	vertexStagingBufferParams.memoryFlags = MemoryPropertyFlags::HostVisible | MemoryPropertyFlags::HostCoherent;
-	vertexStagingBufferParams.usageFlags = BufferUsage::CPU;
-	RefPtr<IGPUBuffer> vertexStagingBuffer = m_device->CreateBuffer(vertexStagingBufferParams, "VertexStagingBuffer");
 	
-	IBuffer::CreationParams indexStagingBufferParams{};
-	indexStagingBufferParams.bufferSize = nextIndexOffset + meshes.back().GetIndexBuffer().size();
-	indexStagingBufferParams.alignment = 0;
-	indexStagingBufferParams.memoryFlags = MemoryPropertyFlags::HostVisible | MemoryPropertyFlags::HostCoherent;
-	indexStagingBufferParams.usageFlags = BufferUsage::CPU;
-	RefPtr<IGPUBuffer> indexStagingBuffer = m_device->CreateBuffer(indexStagingBufferParams, "IndexStagingBuffer");
-
-	void* mappedVertexSB = vertexStagingBuffer->Map();
-	void* mappedIndexSB = indexStagingBuffer->Map();
-
-	for (int meshIndex = 0; meshIndex < meshes.size(); meshIndex++)
-	{
-		memcpy((char*)mappedVertexSB + meshVertexOffsets[meshIndex], meshes[meshIndex].GetVertexBuffer().data(), meshes[meshIndex].GetVertexBuffer().size());
-		memcpy((char*)mappedIndexSB + meshIndexOffsets[meshIndex], meshes[meshIndex].GetIndexBuffer().data(), meshes[meshIndex].GetIndexBuffer().size());
-	}
-
-	vertexStagingBuffer->Unmap();
-	indexStagingBuffer->Unmap();
-
-	auto vbUpdateCB = m_device->CreateCommandBuffer();
-	vbUpdateCB->Begin();
-
-	for (int meshIndex = 0; meshIndex < meshes.size(); meshIndex++)
-	{
-		auto& mesh = meshes[meshIndex];
-
-		auto vertexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
-		.bufferSize = mesh.GetVertexBuffer().size(),
-		.usageFlags = BufferUsage::VertexBuffer }, "MeshVB" + std::to_string(meshIndex));
-
-		auto indexBuffer = m_device->CreateBuffer(IGPUBuffer::CreationParams{
-		.bufferSize = mesh.GetIndexBuffer().size(),
-		.usageFlags = BufferUsage::IndexBuffer }, "MeshIB" + std::to_string(meshIndex));
-
-		
-		vbUpdateCB->CopyBuffer(vertexStagingBuffer.get(), meshVertexOffsets[meshIndex], vertexBuffer.get(), 0, mesh.GetVertexBuffer().size());
-		vbUpdateCB->CopyBuffer(indexStagingBuffer.get(), meshIndexOffsets[meshIndex], indexBuffer.get(), 0, mesh.GetIndexBuffer().size());
-
-
-		vertexBuffers.emplace_back(vertexBuffer);
-		indexBuffers.emplace_back(indexBuffer);
-
-	}
-	vbUpdateCB->End();
-
-	{
-		QueueSubmitInfo submitInfo(vbUpdateCB.get(), m_device.get());
-		graphicsQueue->Submit(submitInfo);
-	}
-
 	RefPtr<IDescriptorSet> ds = m_descPool->AllocateDescriptorSet(dsLayout.get());
-
-	pipelineInfo.blendStateInfo.attachmentBlendStates.resize(1);
-	pipelineInfo.blendStateInfo.attachmentBlendStates[0].blendEnable = true;
-	pipelineInfo.blendStateInfo.attachmentBlendStates[0].srcColorBlendFactor = BlendFactor::SrcAlpha;
-	pipelineInfo.blendStateInfo.attachmentBlendStates[0].dstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
-
-	pipelineInfo.depthStencilInfo.depthTestEnable = true;
-	pipelineInfo.depthStencilInfo.depthTestPassResult = CompareOperation::Greater;
-	pipelineInfo.depthStencilInfo.depthWriteEnable = true;
-	pipelineInfo.depthStencilInfo.stencilTestEnabled = false;
-
-	pipelineInfo.rasterInfo.frontFace = FrontFace::CounterClockwise;
-	pipelineInfo.rasterInfo.cullMode = CullMode::None;
-	pipelineInfo.rasterInfo.polygonMode = PolygonMode::Fill;
-
-	std::vector<VertexAttributeType> vertexAttributes(meshes[0].GetMeshInfo().GetAttributeCOunt());
-	for (int i = 0; i < meshes[0].GetMeshInfo().GetAttributeCOunt(); i++)
-	{
-		vertexAttributes[i] = meshes[0].GetMeshInfo().GetAttribute(i).type;
-	}
-	pipelineInfo.vertexBufferLayout = vertexAttributes;
-	
-
-	pipelineInfo.stagesDescription.resize(2);
-	pipelineInfo.stagesDescription[0].stage = ShaderStage::Vertex;
-	pipelineInfo.stagesDescription[0].path = "D:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
-	pipelineInfo.stagesDescription[0].entryPoint = "VS";
-	pipelineInfo.stagesDescription[1].stage = ShaderStage::Fragment;
-	pipelineInfo.stagesDescription[1].path = "D:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
-	pipelineInfo.stagesDescription[1].entryPoint = "PS";
-
-	pipelineInfo.framebufferLayout = m_framebufferInfo.layout;
-	
-	pipelineInfo.vertexTopology = PrimitiveTopology::TriangleList;
 
 	ViewportInfo viewport;
 	viewport.x = 0;
 	viewport.y = 0;
 	viewport.width = m_windowSize.x;
 	viewport.height = m_windowSize.y;
-	pipelineInfo.viewportInfo = viewport;
+	std::vector<RefPtr<IGraphicsPipeline>> graphPipelines(gpuMeshes.size());
+	for (int i = 0; i < vertexAttributes.size(); i++)
+	{
+		IGraphicsPipeline::CreateInfo pipelineInfo{};
+		pipelineInfo.blendStateInfo.attachmentBlendStates.resize(1);
+		pipelineInfo.blendStateInfo.attachmentBlendStates[0].blendEnable = true;
+		pipelineInfo.blendStateInfo.attachmentBlendStates[0].srcColorBlendFactor = BlendFactor::SrcAlpha;
+		pipelineInfo.blendStateInfo.attachmentBlendStates[0].dstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
 
-	auto graphPipeline = m_device->CreateGraphicsPipeline(pipelineInfo, pipelineLayout);
+		pipelineInfo.depthStencilInfo.depthTestEnable = true;
+		pipelineInfo.depthStencilInfo.depthTestPassResult = CompareOperation::Greater;
+		pipelineInfo.depthStencilInfo.depthWriteEnable = true;
+		pipelineInfo.depthStencilInfo.stencilTestEnabled = false;
+
+		pipelineInfo.rasterInfo.frontFace = FrontFace::CounterClockwise;
+		pipelineInfo.rasterInfo.cullMode = CullMode::None;
+		pipelineInfo.rasterInfo.polygonMode = PolygonMode::Fill;
 
 
+		pipelineInfo.vertexBufferLayout = vertexAttributes[i];
+
+
+		pipelineInfo.stagesDescription.resize(2);
+		pipelineInfo.stagesDescription[0].stage = ShaderStage::Vertex;
+		pipelineInfo.stagesDescription[0].path = "D:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
+		pipelineInfo.stagesDescription[0].entryPoint = "VS";
+		pipelineInfo.stagesDescription[1].stage = ShaderStage::Fragment;
+		pipelineInfo.stagesDescription[1].path = "D:\\dev\\pet\\whatever\\whatever\\source\\shaders\\testgraphics.hlsl";
+		pipelineInfo.stagesDescription[1].entryPoint = "PS";
+
+		pipelineInfo.framebufferLayout = m_framebufferInfo.layout;
+
+		pipelineInfo.vertexTopology = PrimitiveTopology::TriangleList;
+
+		pipelineInfo.viewportInfo = viewport;
+
+
+		graphPipelines[i] = m_device->CreateGraphicsPipeline(pipelineInfo, pipelineLayout);
+
+	}
 
 
 	auto vp = m_camera->GetViewMatrix() * glm::vec4(-1, 0, 0.5, 0);
@@ -320,18 +265,25 @@ void App::Run()
 		commandBuffer->UpdateBuffer(cameraUB.get(), 0, sizeof(ubData), &ubData);
 		commandBuffer->BeginRenderPass(mainRP.get(), framebuffer.get());
 		commandBuffer->SetViewport(viewport);
-		commandBuffer->BindPipeline(graphPipeline.get());
-		commandBuffer->BindDescriptorSet(0, ds.get());
-
-		for (int i = 0; i < vertexBuffers.size(); i++)
+		
+		int pipelineIndex = 0;
+		for (auto& meshSet : gpuMeshes)
 		{
-			IGPUBuffer* vertexBuffer = vertexBuffers[i].get();
-			commandBuffer->BindVertexBuffers(&vertexBuffer, 1, &vbOffset);
-			IGPUBuffer* indexBuffer = indexBuffers[i].get();
-			commandBuffer->BindIndexBuffer(indexBuffer, 0, meshes[i].GetMeshInfo().indexType);
+			commandBuffer->BindPipeline(graphPipelines[pipelineIndex].get());
+			commandBuffer->BindDescriptorSet(0, ds.get());
 
-			commandBuffer->DrawIndexed(0, 0, meshes[i].GetIndexBuffer().size() / sizeof(uint32_t), 1, 0);
+			for (auto& mesh : meshSet.second)
+			{
+				IGPUBuffer* vertexBuffer = mesh.GetVertexBuffer();
+				commandBuffer->BindVertexBuffers(&vertexBuffer, 1, &vbOffset);
+				IGPUBuffer* indexBuffer = mesh.GetIndexBuffer();
+				commandBuffer->BindIndexBuffer(indexBuffer, 0, mesh.GetMeshInfo().indexType);
+				uint32_t indexCount = mesh.GetIndexBuffer()->GetSize() / GetIndexSize(mesh.GetMeshInfo().indexType);
+				commandBuffer->DrawIndexed(0, 0, indexCount, 1, 0);
+			}
+			pipelineIndex++;
 		}
+
 		commandBuffer->EndRenderPass();
 
 		ImGui_ImplVulkan_NewFrame();

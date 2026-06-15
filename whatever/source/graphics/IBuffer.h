@@ -39,6 +39,7 @@ namespace wtv
 		IBuffer(const CreationParams& params, const std::string& name) : m_params(params), m_name(name) {}
 		virtual ~IBuffer() = default;
 		const CreationParams& GetProperties() const { return m_params; };
+		uint64_t GetSize() const { return m_params.bufferSize; }
 	private:
 		CreationParams m_params;
 		std::string m_name;

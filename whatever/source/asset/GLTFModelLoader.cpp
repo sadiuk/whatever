@@ -10,7 +10,7 @@ namespace wtv
 	VertexAttributeSemantic GetVertexAttribSemanticFromTinyGLTF(const std::string semantic);
 	IndexType GetIndexTypeFromTinyGLTF(int componentType);
 
-	std::vector<CPUMesh> GLTFModelLoader::LoadModel(const char* filePath)
+	std::unordered_map<MeshInfo::VertexLayout, std::vector<CPUMesh>, VertexLayoutHash> GLTFModelLoader::LoadModel(const char* filePath)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -20,8 +20,7 @@ namespace wtv
 
 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filePath);
 
-		std::vector<CPUMesh> meshes;
-		meshes.reserve(model.meshes.size());
+		std::unordered_map<MeshInfo::VertexLayout, std::vector<CPUMesh>, VertexLayoutHash> meshes;
 
 		for (int i = 0; i < model.meshes.size(); i++)
 		{
@@ -29,7 +28,7 @@ namespace wtv
 			for (auto& prim : gltfMesh.primitives)
 			{
 				IndexType indexType = GetIndexTypeFromTinyGLTF(model.accessors[prim.indices].componentType);
-				std::vector<VertexAttribute> vertexAttribs(prim.attributes.size());
+				MeshInfo::VertexLayout vertexAttribs{};
 				int attribIndex = 0;
 				for (auto& attrib : prim.attributes)
 				{
@@ -41,8 +40,8 @@ namespace wtv
 				}
 				
 				auto& indicesAccessor = model.accessors[prim.indices];
-				MeshInfo meshInfo(vertexAttribs.data(), vertexAttribs.size(), indexType);
-				meshes.emplace_back(meshInfo);
+				MeshInfo meshInfo(vertexAttribs.data(), prim.attributes.size(), indexType);
+				CPUMesh mesh(meshInfo);
 
 				// Upload indices
 
@@ -51,14 +50,14 @@ namespace wtv
 				uint32_t indexSize = tinygltf::GetComponentSizeInBytes(indicesAccessor.componentType);
 				uint32_t dataSize = indicesAccessor.count * indexSize;
 
-				meshes.back().SetIndices(
+				mesh.SetIndices(
 					indexBuffer.data.data() + indexBufferView.byteOffset + indicesAccessor.byteOffset,
 					dataSize
 				);
 				
 
 				uint32_t vertexCount = model.accessors[prim.attributes.at("POSITION")].count;
-				meshes.back().SetVertexCount(vertexCount);
+				mesh.SetVertexCount(vertexCount);
 				// Upload all vertex attribute streams
 				for (auto& attrib : prim.attributes)
 				{
@@ -70,12 +69,14 @@ namespace wtv
 
 					VertexAttributeSemantic semantic = GetVertexAttribSemanticFromTinyGLTF(attrib.first);
 
-					if (semantic != VertexAttributeSemantic::Position)
+					if (semantic != VertexAttributeSemantic::Position &&
+						semantic != VertexAttributeSemantic::Tangent &&
+						semantic != VertexAttributeSemantic::Normal)
 					{
-						meshes.back().SetVerticesAttribute(
+						mesh.SetVerticesAttribute(
 							semantic,
-							buffer.data.data() + bufferView.byteOffset,
-							bufferView.byteLength,
+							buffer.data.data() + bufferView.byteOffset + accessor.byteOffset,
+							accessor.count * elementSize,
 							bufferView.byteStride,
 							elementSize,
 							vertexCount
@@ -97,12 +98,13 @@ namespace wtv
 								double* pos = static_cast<double*>(vertexData);
 								//std::swap(pos[0], pos[1]);
 								std::swap(pos[1], pos[2]);
+								pos[1] *= -1;
 							}
 						};
-						meshes.back().SetVerticesAttribute(
+						mesh.SetVerticesAttribute(
 							semantic,
-							buffer.data.data() + bufferView.byteOffset,
-							bufferView.byteLength,
+							buffer.data.data() + bufferView.byteOffset + accessor.byteOffset,
+							accessor.count * elementSize,
 							bufferView.byteStride,
 							elementSize,
 							vertexCount,
@@ -110,7 +112,9 @@ namespace wtv
 						);
 					}
 				}
-				meshes.back().FormVertexBuffer();
+				mesh.FormVertexBuffer();
+
+				meshes[vertexAttribs].push_back(mesh);
 			}
 		}
 			

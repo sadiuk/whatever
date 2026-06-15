@@ -4,6 +4,7 @@
 #include "IServiceProvider.h"
 #include "util/RefPtr.h"
 #include "graphics/IFramebuffer.h"
+#include "graphics/CPUtoGPUConverter.h"
 #include "scene/Camera.h"
 #include "Input.h"
 #include "CameraControler.h"
@@ -28,6 +29,7 @@ private:
 	RefPtr<Input> m_input;
 	RefPtr<CameraController> m_cameraController;
 	RefPtr<IGPUImage> m_depthBuffer;
+	RefPtr<CPUtoGPUConverter> m_cpuToGpuConverter;
 	glm::uvec2 m_windowSize;
 	glm::uvec2 m_windowPos;
 	RefPtr<Camera> m_camera;
