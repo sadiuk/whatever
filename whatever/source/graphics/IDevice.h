@@ -40,6 +40,7 @@ namespace wtv
 		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
 		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
 		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params, const std::string& name) = 0;
+		virtual RefPtr<IGPUImage> CreateImage(const IImage::CreationParams& params, MemoryPropertyFlags memoryFlags, const std::string& name) = 0;
 		virtual RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) = 0;
 		virtual RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) = 0;
 		virtual RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) = 0;

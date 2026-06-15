@@ -74,6 +74,7 @@ namespace wtv
 		RefPtr<IGPUImage> GetBackbuffer() override;
 		RefPtr<IFence> CreateFence(bool createSignaled) override;
 		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params, const std::string& name) override;
+		RefPtr<IGPUImage> CreateImage(const IImage::CreationParams& params, MemoryPropertyFlags memoryFlags, const std::string& name) override;
 		ImageFormat GetSwapchainFormat() override;
 		RefPtr<IFramebuffer> CreateFramebuffer(IFramebuffer::Properties&& params) override;
 		RefPtr<IGPURenderPass> CreateRenderPass(const RenderPassParams& params) override;
@@ -97,9 +98,12 @@ namespace wtv
 		const VkPhysicalDeviceMemoryProperties2& GetMemoryProperties() { return m_memoryProperties; }
 		int GetMemoryTypeIndex(VkMemoryPropertyFlags memoryPropFlags);
 		VulkanSemaphore& GetTimelineSemaphore() { return *(m_gpuTimelineSemaphore.get()); }
-		void EnqueueForDeletion(VkBuffer buffer, uint64_t semaphoreWaitValue) { m_buffersToDelete.emplace_back(buffer, semaphoreWaitValue); }
 		void FlushDeletions();
 		const VulkanDebugNamer& GetDebugNamer() { return m_debugNamer; }
+	public:
+		void EnqueueForDeletion(VkBuffer buffer, uint64_t semaphoreWaitValue) { m_buffersToDelete.emplace_back(buffer, semaphoreWaitValue); }
+		void EnqueueForDeletion(VkImageView view, uint64_t semaphoreWaitValue) { m_imageViewsToDelete.emplace_back(view, semaphoreWaitValue); }
+		void EnqueueForDeletion(VkImage image, uint64_t semaphoreWaitValue) { m_imagesToDelete.emplace_back(image, semaphoreWaitValue); }
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;
@@ -119,6 +123,8 @@ namespace wtv
 		std::unordered_map<IFramebuffer::Layout, RefPtr<VulkanRenderPass>> m_dummyRPs;
 		std::shared_mutex m_dummyRPsMutex;
 		std::list<std::pair<VkBuffer, uint64_t>> m_buffersToDelete;
+		std::list<std::pair<VkImageView, uint64_t>> m_imageViewsToDelete;
+		std::list<std::pair<VkImage, uint64_t>> m_imagesToDelete;
 
 		VulkanDebugNamer m_debugNamer;
 	};

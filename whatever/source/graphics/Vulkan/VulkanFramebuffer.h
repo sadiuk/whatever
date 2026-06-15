@@ -1,11 +1,11 @@
 #pragma once
 #include "graphics/IFramebuffer.h"
 #include "IServiceProvider.h"
-#include "VulkanDevice.h"
 
 #include "vulkan/vulkan.h"
 namespace wtv
 {
+	class VulkanDevice;
 	class VulkanFramebuffer : public IFramebuffer, public IServiceProviderHolder
 	{
 	public:

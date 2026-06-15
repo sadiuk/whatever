@@ -323,6 +323,8 @@ namespace wtv
         DepthStencilAttachment = ColorAttachment << 1,
         SubpassInput = DepthStencilAttachment << 1
     };
+    DEFINE_ENUM_FLAG_OPERATORS(ImageUsage);
+
 
     enum class BufferUsage : uint32_t
     {
@@ -427,6 +429,25 @@ namespace wtv
         VideoEncodeQuantizationMapKhr,
         ZeroInitializedExt
     };
+
+    enum class ImageAspectFlags : uint32_t
+    {
+        Undefined = 0,
+        ColorBit = 0x00000001,
+        DepthBit = 0x00000002,
+        StencilBit = 0x00000004,
+        MetadataBit = 0x00000008,
+        Plane0Bit = 0x00000010,
+        Plane1Bit = 0x00000020,
+        Plane2Bit = 0x00000040,
+        MemoryPlane0BitExt = 0x00000080,
+        MemoryPlane1BitExt = 0x00000100,
+        MemoryPlane2BitExt = 0x00000200,
+        MemoryPlane3BitExt = 0x00000400,
+
+        DepthStencilBit = 0x00000006,
+    };
+    DEFINE_ENUM_FLAG_OPERATORS(ImageAspectFlags);
 
     inline uint32_t GetAttributeSize(VertexAttributeType attributeType) {
         switch (attributeType) {

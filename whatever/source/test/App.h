@@ -27,12 +27,14 @@ private:
 	RefPtr<IDescriptorPool> m_descPool;
 	RefPtr<Input> m_input;
 	RefPtr<CameraController> m_cameraController;
+	RefPtr<IGPUImage> m_depthBuffer;
 	glm::uvec2 m_windowSize;
 	glm::uvec2 m_windowPos;
 	RefPtr<Camera> m_camera;
 
 	RefPtr<IGPURenderPass> m_imguiRenderPass;
 	IFramebuffer::Properties m_framebufferInfo{};
+	IFramebuffer::Properties m_imguiFramebufferInfo{};
 
 		
 };

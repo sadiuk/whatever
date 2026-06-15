@@ -13,11 +13,14 @@ namespace wtv
 		VmaAllocator m_allocator;
 		IServiceProvider* m_services;
 
-		std::unordered_map<VkBuffer, VmaAllocation> m_allocationsMap;
+		std::unordered_map<VkBuffer, VmaAllocation> m_bufferAllocationsMap;
+		std::unordered_map<VkImage, VmaAllocation> m_imageAllocationsMap;
 	public:
 		VMAAllocator(VulkanDevice* device, IServiceProvider* services);
 		VkBuffer AllocateBuffer(const IGPUBuffer::CreationParams& createInfo) override;
+		VkImage AllocateImage(const IImage::CreationParams& createInfo, MemoryPropertyFlags memoryFlags) override;
 		void DeallocateBuffer(VkBuffer buffer) override;
+		void DeallocateImage(VkImage Image) override;
 		IServiceProvider* GetServiceProvider() const override { return m_services; }
 
 		void* Map(VkBuffer buffer) override;

@@ -3,6 +3,7 @@
 #include "VulkanConstantTranslator.h"
 #include "VulkanDevice.h"
 #include "VkMakros.h"
+#include "VulkanGPUImage.h"
 
 #include "vulkan/vulkan.h"
 
@@ -109,7 +110,7 @@ namespace wtv
 		m_images.resize(imageCount);
 		for (int i = 0; i < m_images.size(); ++i)
 		{
-			m_images[i] = MakeRef<VulkanGPUImage>(m_engine, params, rawSwapchainImages[i]);
+			m_images[i] = MakeRef<VulkanGPUImage>(m_engine, params, "Swapchain Image" + std::to_string(i), rawSwapchainImages[i]);
 		}
 	}
 	void VulkanSwapchain::GetNextImage()

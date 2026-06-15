@@ -13,13 +13,25 @@ namespace wtv
 
 	void VulkanDebugNamer::SetBufferName(VkBuffer buffer, const char* name) const
 	{
-		VkDebugUtilsObjectNameInfoEXT nameInfo{};
-		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-		nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
-		nameInfo.objectHandle = (uint64_t)buffer;
-		nameInfo.pObjectName = name;
-
 		if (vkSetDebugUtilsObjectNameEXT != nullptr) {
+			VkDebugUtilsObjectNameInfoEXT nameInfo{};
+			nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+			nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
+			nameInfo.objectHandle = (uint64_t)buffer;
+			nameInfo.pObjectName = name;
+
+			vkSetDebugUtilsObjectNameEXT(m_device->GetDevice(), &nameInfo);
+		}
+	}
+	void VulkanDebugNamer::SetImageName(VkImage image, const char* name) const
+	{
+		if (vkSetDebugUtilsObjectNameEXT != nullptr) {
+			VkDebugUtilsObjectNameInfoEXT nameInfo{};
+			nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+			nameInfo.objectType = VK_OBJECT_TYPE_IMAGE;
+			nameInfo.objectHandle = (uint64_t)image;
+			nameInfo.pObjectName = name;
+
 			vkSetDebugUtilsObjectNameEXT(m_device->GetDevice(), &nameInfo);
 		}
 	}

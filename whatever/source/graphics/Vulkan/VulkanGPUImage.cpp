@@ -5,47 +5,19 @@
 #include "graphics/FormatUtils.h"
 namespace wtv
 {
-	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params) :
+	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, MemoryPropertyFlags flags, const std::string& name, IVulkanAllocator* allocator) :
 		IGPUImage(params),
-		m_engine(engine)	
+		m_device(engine),
+		m_allocator(allocator)
 	{
-		VkImageCreateInfo imageInfo{};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.pNext = nullptr;
-		imageInfo.imageType = VulkanConstantTranslator::GetVkImageType(params.dimension);
-		imageInfo.format = VulkanConstantTranslator::GetVkFormat(params.format);
-		imageInfo.extent.width = params.width;
-		imageInfo.extent.height = params.height;
-		imageInfo.extent.depth = params.depth;
-		imageInfo.mipLevels = params.mipLevels;
-		imageInfo.arrayLayers = params.arraySize;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageInfo.usage = VulkanConstantTranslator::GetVkImageUsageMask(params.usageFlags);
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.queueFamilyIndexCount = 0;
-		imageInfo.pQueueFamilyIndices = nullptr;
-		imageInfo.initialLayout = VK_IMAGE_LAYOUT_GENERAL;
+		m_image = m_allocator->AllocateImage(params, flags);
+		m_device->GetDebugNamer().SetImageName(m_image, name.c_str());
 
-		ASSERT_VK_SUCCESS(vkCreateImage(m_engine->GetDevice(), &imageInfo, nullptr, &m_image));
-
-		VkMemoryRequirements memRequirements{};
-		vkGetImageMemoryRequirements(m_engine->GetDevice(), m_image, &memRequirements);
-
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.pNext = nullptr;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = m_engine->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		ASSERT_VK_SUCCESS(vkAllocateMemory(m_engine->GetDevice(), &allocInfo, nullptr, &m_memory));
-
-		ASSERT_VK_SUCCESS(vkBindImageMemory(m_engine->GetDevice(), m_image, m_memory, 0));
 	}
 
-	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, VkImage rawHandle) :
+	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, const std::string& name, VkImage rawHandle) :
 		IGPUImage(params),
-		m_engine(engine),
+		m_device(engine),
 		m_image(rawHandle)
 	{
 	}
@@ -54,9 +26,12 @@ namespace wtv
 	{
 		for (auto view : m_cachedViews)
 		{
-			vkDestroyImageView(m_engine->GetDevice(), view.second, nullptr);
+			m_device->EnqueueForDeletion(view.second, GetSemaphoreWaitValue());
 		}
-		vkDestroyImage(m_engine->GetDevice(), m_image, nullptr);
+		if (m_allocator)
+		{
+			vkDestroyImage(m_device->GetDevice(), m_image, nullptr);
+		}
 	}
 
 	VkImageView VulkanGPUImage::GetImageView(const IImage::View& view)
@@ -88,9 +63,10 @@ namespace wtv
 		viewInfo.subresourceRange.baseMipLevel = view.baseMip;
 		viewInfo.subresourceRange.layerCount = view.arrayLayerCount;
 		viewInfo.subresourceRange.levelCount = view.mipCount;
-		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_engine->GetDevice(), &viewInfo, nullptr, &newImageView));
+		viewInfo.subresourceRange.aspectMask = VulkanConstantTranslator::GetVkImageAspectFlagBits(view.aspectFlags);
+		if (viewInfo.format == VK_FORMAT_D32_SFLOAT)
+			int a = 0;
+		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_device->GetDevice(), &viewInfo, nullptr, &newImageView));
 
 		m_cachedViews.push_back({ view, newImageView });
 
@@ -99,6 +75,6 @@ namespace wtv
 
 	IServiceProvider* VulkanGPUImage::GetServiceProvider() const
 	{
-		return m_engine->GetServiceProvider();
+		return m_device->GetServiceProvider();
 	}
 }

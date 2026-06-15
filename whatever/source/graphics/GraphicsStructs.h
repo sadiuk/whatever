@@ -59,7 +59,7 @@ namespace wtv
 	{
 		bool depthTestEnable = true;
 		bool depthWriteEnable = true;
-		CompareOperation depthTestPassResult;
+		CompareOperation depthTestPassResult = CompareOperation::Always;
 		bool stencilTestEnabled = false;
 		StencilOperation backStencilOp;
 		StencilOperation frontStencilOp;

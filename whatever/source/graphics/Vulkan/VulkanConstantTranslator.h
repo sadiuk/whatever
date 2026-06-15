@@ -27,6 +27,7 @@ namespace wtv
 		static VkDescriptorType GetVkDescriptorType(DescriptorType type);
 		static VkImageLayout GetVkImageLayout(ImageLayout layout);
 		static VkIndexType GetVkIndexType(IndexType indexType);
+		static VkImageAspectFlags GetVkImageAspectFlagBits(ImageAspectFlags aspectFlags);
 		static VkMemoryPropertyFlagBits GetVkMemoryPropertyFlagBits(MemoryPropertyFlags memoryPropertyFlags);
 	};
 

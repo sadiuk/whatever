@@ -1,11 +1,11 @@
 #pragma once
 #include "graphics/ISwapchain.h"
 #include "IVulkanSurface.h"
-#include "VulkanGPUImage.h"
 
 namespace wtv
 {
 	class VulkanDevice;
+	class VulkanGPUImage;
 	class VulkanSwapchain : public ISwapchain, public IServiceProviderHolder
 	{
 	public:

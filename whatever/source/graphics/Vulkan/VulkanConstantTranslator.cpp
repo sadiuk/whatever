@@ -950,6 +950,25 @@ namespace wtv
         }
     }
 
+    VkImageAspectFlags VulkanConstantTranslator::GetVkImageAspectFlagBits(ImageAspectFlags aspectFlags)
+    {
+        VkImageAspectFlags result = 0;
+
+        if ((aspectFlags & ImageAspectFlags::ColorBit) == ImageAspectFlags::ColorBit)           result |= VK_IMAGE_ASPECT_COLOR_BIT;
+        if ((aspectFlags & ImageAspectFlags::DepthBit) == ImageAspectFlags::DepthBit)           result |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if ((aspectFlags & ImageAspectFlags::StencilBit) == ImageAspectFlags::StencilBit)         result |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        if ((aspectFlags & ImageAspectFlags::MetadataBit) == ImageAspectFlags::MetadataBit)        result |= VK_IMAGE_ASPECT_METADATA_BIT;
+        if ((aspectFlags & ImageAspectFlags::Plane0Bit) == ImageAspectFlags::Plane0Bit)          result |= VK_IMAGE_ASPECT_PLANE_0_BIT;
+        if ((aspectFlags & ImageAspectFlags::Plane1Bit) == ImageAspectFlags::Plane1Bit)          result |= VK_IMAGE_ASPECT_PLANE_1_BIT;
+        if ((aspectFlags & ImageAspectFlags::Plane2Bit) == ImageAspectFlags::Plane2Bit)         result |= VK_IMAGE_ASPECT_PLANE_2_BIT;
+        if ((aspectFlags & ImageAspectFlags::MemoryPlane0BitExt) == ImageAspectFlags::MemoryPlane0BitExt) result |= VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT;
+        if ((aspectFlags & ImageAspectFlags::MemoryPlane1BitExt) == ImageAspectFlags::MemoryPlane1BitExt) result |= VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT;
+        if ((aspectFlags & ImageAspectFlags::MemoryPlane2BitExt) == ImageAspectFlags::MemoryPlane2BitExt) result |= VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT;
+        if ((aspectFlags & ImageAspectFlags::MemoryPlane3BitExt) == ImageAspectFlags::MemoryPlane3BitExt) result |= VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT;
+
+        return result;
+    }
+
     VkMemoryPropertyFlagBits VulkanConstantTranslator::GetVkMemoryPropertyFlagBits(MemoryPropertyFlags memoryPropertyFlags)
     {
         switch (memoryPropertyFlags)

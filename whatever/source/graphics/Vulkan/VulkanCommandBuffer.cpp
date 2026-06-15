@@ -66,7 +66,7 @@ void wtv::VulkanCommandBuffer::BeginRenderPass(IGPURenderPass* rp, IFramebuffer*
 		else
 			clearValues.push_back(VkClearValue(VkClearColorValue{ 0.0f, 0.0f, 0.0f, 0.0f }));
 	}
-	if (rpParams.depthAttachment.has_value())
+	if (rpParams.depthAttachment.has_value() && rpParams.depthAttachment->clearColor.has_value())
 	{
 		const auto& entry = rpParams.depthAttachment.value();
 		glm::vec4 value = entry.clearColor.value();

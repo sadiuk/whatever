@@ -35,21 +35,29 @@ namespace wtv
 				depthAttachment->format = layout.depthBuffer.value();
 			}
 		}
-		void SetColorAttachmentInfo(int colorBufferIndex, AttachmentLoadOp loadOp, AttachmentStoreOp storeOp, ImageLayout layoutBefore, ImageLayout layoutAfter)
+		void SetColorAttachmentInfo(int colorBufferIndex, AttachmentLoadOp loadOp, AttachmentStoreOp storeOp, ImageLayout layoutBefore, ImageLayout layoutAfter, const glm::vec4* clearColor = nullptr)
 		{
 			assert(colorBufferIndex < colorAttachments.size());
 			colorAttachments[colorBufferIndex].loadOp = loadOp;
 			colorAttachments[colorBufferIndex].storeOp = storeOp;
 			colorAttachments[colorBufferIndex].layoutBefore = layoutBefore;
 			colorAttachments[colorBufferIndex].layoutAfter = layoutAfter;
+			if(clearColor)
+				colorAttachments[colorBufferIndex].clearColor = *clearColor;
 		}
-		void SetDepthAttachmentInfo(AttachmentLoadOp loadOp, AttachmentStoreOp storeOp, ImageLayout layoutBefore, ImageLayout layoutAfter)
+		void SetDepthAttachmentInfo(AttachmentLoadOp loadOp, AttachmentStoreOp storeOp, ImageLayout layoutBefore, ImageLayout layoutAfter, float* clearDepth = nullptr, uint8_t* clearStencil = nullptr)
 		{
 			assert(depthAttachment.has_value());
 			depthAttachment->loadOp = loadOp;
 			depthAttachment->storeOp = storeOp;
 			depthAttachment->layoutBefore = layoutBefore;
 			depthAttachment->layoutAfter = layoutAfter;
+			if (clearDepth || clearStencil)
+				depthAttachment->clearColor = glm::vec4{};
+			if(clearDepth)
+				depthAttachment->clearColor->x = *clearDepth;
+			if (clearStencil)
+				depthAttachment->clearColor->y = *clearStencil;
 		}
 		int GetAttachmentCount() const
 		{

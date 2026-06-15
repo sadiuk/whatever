@@ -27,6 +27,7 @@ namespace wtv
 	void WindowSDL2::Update()
 	{
 		SDL_Event e;
+		NotifyNewFrame();
 		while (SDL_PollEvent(&e) > 0)
 		{
 			ImGui_ImplSDL2_ProcessEvent(&e);

@@ -2,6 +2,8 @@
 #include "VulkanGPUImage.h"
 #include "VkMakros.h"
 #include "graphics/FormatUtils.h"
+#include "VulkanDevice.h"
+
 namespace wtv
 {
 	VulkanFramebuffer::VulkanFramebuffer(Properties&& params, VulkanDevice* engine) :

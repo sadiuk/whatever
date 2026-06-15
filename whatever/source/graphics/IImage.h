@@ -14,7 +14,7 @@ namespace wtv
 			ImageFormat format;
 			ImageDimension dimension = ImageDimension::Dimension2D;
 			uint32_t samples = 1;
-			std::underlying_type_t<ImageUsage> usageFlags;
+			ImageUsage usageFlags;
 		};
 		struct Properties
 		{
@@ -38,12 +38,13 @@ namespace wtv
 		};
 		struct View
 		{
-			View(IImage* img) : image(img)
+			View(IImage* img, ImageAspectFlags af) : image(img)
 			{
 				const auto& props = image->GetProperties();
 				width = props.width;
 				height = props.height;
 				depth = props.depth;
+				aspectFlags = af;
 			}
 			IImage* image;
 			uint32_t x = 0;
@@ -56,6 +57,7 @@ namespace wtv
 			uint32_t mipCount = 1;
 			uint32_t baseArrayLayer = 0;
 			uint32_t arrayLayerCount = 1;
+			ImageAspectFlags aspectFlags = ImageAspectFlags::ColorBit;
 			bool operator ==(const View& other) const = default;
 			bool HasSameExtent(const View& other) const
 			{

@@ -327,7 +327,7 @@ namespace wtv
 		for (int i = 0; i < layout.colorBuffers.size(); i++)
 			rpParams.SetColorAttachmentInfo(i, AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::ColorAttachmentOptimal);
 		if(layout.depthBuffer.has_value())
-			rpParams.SetDepthAttachmentInfo(AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::ColorAttachmentOptimal);
+			rpParams.SetDepthAttachmentInfo(AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::DepthStencilAttachmentOptimal, ImageLayout::DepthStencilAttachmentOptimal);
 		auto rp = MakeRef<VulkanRenderPass>(this, rpParams);
 		m_dummyRPs[layout] = rp;
 		return rp.get();
@@ -360,6 +360,32 @@ namespace wtv
 				++buffIt;
 			}
 		}
+
+		for (auto imgViewIt = m_imageViewsToDelete.begin(); imgViewIt != m_imageViewsToDelete.end(); )
+		{
+			if (imgViewIt->second <= completedValue)
+			{
+				vkDestroyImageView(m_device, imgViewIt->first, nullptr);
+				imgViewIt = m_imageViewsToDelete.erase(imgViewIt);
+			}
+			else
+			{
+				++imgViewIt;
+			}
+		}
+
+		for (auto imgIt = m_imagesToDelete.begin(); imgIt != m_imagesToDelete.end(); )
+		{
+			if (imgIt->second <= completedValue)
+			{
+				m_allocator->DeallocateImage(imgIt->first);
+				imgIt = m_imagesToDelete.erase(imgIt);
+			}
+			else
+			{
+				++imgIt;
+			}
+		}
 	}
 
 	RefPtr<IGPUImage> VulkanDevice::GetBackbuffer()
@@ -376,6 +402,12 @@ namespace wtv
 	{
 		auto buffer = MakeRef<VulkanGPUBuffer>(this, params, name, m_allocator.get());
 		return buffer;
+	}
+
+	RefPtr<IGPUImage> VulkanDevice::CreateImage(const IImage::CreationParams& params, MemoryPropertyFlags memoryFlags, const std::string& name)
+	{
+		auto image = MakeRef<VulkanGPUImage>(this, params, memoryFlags, name, m_allocator.get());
+		return image;
 	}
 
 	ImageFormat VulkanDevice::GetSwapchainFormat()

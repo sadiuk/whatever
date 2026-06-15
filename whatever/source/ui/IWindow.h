@@ -13,6 +13,7 @@ namespace wtv
 
 	struct IWindowEventListener : public IReferenceCounted
 	{
+		virtual void OnNewFrame(IWindow* window) {};
 		virtual void OnWindowClose(IWindow* window) {};
 		virtual void OnMouseMove(IWindow* window, const glm::ivec2& newMousePos) {}
 		virtual void OnMouseButtonStateChange(IWindow* window, MouseButton button, MouseButtonState state) {};
@@ -39,6 +40,11 @@ namespace wtv
 		}
 		virtual glm::ivec2 GetMousePosition() = 0;
 	protected:
+		void NotifyNewFrame()
+		{
+			for (auto& listener : m_eventListeners)
+				listener->OnNewFrame(this);
+		}
 		void NotifyWindowClose()
 		{
 			for (auto& listener : m_eventListeners)

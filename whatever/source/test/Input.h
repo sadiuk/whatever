@@ -10,6 +10,10 @@ namespace wtv
 		glm::ivec2 m_mousePos{};
 		glm::ivec2 m_relativeMousePos{ 0, 0 };
 	private:
+		void OnNewFrame(IWindow* window) override
+		{
+			m_relativeMousePos = { 0, 0 };
+		}
 		void OnMouseMove(IWindow* window, const glm::ivec2& newMousePos) override
 		{
 			m_relativeMousePos = newMousePos - m_mousePos;

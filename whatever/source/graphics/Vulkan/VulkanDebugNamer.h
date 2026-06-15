@@ -10,6 +10,7 @@ namespace wtv
 		void Init(VulkanDevice* device);
 		
 		void SetBufferName(VkBuffer buffer, const char* name) const;
+		void SetImageName(VkImage image, const char* name) const;
 	private:
 		VulkanDevice* m_device;
 		PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT{};

@@ -21,18 +21,30 @@ VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const RenderPassParams&
 		attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachmentDescs[i].initialLayout = VulkanConstantTranslator::GetVkImageLayout(params.GetRTInfo(i).layoutBefore);
 		attachmentDescs[i].finalLayout = VulkanConstantTranslator::GetVkImageLayout(params.GetRTInfo(i).layoutAfter);
+		if (attachmentDescs[i].format == VK_FORMAT_D32_SFLOAT)
+			int a = 0;
 		attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
 	}
 
-	std::vector<VkAttachmentReference> attachmentRefs(attachmentDescs.size());
+
+	bool lastDepth = IsDepthFormat(params.GetRTInfo(attachmentDescs.size() - 1).format);
+
+	std::vector<VkAttachmentReference> attachmentRefs(lastDepth ? attachmentDescs.size() - 1 : attachmentDescs.size());
 	for (int i = 0; i < attachmentRefs.size(); ++i)
 	{
 		attachmentRefs[i].attachment = i;
-		attachmentRefs[i].layout = IsDepthFormat(params.GetRTInfo(i).format) ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		attachmentRefs[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+	VkAttachmentReference depthAttachment;
+	if (lastDepth)
+	{
+		depthAttachment.attachment = attachmentDescs.size() - 1;
+		depthAttachment.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 	VkSubpassDescription subpassDesc{};
 	subpassDesc.colorAttachmentCount = attachmentRefs.size();
 	subpassDesc.pColorAttachments = attachmentRefs.data();
+	subpassDesc.pDepthStencilAttachment = lastDepth ? &depthAttachment : nullptr;
 	subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
 

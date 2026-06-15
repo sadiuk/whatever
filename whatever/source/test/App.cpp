@@ -62,17 +62,25 @@ void App::Init()
 	params.SetDescriptorCount(DescriptorType::InputAttachment, 1000);
 	m_descPool = m_device->CreateDescriptorPool(params);
 
+	IImage::CreationParams depthBufferParams{ m_windowSize.x, m_windowSize.y, 1, 1, 1, ImageFormat::D32_SFLOAT, ImageDimension::Dimension2D, 1, ImageUsage::DepthStencilAttachment };
+	m_depthBuffer = m_device->CreateImage(depthBufferParams, MemoryPropertyFlags::DeviceLocal, "Scene Depth Buffer");
+
 	IFramebuffer::Layout framebufferLayout{};
 	framebufferLayout.colorBuffers.emplace_back();
 	framebufferLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
-	//framebufferLayout.colorBuffers[0].loadOp = AttachmentLoadOp::Clear;
-	//framebufferLayout.colorBuffers[0].clearColor = glm::vec4(0.7, 0.5, 0.4, 1);
+	framebufferLayout.depthBuffer = m_depthBuffer->GetProperties().format;
 
-	//auto meshes = loader.LoadModel("../../../media/Sponza/glTF/Sponza.gltf");
-
-	IImage::View swapchainImageView(m_device->GetBackbuffer().get());
+	IImage::View swapchainImageView(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+	IImage::View depthBufferImageView(m_depthBuffer.get(), ImageAspectFlags::DepthBit);
 	m_framebufferInfo.colorBuffers = { swapchainImageView };
+	m_framebufferInfo.depthBuffer = depthBufferImageView;
 	m_framebufferInfo.layout = framebufferLayout;
+
+	IFramebuffer::Layout imaguiFramebufferLayout{};
+	imaguiFramebufferLayout.colorBuffers.emplace_back();
+	imaguiFramebufferLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
+	m_imguiFramebufferInfo.colorBuffers = { swapchainImageView };
+	m_imguiFramebufferInfo.layout = imaguiFramebufferLayout;
 
 
 	IMGUI_CHECKVERSION();
@@ -99,11 +107,14 @@ void App::Init()
 		}
 		};
 
-	auto imguiFBLayout = m_framebufferInfo.layout;
+	IFramebuffer::Layout imguiFBLayout{};
+	imguiFBLayout.colorBuffers.emplace_back();
+	imguiFBLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
+
+	
 	//imguiFBLayout.colorBuffers[0].loadOp = AttachmentLoadOp::Load;
 	RenderPassParams imguiRPParams(imguiFBLayout);
 	imguiRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::PresentSrcKhr);
-
 	m_imguiRenderPass = m_device->CreateRenderPass(imguiRPParams);
 	init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 	init_info.PipelineInfoMain.RenderPass = static_cast<VulkanRenderPass*>(m_imguiRenderPass.get())->GetNativeHandle();
@@ -226,8 +237,9 @@ void App::Run()
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].srcColorBlendFactor = BlendFactor::SrcAlpha;
 	pipelineInfo.blendStateInfo.attachmentBlendStates[0].dstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
 
-	pipelineInfo.depthStencilInfo.depthTestEnable = false;
-	pipelineInfo.depthStencilInfo.depthWriteEnable = false;
+	pipelineInfo.depthStencilInfo.depthTestEnable = true;
+	pipelineInfo.depthStencilInfo.depthTestPassResult = CompareOperation::Greater;
+	pipelineInfo.depthStencilInfo.depthWriteEnable = true;
 	pipelineInfo.depthStencilInfo.stencilTestEnabled = false;
 
 	pipelineInfo.rasterInfo.frontFace = FrontFace::CounterClockwise;
@@ -281,7 +293,10 @@ void App::Run()
 	ds->SetBinding(0, cameraUB.get(), 0, sizeof(Camera::CameraCBData));
 
 	RenderPassParams mainRPParams(m_framebufferInfo.layout);
-	mainRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::ColorAttachmentOptimal);
+	glm::vec4 clearColor(0, 0, 0, 0);
+	float clearDepth = 0;
+	mainRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::ColorAttachmentOptimal, &clearColor);
+	mainRPParams.SetDepthAttachmentInfo(AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::DepthStencilAttachmentOptimal, &clearDepth);
 	auto mainRP = m_device->CreateRenderPass(mainRPParams);
 	while (m_window->IsOpen())
 	{
@@ -292,7 +307,8 @@ void App::Run()
 
 		auto fbInfo = m_framebufferInfo;
 		// Update the backbuffer image view for the current frame
-		fbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer().get());
+		fbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+		fbInfo.depthBuffer = IImage::View(m_depthBuffer.get(), ImageAspectFlags::DepthBit);
 		auto framebuffer = m_device->CreateFramebuffer(std::move(fbInfo));
 
 
@@ -324,10 +340,14 @@ void App::Run()
 		ImGui::Begin("Hello");
 		ImGui::Text("Hello, Vulkan + SDL2!");
 		ImGui::End();
-
 		ImGui::Render();
+
+		auto imguiFbInfo = m_imguiFramebufferInfo;
+		// Update the backbuffer image view for the current frame
+		imguiFbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+		auto imguiFB = m_device->CreateFramebuffer(std::move(imguiFbInfo));
 		ImDrawData* draw_data = ImGui::GetDrawData();
-		commandBuffer->BeginRenderPass(m_imguiRenderPass.get(), framebuffer.get());
+		commandBuffer->BeginRenderPass(m_imguiRenderPass.get(), imguiFB.get());
 		ImGui_ImplVulkan_RenderDrawData(draw_data, static_cast<VulkanCommandBuffer*>(commandBuffer.get())->GetNativeHandle());
 		commandBuffer->EndRenderPass();
 		commandBuffer->End();
