@@ -449,6 +449,136 @@ namespace wtv
     };
     DEFINE_ENUM_FLAG_OPERATORS(ImageAspectFlags);
 
+    enum class BarrierPipelineStageFlags : uint64_t
+    {
+        None = 0ULL,
+        TopOfPipe = 1ULL << 0,
+        DrawIndirect = 1ULL << 1,
+        VertexInput = 1ULL << 2,
+        VertexShader = 1ULL << 3,
+        TessellationControlShader = 1ULL << 4,
+        TessellationEvaluationShader = 1ULL << 5,
+        GeometryShader = 1ULL << 6,
+        FragmentShader = 1ULL << 7,
+        EarlyFragmentTests = 1ULL << 8,
+        LateFragmentTests = 1ULL << 9,
+        ColorAttachmentOutput = 1ULL << 10,
+        ComputeShader = 1ULL << 11,
+        Transfer = 1ULL << 12,
+        BottomOfPipe = 1ULL << 13,
+        Host = 1ULL << 14,
+        AllGraphics = 1ULL << 15,
+        AllCommands = 1ULL << 16,
+
+        // Vulkan 1.3 / VK_KHR_synchronization2
+        None2 = 0ULL,
+        Copy = 1ULL << 32,
+        Resolve = 1ULL << 33,
+        Blit = 1ULL << 34,
+        Clear = 1ULL << 35,
+        IndexInput = 1ULL << 36,
+        VertexAttributeInput = 1ULL << 37,
+        PreRasterizationShaders = 1ULL << 38,
+
+        // VK_EXT_transform_feedback
+        TransformFeedback = 1ULL << 24,
+
+        // VK_EXT_conditional_rendering
+        ConditionalRendering = 1ULL << 18,
+
+        // VK_KHR_acceleration_structure / VK_NV_ray_tracing
+        AccelerationStructureBuild = 1ULL << 25,
+        RayTracingShader = 1ULL << 21,
+
+        // VK_KHR_fragment_shading_rate / VK_NV_shading_rate_image
+        FragmentShadingRate = 1ULL << 22,
+
+        // VK_EXT_mesh_shader / VK_NV_mesh_shader
+        TaskShader = 1ULL << 19,
+        MeshShader = 1ULL << 20,
+
+        // VK_EXT_fragment_density_map
+        FragmentDensityProcess = 1ULL << 23,
+
+        // VK_NV_device_generated_commands
+        CommandPreprocess = 1ULL << 17,
+
+        // VK_KHR_video_decode_queue
+        VideoDecode = 1ULL << 26,
+
+        // VK_KHR_video_encode_queue
+        VideoEncode = 1ULL << 27,
+
+        // VK_HUAWEI_subpass_shading
+        SubpassShading = 1ULL << 39,
+
+        // VK_HUAWEI_invocation_mask
+        InvocationMask = 1ULL << 40,
+
+        // VK_NV_ray_tracing_motion_blur / micromap
+        AccelerationStructureCopy = 1ULL << 41,
+        MicromapBuild = 1ULL << 42,
+
+        // VK_EXT_opacity_micromap
+        OpticalFlow = 1ULL << 43,
+    };
+    DEFINE_ENUM_FLAG_OPERATORS(BarrierPipelineStageFlags);
+
+	enum class BarrierAccessFlags : uint64_t
+	{
+		None = 0ULL,
+		IndirectCommandRead = 1ULL << 0,
+		IndexRead = 1ULL << 1,
+		VertexAttributeRead = 1ULL << 2,
+		UniformRead = 1ULL << 3,
+		InputAttachmentRead = 1ULL << 4,
+		ShaderRead = 1ULL << 5,
+		ShaderWrite = 1ULL << 6,
+		ColorAttachmentRead = 1ULL << 7,
+		ColorAttachmentWrite = 1ULL << 8,
+		DepthStencilAttachmentRead = 1ULL << 9,
+		DepthStencilAttachmentWrite = 1ULL << 10,
+		TransferRead = 1ULL << 11,
+		TransferWrite = 1ULL << 12,
+		HostRead = 1ULL << 13,
+		HostWrite = 1ULL << 14,
+		MemoryRead = 1ULL << 15,
+		MemoryWrite = 1ULL << 16,
+		// Vulkan 1.3 / VK_KHR_synchronization2
+		None2 = 0ULL,
+		CommandPreprocessRead = 1ULL << 17,
+		CommandPreprocessWrite = 1ULL << 18,
+		FragmentShadingRateAttachmentRead = 1ULL << 19,
+		AccelerationStructureRead = 1ULL << 20,
+		AccelerationStructureWrite = 1ULL << 21,
+	};
+    DEFINE_ENUM_FLAG_OPERATORS(BarrierAccessFlags);
+
+    enum class SamplerFilter : uint32_t
+    {
+        undefined = 0,
+		Nearest = 1,
+		Linear = 2
+    };
+
+    enum class SamplerMipMapMode : uint32_t
+    {
+        Undefined = 0,
+		Nearest = 1,
+		Linear = 2
+    };
+
+    enum class SamplerAddressMode : uint32_t
+    {
+        Undefined = 0,
+        Repeat,
+        MirroredRepeat,
+        ClampToEdge,
+        ClampToBorder,
+        MirrorClampToEdge
+    };
+
+
     inline uint32_t GetAttributeSize(VertexAttributeType attributeType) {
         switch (attributeType) {
         case VertexAttributeType::int1:

@@ -187,10 +187,26 @@ namespace wtv
 		VkPhysicalDeviceFeatures2 features2 = {};
 		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		features2.pNext = &timelineFeatures;
+		VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures{};
+		indexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+		indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+		indexingFeatures.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE;
+		indexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+		indexingFeatures.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
+		indexingFeatures.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE;
+		indexingFeatures.descriptorBindingUniformTexelBufferUpdateAfterBind = VK_TRUE;
+		indexingFeatures.descriptorBindingStorageTexelBufferUpdateAfterBind = VK_TRUE;
+		indexingFeatures.runtimeDescriptorArray = VK_TRUE;
+		indexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		indexingFeatures.pNext = &features2;
+		VkPhysicalDeviceSynchronization2Features sync2Features{};
+		sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+		sync2Features.synchronization2 = VK_TRUE;
+		sync2Features.pNext = &indexingFeatures;
 
 		VkDeviceCreateInfo deviceInfo = {};
 		deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceInfo.pNext = &features2;
+		deviceInfo.pNext = &sync2Features;
 		deviceInfo.queueCreateInfoCount = 1;
 		deviceInfo.pQueueCreateInfos = queueInfos;
 		deviceInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
@@ -297,6 +313,32 @@ namespace wtv
 	RefPtr<IQueue> VulkanDevice::GetGraphicsQueue() const
 	{
 		return StaticRefCast<IQueue>(m_graphicsQueue);
+	}
+
+	int VulkanDevice::CreateSampler(const SamplerCreateInfo& params)
+	{
+		VkSamplerCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.magFilter = VulkanConstantTranslator::GetVkFilter(params.magFilter);
+		createInfo.minFilter = VulkanConstantTranslator::GetVkFilter(params.minFilter);
+		createInfo.mipmapMode = VulkanConstantTranslator::GetVkSamplerMipmapMode(params.mipmapMode);
+		createInfo.addressModeU = VulkanConstantTranslator::GetVkSamplerAddressMode(params.addressModeU);
+		createInfo.addressModeV = VulkanConstantTranslator::GetVkSamplerAddressMode(params.addressModeV);
+		createInfo.addressModeW = VulkanConstantTranslator::GetVkSamplerAddressMode(params.addressModeW);
+		createInfo.mipLodBias = params.mipLodBias;
+		createInfo.anisotropyEnable = params.anisotropyEnable ? VK_TRUE : VK_FALSE;
+		createInfo.maxAnisotropy = params.maxAnisotropy;
+		createInfo.compareEnable = params.compareEnable ? VK_TRUE : VK_FALSE;
+		createInfo.compareOp = VulkanConstantTranslator::GetCompareOperation(params.compareOp);
+		createInfo.minLod = params.minLod;
+		createInfo.maxLod = params.maxLod;
+		createInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+		createInfo.unnormalizedCoordinates = params.unnormalizedCoordinates ? VK_TRUE : VK_FALSE;
+		VkSampler sampler;
+		vkCreateSampler(m_device, &createInfo, nullptr, &sampler);
+		m_samplers.push_back(sampler);
+		return m_samplers.size() - 1;
 	}
 
 	uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)

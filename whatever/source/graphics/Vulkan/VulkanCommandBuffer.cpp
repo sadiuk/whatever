@@ -226,6 +226,67 @@ void wtv::VulkanCommandBuffer::CopyBuffer(IGPUBuffer* src, uint64_t srcOffset, I
 	vkCmdCopyBuffer(m_commandBuffer, srcBuf, dstBuf, 1, &copyRegion);
 }
 
+void wtv::VulkanCommandBuffer::CopyBufferToImage(IGPUBuffer* src, uint64_t srcOffset, IGPUImage* dst, uint32_t dstSubresource, ImageAspectFlags aspectFlags)
+{
+	VulkanGPUBuffer* buffer = static_cast<VulkanGPUBuffer*>(src);
+	VulkanGPUImage* image = static_cast<VulkanGPUImage*>(dst);
+	VkBufferImageCopy region{};
+	region.bufferOffset = srcOffset;
+	region.bufferRowLength = dst->GetProperties().width;
+	region.bufferImageHeight = dst->GetProperties().height;
+	VkImageSubresourceLayers subresource{};
+	subresource.aspectMask = VulkanConstantTranslator::GetVkImageAspectFlagBits(aspectFlags);
+	subresource.baseArrayLayer = dstSubresource / dst->GetProperties().arraySize;
+	subresource.mipLevel = dstSubresource % dst->GetProperties().mipLevels;
+	subresource.layerCount = dst->GetProperties().arraySize;
+	region.imageSubresource = subresource;
+	region.imageOffset = {0, 0, 0};
+	region.imageExtent = {dst->GetProperties().width, dst->GetProperties().height, 1};
+
+	vkCmdCopyBufferToImage(m_commandBuffer, buffer->GetNativeHandle(), image->GetNativeHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+}
+
+void wtv::VulkanCommandBuffer::PipelineBarrier(const ImageBarrier& barrier)
+{
+	VkDependencyInfo info{};
+	info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+
+	info.bufferMemoryBarrierCount = 0;
+	info.memoryBarrierCount = 0;
+	info.imageMemoryBarrierCount = 1;
+	VkImageMemoryBarrier2 imageBarrier{};
+	imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+	imageBarrier.srcStageMask = VulkanConstantTranslator::GetVkPipelineStageFlags2(barrier.srcStageMask);
+	imageBarrier.srcAccessMask = VulkanConstantTranslator::GetVkAccessFlags2(barrier.srcAccessMask);
+	imageBarrier.dstStageMask = VulkanConstantTranslator::GetVkPipelineStageFlags2(barrier.dstStageMask);
+	imageBarrier.dstAccessMask = VulkanConstantTranslator::GetVkAccessFlags2(barrier.dstAccessMask);
+	VulkanGPUImage* vkImage = static_cast<VulkanGPUImage*>(barrier.imageView.image);
+	imageBarrier.image = vkImage->GetNativeHandle();
+	imageBarrier.oldLayout = VulkanConstantTranslator::GetVkImageLayout(barrier.layoutBefore);
+	imageBarrier.newLayout = VulkanConstantTranslator::GetVkImageLayout(barrier.layoutAfter);
+	if(barrier.srcQueue)
+		imageBarrier.srcQueueFamilyIndex = static_cast<VulkanQueue*>(barrier.srcQueue)->GetQueueFamilyIndex();
+	else
+		imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	if(barrier.dstQueue)
+		imageBarrier.dstQueueFamilyIndex = static_cast<VulkanQueue*>(barrier.dstQueue)->GetQueueFamilyIndex();
+	else
+		imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	imageBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits(barrier.imageView.aspectFlags);
+	imageBarrier.subresourceRange.baseArrayLayer = barrier.imageView.baseArrayLayer;
+	imageBarrier.subresourceRange.layerCount = barrier.imageView.arrayLayerCount;
+	imageBarrier.subresourceRange.baseMipLevel = barrier.imageView.baseMip;
+	imageBarrier.subresourceRange.levelCount = barrier.imageView.mipCount;
+	info.pImageMemoryBarriers = &imageBarrier;
+
+	vkCmdPipelineBarrier2(m_commandBuffer, &info);
+}
+
+void wtv::VulkanCommandBuffer::PushConstants(const void* data, uint32_t size, ShaderStageFlags stageFlags)
+{
+	vkCmdPushConstants(m_commandBuffer, m_pipelineLayout->GetNativeHandle(), VulkanConstantTranslator::GetVkShaderStageFlags(stageFlags), 0, size, data);
+}
+
 wtv::IServiceProvider* wtv::VulkanCommandBuffer::GetServiceProvider() const
 {
 	return m_engine->GetServiceProvider();

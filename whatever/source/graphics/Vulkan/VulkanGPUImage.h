@@ -16,6 +16,7 @@ namespace wtv
 		VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, MemoryPropertyFlags flags, const std::string& name, IVulkanAllocator* allocator);
 		VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, const std::string& name, VkImage rawHandle);
 		~VulkanGPUImage();
+		VkImage GetNativeHandle() const { return m_image; }
 		VkImageView GetImageView(const IImage::View& view);
 		IServiceProvider* GetServiceProvider() const override;
 	private:

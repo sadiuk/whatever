@@ -19,7 +19,7 @@ namespace wtv
 	struct IDescriptorSetLayout;
 	struct IDescriptorPool : public IReferenceCounted
 	{
-		virtual RefPtr<IDescriptorSet> AllocateDescriptorSet(const RefPtr<IDescriptorSetLayout>& layout) = 0;
+		virtual RefPtr<IDescriptorSet> AllocateDescriptorSet(RefPtr<IDescriptorSetLayout>& layout) = 0;
 		virtual ~IDescriptorPool() {}
 	};
 }

@@ -1,3 +1,4 @@
+#pragma once
 #include "util/RefPtr.h"
 #include "GraphicsConstants.h"
 namespace wtv
@@ -46,6 +47,7 @@ namespace wtv
 				depth = props.depth;
 				aspectFlags = af;
 			}
+			View(const View& other) = default;
 			IImage* image;
 			uint32_t x = 0;
 			uint32_t y = 0;

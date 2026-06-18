@@ -19,12 +19,14 @@ namespace wtv
 		IFence& GetFence() override;
 		VulkanBinarySemaphore& GetRenderFinishedSemaphore() { return *m_signalSemaphore.get(); }
 		VkQueue GetNativeHandle() { return m_queue; }
+		uint32_t GetQueueFamilyIndex() const { return m_queueFamilyIndex; }
 	protected:
 		VkQueue m_queue;
 		VkDevice m_deviceRaw;
 		RefPtr<VulkanBinarySemaphore> m_signalSemaphore;
 		VulkanFence m_fence;
 		VulkanDevice* m_device;
+		uint32_t m_queueFamilyIndex;
 	};
 	class VulkanPresentQueue : public VulkanQueue
 	{

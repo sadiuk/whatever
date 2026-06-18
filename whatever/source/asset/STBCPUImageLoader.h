@@ -2,8 +2,8 @@
 #include "ICPUImageLoader.h"
 namespace wtv
 {
-	class STBCPUImageLoader : public ICPUImageLoader
+	class STBCPUImageLoader
 	{
-		ICPUImage* Load(const std::filesystem::path& path) override;
+		CPUImageData Load(const std::filesystem::path& path);
 	};
 }

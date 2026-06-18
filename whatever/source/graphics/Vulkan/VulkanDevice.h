@@ -82,7 +82,7 @@ namespace wtv
 		RefPtr<IDescriptorSetLayout> CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params) override;
 		RefPtr<IBinarySemaphore> CreateBinarySemaphore() const;
 		RefPtr<IQueue> GetGraphicsQueue() const override;
-
+		SamplerIndex CreateSampler(const SamplerCreateInfo& params) override;
 		void Present() override;
 		void BeginFrame() override;
 	public:
@@ -100,6 +100,7 @@ namespace wtv
 		VulkanSemaphore& GetTimelineSemaphore() { return *(m_gpuTimelineSemaphore.get()); }
 		void FlushDeletions();
 		const VulkanDebugNamer& GetDebugNamer() { return m_debugNamer; }
+		VkSampler GetSampler(SamplerIndex index) { return m_samplers[index]; }
 	public:
 		void EnqueueForDeletion(VkBuffer buffer, uint64_t semaphoreWaitValue) { m_buffersToDelete.emplace_back(buffer, semaphoreWaitValue); }
 		void EnqueueForDeletion(VkImageView view, uint64_t semaphoreWaitValue) { m_imageViewsToDelete.emplace_back(view, semaphoreWaitValue); }
@@ -125,6 +126,7 @@ namespace wtv
 		std::list<std::pair<VkBuffer, uint64_t>> m_buffersToDelete;
 		std::list<std::pair<VkImageView, uint64_t>> m_imageViewsToDelete;
 		std::list<std::pair<VkImage, uint64_t>> m_imagesToDelete;
+		std::vector<VkSampler> m_samplers;
 
 		VulkanDebugNamer m_debugNamer;
 	};

@@ -1,7 +1,7 @@
 #pragma once
 #include "GraphicsConstants.h"
 #include "util/RefPtr.h"
-
+#include "IImage.h"
 #include <vector>
 namespace wtv
 {
@@ -16,8 +16,8 @@ namespace wtv
 			ShaderStageFlags stages;
 		};
 		std::vector<LayoutEntry> m_entries;
-
-		DescriptorSetLayoutParams(uint32_t bindingCount = 0) : m_entries(bindingCount) {}
+		bool m_bindless = false;
+		DescriptorSetLayoutParams(uint32_t bindingCount = 0, bool bindless = false) : m_entries(bindingCount), m_bindless(bindless) {}
 		void DescribeLayoutEntry(uint32_t slot, DescriptorType type, uint32_t count, ShaderStageFlags stages)
 		{
 			m_lastDescribedIndex++;
@@ -31,7 +31,7 @@ namespace wtv
 		{
 			for (const auto& entry : m_entries)
 			{
-				if (entry.slot == slot)
+				if (entry.slot <= slot && entry.slot + entry.count > slot)
 					return &entry;
 			}
 			return nullptr;
@@ -48,6 +48,9 @@ namespace wtv
 	struct IDescriptorSet : public IReferenceCounted
 	{
 		virtual void SetBinding(uint32_t slot, IGPUBuffer* buffer, uint32_t offset, uint32_t size) = 0;
+		virtual void SetBinding(uint32_t slot, int sampler) = 0;
+		virtual void SetBinding(uint32_t slot, const IImage::View& image, ImageLayout layout, int sampler) = 0;
+		virtual IDescriptorSetLayout* GetLayout() = 0;
 		virtual ~IDescriptorSet() {}
 	};
 }

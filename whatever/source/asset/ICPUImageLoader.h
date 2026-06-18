@@ -4,8 +4,8 @@
 
 namespace wtv
 {
-	class ICPUImageLoader
-	{
-		virtual ICPUImage* Load(const std::filesystem::path& path) = 0;
-	};
+	//class ICPUImageLoader
+	//{
+	//	virtual ICPUImage* Load(const std::filesystem::path& path) = 0;
+	//};
 }

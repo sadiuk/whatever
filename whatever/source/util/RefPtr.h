@@ -32,7 +32,8 @@ namespace wtv
 		RefPtr(std::nullptr_t nil) {}
 		RefPtr(const this_t& other)
 		{
-			other.m_pointer->AddRef();
+			if(other.m_pointer)
+				other.m_pointer->AddRef();
 			m_pointer = other.m_pointer;
 		}
 		/*template<typename = std::enable_if_t<std::is_const_v<Type>>>

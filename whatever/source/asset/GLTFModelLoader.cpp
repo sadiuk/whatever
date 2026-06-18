@@ -1,4 +1,5 @@
 #include "GLTFModelLoader.h"
+
 #define TINYGLTF_IMPLEMENTATION
 //#define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -9,8 +10,9 @@ namespace wtv
 	VertexAttributeType GetVertexAttribTypeFromTinyGLTF(int componentType, int type);
 	VertexAttributeSemantic GetVertexAttribSemanticFromTinyGLTF(const std::string semantic);
 	IndexType GetIndexTypeFromTinyGLTF(int componentType);
+	RefPtr<CPUImageData> GetCPUImage(const tinygltf::Image& image);
 
-	std::unordered_map<MeshInfo::VertexLayout, std::vector<CPUMesh>, VertexLayoutHash> GLTFModelLoader::LoadModel(const char* filePath)
+	std::vector<CPUMesh> GLTFModelLoader::LoadModel(const char* filePath)
 	{
 		tinygltf::Model model;
 		tinygltf::TinyGLTF loader;
@@ -20,8 +22,38 @@ namespace wtv
 
 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filePath);
 
-		std::unordered_map<MeshInfo::VertexLayout, std::vector<CPUMesh>, VertexLayoutHash> meshes;
+		std::vector<CPUMesh> meshes;
+		std::vector<RefPtr<CPUMaterial>> materials(model.materials.size());
+		std::vector<RefPtr<CPUImageData>> images(model.images.size());
 
+		for (int i = 0; i < model.textures.size(); i++)
+		{
+			images[i] = GetCPUImage(model.images[model.textures[i].source]);
+		}
+		for (int i = 0; i < model.materials.size(); i++)
+		{
+			auto& mat = materials[i];
+			mat = MakeRef<CPUMaterial>();
+			const tinygltf::Material& material = model.materials[i];
+			mat->metallicFactor = material.pbrMetallicRoughness.metallicFactor;
+			mat->roughnessFactor = material.pbrMetallicRoughness.roughnessFactor;
+			mat->emissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+			mat->diffuseFactor = glm::vec3(material.pbrMetallicRoughness.baseColorFactor[0], material.pbrMetallicRoughness.baseColorFactor[1], material.pbrMetallicRoughness.baseColorFactor[2]);
+			
+			mat->metallicRoughnessTexture = material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0 ? images[material.pbrMetallicRoughness.metallicRoughnessTexture.index] : nullptr;
+			if(mat->metallicRoughnessTexture.get())
+				mat->metallicRoughnessTexture->name = "MetallicRoughness";
+			mat->diffuseTexture = material.pbrMetallicRoughness.baseColorTexture.index >= 0 ? images[material.pbrMetallicRoughness.baseColorTexture.index] : nullptr;
+			if(mat->diffuseTexture.get())
+				mat->diffuseTexture->name = "Diffuse";
+			mat->normalTexture = material.normalTexture.index >= 0 ? images[material.normalTexture.index] : nullptr;
+			if(mat->normalTexture.get())
+				mat->normalTexture->name = "Normal";
+			mat->emissiveTexture = material.emissiveTexture.index >= 0 ? images[material.emissiveTexture.index] : nullptr;
+			if(mat->emissiveTexture.get())
+				mat->emissiveTexture->name = "Emissive";
+			
+		}
 		for (int i = 0; i < model.meshes.size(); i++)
 		{
 			const tinygltf::Mesh& gltfMesh = model.meshes[i];
@@ -39,9 +71,14 @@ namespace wtv
 					attribIndex++;
 				}
 				
+				
 				auto& indicesAccessor = model.accessors[prim.indices];
 				MeshInfo meshInfo(vertexAttribs.data(), prim.attributes.size(), indexType);
 				CPUMesh mesh(meshInfo);
+				if (prim.material >= 0)
+				{
+					mesh.SetMaterial(materials[prim.material]);
+				}
 
 				// Upload indices
 
@@ -114,7 +151,7 @@ namespace wtv
 				}
 				mesh.FormVertexBuffer();
 
-				meshes[vertexAttribs].push_back(mesh);
+				meshes.push_back(mesh);
 			}
 		}
 			
@@ -254,6 +291,34 @@ namespace wtv
 			assert(false);
 			return IndexType::Undefined;
 		}
+	}
+
+	RefPtr<CPUImageData> GetCPUImage(const tinygltf::Image& image)
+	{
+		auto cpuImg = MakeRef<CPUImageData>();
+		cpuImg->width = image.width;
+		cpuImg->height = image.height;
+		cpuImg->height = image.height;
+		assert(image.bits == 8);
+		switch (image.component)
+		{
+		case 1:
+			cpuImg->format = ImageFormat::R8_UNORM;
+			break;
+		case 2:
+			cpuImg->format = ImageFormat::R8G8_UNORM;
+			break;
+		case 3:
+			cpuImg->format = ImageFormat::R8G8B8_UNORM;
+			break;
+		case 4:
+			cpuImg->format = ImageFormat::R8G8B8A8_UNORM;
+			break;
+		}
+
+		cpuImg->data = std::vector<char>((char*)image.image.data(), (char*)image.image.data() + image.width * image.height * image.component);
+
+		return cpuImg;
 	}
 
 }

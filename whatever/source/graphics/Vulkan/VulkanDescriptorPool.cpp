@@ -4,9 +4,9 @@
 
 namespace wtv
 {
-	RefPtr<IDescriptorSet> VulkanDescriptorPool::AllocateDescriptorSet(const RefPtr<IDescriptorSetLayout>& layout)
+	RefPtr<IDescriptorSet> VulkanDescriptorPool::AllocateDescriptorSet(RefPtr<IDescriptorSetLayout>& layout)
 	{
-		RefPtr<const VulkanDescriptorSetLayout> vkLayout(static_cast<const VulkanDescriptorSetLayout*>(layout.get()));
+		RefPtr<VulkanDescriptorSetLayout> vkLayout(static_cast<VulkanDescriptorSetLayout*>(layout.get()));
 		return MakeRef<VulkanDescriptorSet>(m_device, this, vkLayout);
 	}
 }

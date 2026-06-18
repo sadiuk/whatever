@@ -29,6 +29,11 @@ namespace wtv
 		static VkIndexType GetVkIndexType(IndexType indexType);
 		static VkImageAspectFlags GetVkImageAspectFlagBits(ImageAspectFlags aspectFlags);
 		static VkMemoryPropertyFlagBits GetVkMemoryPropertyFlagBits(MemoryPropertyFlags memoryPropertyFlags);
+		static VkPipelineStageFlagBits2 GetVkPipelineStageFlags2(BarrierPipelineStageFlags stageFlags);
+		static VkAccessFlags2 GetVkAccessFlags2(BarrierAccessFlags accessFlags);
+		static VkFilter GetVkFilter(SamplerFilter filter);
+		static VkSamplerMipmapMode GetVkSamplerMipmapMode(SamplerMipMapMode filter);
+		static VkSamplerAddressMode GetVkSamplerAddressMode(SamplerAddressMode addressMode);
 	};
 
 

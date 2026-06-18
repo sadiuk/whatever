@@ -1,5 +1,6 @@
 #pragma once
 #include "CPUMesh.h"
+#include "CPUMaterial.h"
 #include "util/RefPtr.h"
 #include <unordered_map>
 
@@ -8,6 +9,6 @@ namespace wtv
 	class GLTFModelLoader
 	{
 	public:
-		std::unordered_map<MeshInfo::VertexLayout, std::vector<CPUMesh>, VertexLayoutHash> LoadModel(const char* filePath);
+		std::vector<CPUMesh> LoadModel(const char* filePath);
 	};
 }

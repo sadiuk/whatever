@@ -989,6 +989,140 @@ namespace wtv
         }
     }
 
+    VkPipelineStageFlags2 VulkanConstantTranslator::GetVkPipelineStageFlags2(BarrierPipelineStageFlags stageFlags)
+    {
+        VkPipelineStageFlags2 result = VK_PIPELINE_STAGE_2_NONE;
+
+        auto check = [&](BarrierPipelineStageFlags flag, VkPipelineStageFlags2 vkFlag)
+            {
+                if ((stageFlags & flag) == flag)
+                    result |= vkFlag;
+            };
+
+        check(BarrierPipelineStageFlags::TopOfPipe, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT);
+        check(BarrierPipelineStageFlags::DrawIndirect, VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT);
+        check(BarrierPipelineStageFlags::VertexInput, VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT);
+        check(BarrierPipelineStageFlags::VertexShader, VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT);
+        check(BarrierPipelineStageFlags::TessellationControlShader, VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT);
+        check(BarrierPipelineStageFlags::TessellationEvaluationShader, VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT);
+        check(BarrierPipelineStageFlags::GeometryShader, VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT);
+        check(BarrierPipelineStageFlags::FragmentShader, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+        check(BarrierPipelineStageFlags::EarlyFragmentTests, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT);
+        check(BarrierPipelineStageFlags::LateFragmentTests, VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+        check(BarrierPipelineStageFlags::ColorAttachmentOutput, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+        check(BarrierPipelineStageFlags::ComputeShader, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT);
+        check(BarrierPipelineStageFlags::Transfer, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+        check(BarrierPipelineStageFlags::BottomOfPipe, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT);
+        check(BarrierPipelineStageFlags::Host, VK_PIPELINE_STAGE_2_HOST_BIT);
+        check(BarrierPipelineStageFlags::AllGraphics, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+        check(BarrierPipelineStageFlags::AllCommands, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
+        check(BarrierPipelineStageFlags::Copy, VK_PIPELINE_STAGE_2_COPY_BIT);
+        check(BarrierPipelineStageFlags::Resolve, VK_PIPELINE_STAGE_2_RESOLVE_BIT);
+        check(BarrierPipelineStageFlags::Blit, VK_PIPELINE_STAGE_2_BLIT_BIT);
+        check(BarrierPipelineStageFlags::Clear, VK_PIPELINE_STAGE_2_CLEAR_BIT);
+        check(BarrierPipelineStageFlags::IndexInput, VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT);
+        check(BarrierPipelineStageFlags::VertexAttributeInput, VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT);
+        check(BarrierPipelineStageFlags::PreRasterizationShaders, VK_PIPELINE_STAGE_2_PRE_RASTERIZATION_SHADERS_BIT);
+        check(BarrierPipelineStageFlags::TransformFeedback, VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT);
+        check(BarrierPipelineStageFlags::ConditionalRendering, VK_PIPELINE_STAGE_2_CONDITIONAL_RENDERING_BIT_EXT);
+        check(BarrierPipelineStageFlags::AccelerationStructureBuild, VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+        check(BarrierPipelineStageFlags::RayTracingShader, VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR);
+        check(BarrierPipelineStageFlags::FragmentShadingRate, VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
+        check(BarrierPipelineStageFlags::TaskShader, VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT);
+        check(BarrierPipelineStageFlags::MeshShader, VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT);
+        check(BarrierPipelineStageFlags::FragmentDensityProcess, VK_PIPELINE_STAGE_2_FRAGMENT_DENSITY_PROCESS_BIT_EXT);
+        check(BarrierPipelineStageFlags::CommandPreprocess, VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV);
+        check(BarrierPipelineStageFlags::VideoDecode, VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR);
+        check(BarrierPipelineStageFlags::VideoEncode, VK_PIPELINE_STAGE_2_VIDEO_ENCODE_BIT_KHR);
+        check(BarrierPipelineStageFlags::SubpassShading, VK_PIPELINE_STAGE_2_SUBPASS_SHADER_BIT_HUAWEI);
+        check(BarrierPipelineStageFlags::InvocationMask, VK_PIPELINE_STAGE_2_INVOCATION_MASK_BIT_HUAWEI);
+        check(BarrierPipelineStageFlags::AccelerationStructureCopy, VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_COPY_BIT_KHR);
+        check(BarrierPipelineStageFlags::MicromapBuild, VK_PIPELINE_STAGE_2_MICROMAP_BUILD_BIT_EXT);
+        check(BarrierPipelineStageFlags::OpticalFlow, VK_PIPELINE_STAGE_2_OPTICAL_FLOW_BIT_NV);
+
+        return result;
+    }
+
+    VkAccessFlags2 VulkanConstantTranslator::GetVkAccessFlags2(BarrierAccessFlags accessFlags)
+    {
+        VkAccessFlags2 result = VK_ACCESS_2_NONE;
+
+        auto check = [&](BarrierAccessFlags flag, VkAccessFlags2 vkFlag)
+            {
+                if ((accessFlags & flag) == flag)
+                    result |= vkFlag;
+            };
+
+        check(BarrierAccessFlags::IndirectCommandRead, VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT);
+        check(BarrierAccessFlags::IndexRead, VK_ACCESS_2_INDEX_READ_BIT);
+        check(BarrierAccessFlags::VertexAttributeRead, VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT);
+        check(BarrierAccessFlags::UniformRead, VK_ACCESS_2_UNIFORM_READ_BIT);
+        check(BarrierAccessFlags::InputAttachmentRead, VK_ACCESS_2_INPUT_ATTACHMENT_READ_BIT);
+        check(BarrierAccessFlags::ShaderRead, VK_ACCESS_2_SHADER_READ_BIT);
+        check(BarrierAccessFlags::ShaderWrite, VK_ACCESS_2_SHADER_WRITE_BIT);
+        check(BarrierAccessFlags::ColorAttachmentRead, VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT);
+        check(BarrierAccessFlags::ColorAttachmentWrite, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
+        check(BarrierAccessFlags::DepthStencilAttachmentRead, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+        check(BarrierAccessFlags::DepthStencilAttachmentWrite, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+        check(BarrierAccessFlags::TransferRead, VK_ACCESS_2_TRANSFER_READ_BIT);
+        check(BarrierAccessFlags::TransferWrite, VK_ACCESS_2_TRANSFER_WRITE_BIT);
+        check(BarrierAccessFlags::HostRead, VK_ACCESS_2_HOST_READ_BIT);
+        check(BarrierAccessFlags::HostWrite, VK_ACCESS_2_HOST_WRITE_BIT);
+        check(BarrierAccessFlags::MemoryRead, VK_ACCESS_2_MEMORY_READ_BIT);
+        check(BarrierAccessFlags::MemoryWrite, VK_ACCESS_2_MEMORY_WRITE_BIT);
+        check(BarrierAccessFlags::CommandPreprocessRead, VK_ACCESS_2_COMMAND_PREPROCESS_READ_BIT_NV);
+        check(BarrierAccessFlags::CommandPreprocessWrite, VK_ACCESS_2_COMMAND_PREPROCESS_WRITE_BIT_NV);
+        check(BarrierAccessFlags::FragmentShadingRateAttachmentRead, VK_ACCESS_2_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
+        check(BarrierAccessFlags::AccelerationStructureRead, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR);
+        check(BarrierAccessFlags::AccelerationStructureWrite, VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
+
+        return result;
+    }
+
+    VkFilter VulkanConstantTranslator::GetVkFilter(SamplerFilter filter)
+    {
+        switch (filter)
+        {
+		case SamplerFilter::Nearest:
+			return VK_FILTER_NEAREST;
+        case SamplerFilter::Linear:
+				return VK_FILTER_LINEAR;
+        }
+		return VK_FILTER_MAX_ENUM;
+    }
+
+    VkSamplerMipmapMode VulkanConstantTranslator::GetVkSamplerMipmapMode(SamplerMipMapMode mode)
+    {
+        switch (mode)
+        {
+		case SamplerMipMapMode::Nearest:
+			return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        case SamplerMipMapMode::Linear:
+            return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        }
+        return VK_SAMPLER_MIPMAP_MODE_MAX_ENUM;
+    }
+
+    VkSamplerAddressMode VulkanConstantTranslator::GetVkSamplerAddressMode(SamplerAddressMode addressMode)
+    {
+        switch (addressMode)
+        {
+		case SamplerAddressMode::Repeat:
+			return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		case SamplerAddressMode::MirroredRepeat:
+			return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+		case SamplerAddressMode::ClampToEdge:
+			return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		case SamplerAddressMode::ClampToBorder:
+			return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		case SamplerAddressMode::MirrorClampToEdge:
+			return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+        }
+		return VK_SAMPLER_ADDRESS_MODE_MAX_ENUM;
+    }
+
+
+
     VkBlendFactor VulkanConstantTranslator::GetVkBlendFactor(BlendFactor blendFactor)
     {
         switch (blendFactor) {

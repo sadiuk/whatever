@@ -6,7 +6,8 @@
 namespace wtv
 {
 	wtv::VulkanQueue::VulkanQueue(VulkanDevice* engine, uint32_t queueFamilyIndex, uint32_t queueIndex) :
-		m_device(engine), m_deviceRaw(engine->GetDevice()), m_fence(engine, true)
+		m_device(engine), m_deviceRaw(engine->GetDevice()), m_fence(engine, true),
+		m_queueFamilyIndex(queueFamilyIndex)
 	{
 		vkGetDeviceQueue(m_deviceRaw, queueFamilyIndex, queueIndex, &m_queue);
 	}

@@ -11,6 +11,7 @@
 #include "IServiceProvider.h"
 #include "IDescriptorPool.h"
 #include "ISemaphore.h"
+#include "Sampler.h"
 #include "util/RefPtr.h"
 #define ENGINE_VERSION 0
 
@@ -18,6 +19,7 @@
 namespace wtv
 {
 	class IQueue;
+	using SamplerIndex = int;
 	struct IDevice : public IReferenceCounted, IServiceProviderHolder
 	{
 		IDevice(IServiceProvider* services) : m_services(services) {}
@@ -46,7 +48,7 @@ namespace wtv
 		virtual RefPtr<IDescriptorPool> CreateDescriptorPool(const DescriptorPoolParams& params) = 0;
 		virtual RefPtr<IDescriptorSetLayout> CreateDescriptorSetLayout(const DescriptorSetLayoutParams& params) = 0;
 		virtual RefPtr<IBinarySemaphore> CreateBinarySemaphore() const = 0;
-
+		virtual SamplerIndex CreateSampler(const SamplerCreateInfo& params) = 0;
 		virtual RefPtr<IQueue> GetGraphicsQueue() const = 0;
 		virtual ImageFormat GetSwapchainFormat() = 0;
 

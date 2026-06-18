@@ -15,10 +15,32 @@ cbuffer Camera : register(b0, space0)
     float4x4 viewProjMatrix;
 };
 
+struct MaterialParamEntry
+{
+    float4 baseColorRGBMetallicA;
+    float4 emissiveRGBRoughnessA;
+};
+StructuredBuffer<MaterialParamEntry> materialParams : register(t0, space1);
+
+Texture2D matTextures[] : register(t2, space1);
+SamplerState matSampler : register(s1, space1);
+
+struct PushConstants
+{
+    uint diffuseTexIndex;
+    uint normalTexIndex;
+    uint metalicRoughnessTexIndex;
+    uint emissiveTexIndex;
+};
+
+[[vk::push_constant]]
+ConstantBuffer<PushConstants> pc;
+
 struct VS_OUTPUT
 {
 	float4 pos : SV_POSITION;
     float4 color : TEXCOORD0;
+    float2 uv : TEXCOORD1;
 };
 
 
@@ -30,6 +52,7 @@ VS_OUTPUT VS(VS_INPUT input)
     float4 viewPos = mul(float4(input.position, 1), viewMatrix);
     output.pos = mul(viewPos, projectionMatrix);
     output.color = float4(input.normal, 1);
+    output.uv = input.texcoord;
 	return output;
 }
 
@@ -43,5 +66,8 @@ PS_OUTPUT PS(VS_OUTPUT input)
 {
     PS_OUTPUT output;
     output.color = input.color;
+    int textureIndex = pc.diffuseTexIndex;
+    Texture2D diffuseTexture = matTextures[textureIndex];
+    output.color = diffuseTexture.Sample(matSampler, input.uv);
     return output;
 }

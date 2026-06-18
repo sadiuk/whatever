@@ -18,11 +18,25 @@ namespace wtv
 			layoutBindings[i].stageFlags = (VkShaderStageFlags)VulkanConstantTranslator::GetVkShaderStageFlags(params.m_entries[i].stages);
 			layoutBindings[i].pImmutableSamplers = nullptr;
 		}
+
+		std::vector<VkDescriptorBindingFlags> bindingFlags(params.m_entries.size());
+		std::for_each(bindingFlags.begin(), bindingFlags.end(), [](VkDescriptorBindingFlags& fl) {
+			fl = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT; });
+		
+
+		VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+		flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+		flagsInfo.bindingCount = params.m_entries.size();
+		flagsInfo.pBindingFlags = bindingFlags.data();
+
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.pNext = nullptr;
+		layoutInfo.pNext = params.m_bindless ? &flagsInfo : nullptr;
+		layoutInfo.flags = params.m_bindless ? VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT : 0;
 		layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
 		layoutInfo.pBindings = layoutBindings.data();
+
+
 		vkCreateDescriptorSetLayout(m_device->GetDevice(), &layoutInfo, nullptr, &m_layout);
 	}
 
@@ -32,7 +46,7 @@ namespace wtv
 	}
 
 
-	VulkanDescriptorSet::VulkanDescriptorSet(VulkanDevice* device, VulkanDescriptorPool* descPool, RefPtr<const VulkanDescriptorSetLayout>& layout)
+	VulkanDescriptorSet::VulkanDescriptorSet(VulkanDevice* device, VulkanDescriptorPool* descPool, RefPtr<VulkanDescriptorSetLayout>& layout)
 		: m_device(device), 
 		m_descPool(descPool),
 		m_layout(layout)
@@ -66,7 +80,8 @@ namespace wtv
 		VkWriteDescriptorSet write = {
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = m_descriptorSet,
-			.dstBinding = slot,
+			.dstBinding = entry->slot,
+			.dstArrayElement = slot - entry->slot,
 			.descriptorCount = 1,
 			.descriptorType = VulkanConstantTranslator::GetVkDescriptorType(entry->type),
 			.pBufferInfo = &bufferInfo
@@ -74,5 +89,57 @@ namespace wtv
 
 		vkUpdateDescriptorSets(m_device->GetDevice(), 1, &write, 0, NULL);
 		m_resources.push_back(std::pair<uint32_t, IGPUResource*>(slot, buffer));
+	}
+
+	void VulkanDescriptorSet::SetBinding(uint32_t slot, int sampler)
+	{
+	auto params = m_layout->GetParams();
+		const auto* entry = params.GetEntry(slot);
+		assert(entry);
+		if (!entry)
+			return;
+
+		VkDescriptorImageInfo imageInfo = {
+			.sampler = m_device->GetSampler(sampler),
+		};
+
+		VkWriteDescriptorSet write = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = m_descriptorSet,
+			.dstBinding = entry->slot,
+			.dstArrayElement = slot - entry->slot,
+			.descriptorCount = 1,
+			.descriptorType = VulkanConstantTranslator::GetVkDescriptorType(entry->type),
+			.pImageInfo = &imageInfo
+		};
+
+		vkUpdateDescriptorSets(m_device->GetDevice(), 1, &write, 0, NULL);
+	}
+
+	void VulkanDescriptorSet::SetBinding(uint32_t slot, const IImage::View& image, ImageLayout layout, int sampler)
+	{
+		auto params = m_layout->GetParams();
+		const auto* entry = params.GetEntry(slot);
+		assert(entry);
+		if (!entry)
+			return;
+
+		VkDescriptorImageInfo imageInfo = {
+			.imageView = static_cast<VulkanGPUImage*>(image.image)->GetImageView(image),
+			.imageLayout = VulkanConstantTranslator::GetVkImageLayout(layout)
+		};
+
+		VkWriteDescriptorSet write = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = m_descriptorSet,
+			.dstBinding = entry->slot,
+			.dstArrayElement = slot - entry->slot,
+			.descriptorCount = 1,
+			.descriptorType = VulkanConstantTranslator::GetVkDescriptorType(entry->type),
+			.pImageInfo = &imageInfo
+		};
+
+		vkUpdateDescriptorSets(m_device->GetDevice(), 1, &write, 0, NULL);
+		m_resources.push_back(std::pair<uint32_t, IGPUResource*>(slot, static_cast<IGPUImage*>(image.image)));
 	}
 }

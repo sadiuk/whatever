@@ -5,6 +5,7 @@
 #include <array>
 #include <algorithm>
 #include <functional>
+#include "CPUMaterial.h"
 #include "graphics/GraphicsConstants.h"
 
 namespace wtv
@@ -50,6 +51,7 @@ namespace wtv
 		std::vector<char> m_indexBuffer;
 		uint32_t m_vertexCount;
 		MeshInfo m_info;
+		RefPtr<CPUMaterial> m_material;
 	public:
 		CPUMesh(const MeshInfo& meshInfo) : m_info(meshInfo)
 		{
@@ -88,6 +90,13 @@ namespace wtv
 				transform(m_vertexBufferStaging[attribute].data() + i * dataStride);
 			}
 		}
+
+		void SetMaterial(const RefPtr<CPUMaterial> material)
+		{
+			m_material = material;
+		}
+
+		const CPUMaterial* GetMaterial() const { return m_material.get(); }
 
 		void FormVertexBuffer()
 		{

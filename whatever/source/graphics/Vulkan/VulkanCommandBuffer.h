@@ -42,6 +42,9 @@ namespace wtv
 		void UpdateBuffer(IGPUBuffer* buffer, size_t offset, size_t size, const void* data) override;
 		void BindDescriptorSet(uint32_t setIndex, IDescriptorSet* set) override;
 		void CopyBuffer(IGPUBuffer* src, uint64_t srcOffset, IGPUBuffer* dst, uint64_t dstOffset, uint64_t size) override;
+		void CopyBufferToImage(IGPUBuffer* src, uint64_t srcOffset, IGPUImage* dst, uint32_t dstSubresource, ImageAspectFlags aspectFlags) override;
+		void PipelineBarrier(const ImageBarrier& barrier) override;
+		void PushConstants(const void* data, uint32_t size, ShaderStageFlags stageFlags) override;
 		std::vector<IGPUResource*>& ListResourcesInUse() { return m_resourcesInUse; }
 	public: 
 		const VulkanFence& GetFence() const { return m_queueSignalFence; }

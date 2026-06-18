@@ -6,6 +6,20 @@
 #include "IDescriptorSet.h"
 namespace wtv
 {
+	struct IQueue;
+	struct ImageBarrier
+	{
+		ImageBarrier(const IImage::View& view) : imageView(view) {}
+		IGPUImage::View imageView;
+		ImageLayout layoutBefore;
+		ImageLayout layoutAfter;
+		BarrierPipelineStageFlags srcStageMask;
+		BarrierAccessFlags srcAccessMask;
+		BarrierPipelineStageFlags dstStageMask;
+		BarrierAccessFlags dstAccessMask;
+		IQueue* srcQueue = nullptr;
+		IQueue* dstQueue = nullptr;
+	};
 	struct ICommandBuffer : public IReferenceCounted
 	{
 		virtual void Reset() = 0;
@@ -26,6 +40,9 @@ namespace wtv
 		virtual void UpdateBuffer(IGPUBuffer* buffer, size_t offset, size_t size, const void* data) = 0;
 		virtual void BindDescriptorSet(uint32_t setIndex, IDescriptorSet* set) = 0;
 		virtual void CopyBuffer(IGPUBuffer* src, uint64_t srcOffset, IGPUBuffer* dst, uint64_t dstOffset, uint64_t size) = 0;
+		virtual void CopyBufferToImage(IGPUBuffer* src, uint64_t srcOffset, IGPUImage* dst, uint32_t dstSubresource, ImageAspectFlags aspectFlags) = 0;
+		virtual void PipelineBarrier(const ImageBarrier& barrier) = 0;
+		virtual void PushConstants(const void* data, uint32_t size, ShaderStageFlags stageFlags) = 0;
 		virtual ~ICommandBuffer() = default;
 	};
 }

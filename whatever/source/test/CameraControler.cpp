@@ -12,6 +12,10 @@ namespace wtv
 		auto position = m_camera->GetPosition();
 		auto direction = glm::normalize(m_camera->GetForwardVector());
 		auto right = glm::normalize(glm::cross(direction, m_camera->GetUpVector()));
+		if (m_input->IsKeyDown(Key::LeftShift))
+		{
+			step *= 10;
+		}
 		if (m_input->IsKeyDown(Key::W))
 		{
 			position = position + direction * step;

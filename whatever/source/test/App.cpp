@@ -139,6 +139,13 @@ App::App()
 	m_windowPos = { 300, 200 };
 	Init();
 }
+struct PushConstants
+{
+	uint32_t diffuseTexIndex;
+	uint32_t normalTexIndex;
+	uint32_t metalicRoughnessTexIndex;
+	uint32_t emissiveTexIndex;
+};
 
 void App::Run()
 {
@@ -147,10 +154,7 @@ void App::Run()
 	RefPtr<IDescriptorSetLayout> dsLayout = m_device->CreateDescriptorSetLayout(dsLayoutParams);
 	IDescriptorSetLayout* dsLayoutRaw = dsLayout.get();
 
-	GraphicsPipelineLayoutCreateInfo layoutCreateInfo{};
-	layoutCreateInfo.descriptorSetLayoutCount = 1;
-	layoutCreateInfo.descriptorSetLayouts = &dsLayoutRaw;
-	RefPtr<IGraphicsPipelineLayout> pipelineLayout = m_device->CreateGraphicsPipelineLayout(layoutCreateInfo);
+
 
 	auto graphicsQueue = m_device->GetGraphicsQueue();
 
@@ -159,7 +163,21 @@ void App::Run()
 	GLTFModelLoader loader;
 	auto cpuMeshes = loader.LoadModel("D:/dev/pet/whatever/whatever/media/Sponza/glTF/Sponza.gltf");
 	
-	auto gpuMeshes = m_cpuToGpuConverter->ConvertToGPU(cpuMeshes);
+	auto gpuMeshes = m_cpuToGpuConverter->ConvertToGPU(cpuMeshes, m_descPool.get());
+	auto matDescSet = gpuMeshes.begin()->second[0].GetMaterial()->m_descriptorSet;
+
+	GraphicsPipelineLayoutCreateInfo layoutCreateInfo{};
+	layoutCreateInfo.descriptorSetLayoutCount = 2;
+	IDescriptorSetLayout* layouts[2] = { dsLayoutRaw, matDescSet->GetLayout() };
+	layoutCreateInfo.descriptorSetLayouts = layouts;
+	layoutCreateInfo.pushConstantRangeCount = 1;
+	PushConstantRange range;
+	range.offset = 0;
+	range.size = sizeof(PushConstants);
+	range.stages = ShaderStageFlags::All;
+	layoutCreateInfo.pcRanges = &range;
+
+	RefPtr<IGraphicsPipelineLayout> pipelineLayout = m_device->CreateGraphicsPipelineLayout(layoutCreateInfo);
 
 	std::vector<std::vector<VertexAttributeType>> vertexAttributes(gpuMeshes.size());
 	int attrSetIndex = 0;
@@ -174,7 +192,7 @@ void App::Run()
 	}
 
 	
-	RefPtr<IDescriptorSet> ds = m_descPool->AllocateDescriptorSet(dsLayout.get());
+	RefPtr<IDescriptorSet> ds = m_descPool->AllocateDescriptorSet(dsLayout);
 
 	ViewportInfo viewport;
 	viewport.x = 0;
@@ -264,15 +282,21 @@ void App::Run()
 		commandBuffer->UpdateBuffer(cameraUB.get(), 0, sizeof(ubData), &ubData);
 		commandBuffer->BeginRenderPass(mainRP.get(), framebuffer.get());
 		commandBuffer->SetViewport(viewport);
-		
+		commandBuffer->BindDescriptorSet(0, ds.get());
+		commandBuffer->BindDescriptorSet(1, matDescSet.get());
 		int pipelineIndex = 0;
 		for (auto& meshSet : gpuMeshes)
 		{
 			commandBuffer->BindPipeline(graphPipelines[pipelineIndex].get());
-			commandBuffer->BindDescriptorSet(0, ds.get());
 
 			for (auto& mesh : meshSet.second)
 			{
+				PushConstants pc{};
+				pc.diffuseTexIndex = mesh.GetMaterial()->m_diffuseTexture.m_indexInDescriptorSet;
+				pc.normalTexIndex = mesh.GetMaterial()->m_normalTexture.m_indexInDescriptorSet;
+				pc.metalicRoughnessTexIndex = mesh.GetMaterial()->m_metallicRoughnessTexture.m_indexInDescriptorSet;
+				pc.emissiveTexIndex = mesh.GetMaterial()->m_emissiveTexture.m_indexInDescriptorSet;
+				commandBuffer->PushConstants(&pc, sizeof(pc), ShaderStageFlags::All);
 				IGPUBuffer* vertexBuffer = mesh.GetVertexBuffer();
 				commandBuffer->BindVertexBuffers(&vertexBuffer, 1, &vbOffset);
 				IGPUBuffer* indexBuffer = mesh.GetIndexBuffer();

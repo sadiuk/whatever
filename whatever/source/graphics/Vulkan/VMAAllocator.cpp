@@ -75,7 +75,7 @@ namespace wtv
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.queueFamilyIndexCount = 0;
 		imageInfo.pQueueFamilyIndices = nullptr;
-		imageInfo.initialLayout = (createInfo.usageFlags & ImageUsage::DepthStencilAttachment) == ImageUsage::DepthStencilAttachment ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;

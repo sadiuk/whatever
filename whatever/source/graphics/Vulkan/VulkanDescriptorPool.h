@@ -19,6 +19,7 @@ namespace wtv
 			VkDescriptorPoolCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			info.maxSets = params.maxSetCount;
+			info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 			std::vector<VkDescriptorPoolSize> sizes;
 			ObtainPoolSizes(sizes);
 			info.poolSizeCount = (uint32_t)sizes.size();
@@ -33,7 +34,7 @@ namespace wtv
 
 		VkDescriptorPool GetNativeHandle() const { return m_descPool; }
 
-		RefPtr<IDescriptorSet> AllocateDescriptorSet(const RefPtr<IDescriptorSetLayout>& layout) override;
+		RefPtr<IDescriptorSet> AllocateDescriptorSet(RefPtr<IDescriptorSetLayout>& layout) override;
 	private:
 		void ObtainPoolSizes(std::vector<VkDescriptorPoolSize>& sizes)
 		{
