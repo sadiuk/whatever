@@ -41,6 +41,8 @@ struct VS_OUTPUT
 	float4 pos : SV_POSITION;
     float4 color : TEXCOORD0;
     float2 uv : TEXCOORD1;
+    float3 normal : NORMAL;
+    float4 tangent : TANGENT;
 };
 
 
@@ -53,6 +55,8 @@ VS_OUTPUT VS(VS_INPUT input)
     output.pos = mul(viewPos, projectionMatrix);
     output.color = float4(input.normal, 1);
     output.uv = input.texcoord;
+    output.normal = input.normal;
+    output.tangent = input.tangent;
 	return output;
 }
 
@@ -68,6 +72,24 @@ PS_OUTPUT PS(VS_OUTPUT input)
     output.color = input.color;
     int textureIndex = pc.diffuseTexIndex;
     Texture2D diffuseTexture = matTextures[textureIndex];
-    output.color = diffuseTexture.Sample(matSampler, input.uv);
+    float4 albedo = diffuseTexture.Sample(matSampler, input.uv);
+    
+    float3 geomNormal = normalize(input.normal);
+    float3 geomTangent = normalize(input.tangent.xyz);
+    Texture2D normalTexture = matTextures[pc.normalTexIndex];
+
+    float3 bitangent = input.tangent.w * cross(geomNormal, geomTangent);
+    float3x3 TBN = float3x3(
+    bitangent.x, bitangent.y, bitangent.z,
+    geomTangent.x, geomTangent.y, geomTangent.z,
+    geomNormal.x, geomNormal.y, geomNormal.z
+    );
+
+    float3 normal = (normalTexture.Sample(matSampler, input.uv).xyz - (float3)0.5) * 2.0;
+    normal = mul(normal, TBN);
+
+    float3 L = normalize(float3(0.1, 0.1, 1));
+    float NdotL = dot(normal, L);
+    output.color = float4(NdotL * albedo.rgb, albedo.a);
     return output;
 }

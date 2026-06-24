@@ -123,14 +123,14 @@ namespace wtv
 					else
 					{
 						auto convertPosition = [elementSize](void* vertexData) {
-							if (elementSize == 12)
+							if (elementSize == 12 || elementSize == 16)
 							{
 								float* pos = static_cast<float*>(vertexData);
 								//std::swap(pos[0], pos[1]);
 								std::swap(pos[1], pos[2]);
 								pos[1] *= -1;
 							}
-							else if (elementSize == 24)
+							else if (elementSize == 24 || elementSize == 32)
 							{
 								double* pos = static_cast<double*>(vertexData);
 								//std::swap(pos[0], pos[1]);
