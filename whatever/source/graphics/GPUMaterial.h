@@ -7,6 +7,12 @@
 #include "glm/glm.hpp"
 namespace wtv
 {
+	enum GPUMaterialDSSlot
+	{
+		MatParamsBufferSlot = 0,
+		MatSamplerSlot = 1,
+		MatTexturesSlot = 2 // Bindless
+	};
 	struct GPUMaterialParamEntry
 	{
 		glm::vec4 baseColorFactorRGBMetallicA{ 1, 1, 1, 1 };

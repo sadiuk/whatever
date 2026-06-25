@@ -160,10 +160,10 @@ RefPtr<ICommandBuffer> CPUtoGPUConverter::UploadMaterials(const CPUMeshVec& mesh
 	
 	stagingBuffer = PopulateGPUImages(matUpdateCB, imagesMap, descPool);
 
-	DescriptorSetLayoutParams dsLayoutParams(imagesMap.size() + 2, true);
-	dsLayoutParams.DescribeLayoutEntry(0, DescriptorType::StorageBuffer, 1, ShaderStageFlags::All);
-	dsLayoutParams.DescribeLayoutEntry(1, DescriptorType::Sampler, 1, ShaderStageFlags::All);
-	dsLayoutParams.DescribeLayoutEntry(2, DescriptorType::SampledImage, imagesMap.size(), ShaderStageFlags::All);
+	DescriptorSetLayoutParams dsLayoutParams(3, true);
+	dsLayoutParams.DescribeLayoutEntry(GPUMaterialDSSlot::MatParamsBufferSlot, DescriptorType::StorageBuffer, 1, ShaderStageFlags::All);
+	dsLayoutParams.DescribeLayoutEntry(GPUMaterialDSSlot::MatSamplerSlot, DescriptorType::Sampler, 1, ShaderStageFlags::All);
+	dsLayoutParams.DescribeLayoutEntry(GPUMaterialDSSlot::MatTexturesSlot, DescriptorType::SampledImage, imagesMap.size(), ShaderStageFlags::All);
 	
 	auto dsLayout = m_device->CreateDescriptorSetLayout(dsLayoutParams);
 	auto descSet = descPool->AllocateDescriptorSet(dsLayout);
@@ -177,10 +177,10 @@ RefPtr<ICommandBuffer> CPUtoGPUConverter::UploadMaterials(const CPUMeshVec& mesh
 		.addressModeV = SamplerAddressMode::Repeat,
 		.addressModeW = SamplerAddressMode::Repeat,
 		});
-	descSet->SetBinding(0, materialParamsBuffer.get(), 0, materialParamsBuffer->GetSize());
-	descSet->SetBinding(1, sampler);
+	descSet->SetBinding(GPUMaterialDSSlot::MatParamsBufferSlot, materialParamsBuffer.get(), 0, materialParamsBuffer->GetSize());
+	descSet->SetBinding(GPUMaterialDSSlot::MatSamplerSlot, sampler);
 
-	int imageIndex = 2;
+	int imageIndex = GPUMaterialDSSlot::MatTexturesSlot;
 	for (auto& imageEntry : imagesMap)
 	{
 		descSet->SetBinding(imageIndex, IImage::View(imageEntry.second.m_texture.get(), ImageAspectFlags::ColorBit), ImageLayout::ShaderReadOnlyOptimal, sampler);
