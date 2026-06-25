@@ -46,7 +46,7 @@ namespace wtv
 	}
 
 
-	VulkanDescriptorSet::VulkanDescriptorSet(VulkanDevice* device, VulkanDescriptorPool* descPool, RefPtr<VulkanDescriptorSetLayout>& layout)
+	VulkanDescriptorSet::VulkanDescriptorSet(VulkanDevice* device, const RefPtr<VulkanDescriptorPool>& descPool, RefPtr<VulkanDescriptorSetLayout>& layout)
 		: m_device(device), 
 		m_descPool(descPool),
 		m_layout(layout)
@@ -61,6 +61,22 @@ namespace wtv
 		vkAllocateDescriptorSets(m_device->GetDevice(), &allocInfo, &m_descriptorSet);
 
 		m_resources.reserve(32);
+	}
+
+	VulkanDescriptorSet::~VulkanDescriptorSet()
+	{
+		uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+		VkDevice device = m_device->GetDevice();
+		m_device->EnqueueForDeletion([semaphoreWaitValue, descPool = m_descPool](uint64_t completedValue)
+			{
+				if (completedValue >= semaphoreWaitValue)
+				{
+					// Release the descPool reference
+					return true;
+				}
+				return false;
+			});
+
 	}
 
 	void VulkanDescriptorSet::SetBinding(uint32_t slot, IGPUBuffer* buffer, uint32_t offset, uint32_t size)
@@ -88,7 +104,7 @@ namespace wtv
 		};
 
 		vkUpdateDescriptorSets(m_device->GetDevice(), 1, &write, 0, NULL);
-		m_resources.push_back(std::pair<uint32_t, IGPUResource*>(slot, buffer));
+		m_resources.push_back(std::pair<uint32_t, IGPUMemoryResource*>(slot, buffer));
 	}
 
 	void VulkanDescriptorSet::SetBinding(uint32_t slot, int sampler)
@@ -140,6 +156,6 @@ namespace wtv
 		};
 
 		vkUpdateDescriptorSets(m_device->GetDevice(), 1, &write, 0, NULL);
-		m_resources.push_back(std::pair<uint32_t, IGPUResource*>(slot, static_cast<IGPUImage*>(image.image)));
+		m_resources.push_back(std::pair<uint32_t, IGPUMemoryResource*>(slot, static_cast<IGPUMemoryResource*>(static_cast<VulkanGPUImage*>(image.image))));
 	}
 }

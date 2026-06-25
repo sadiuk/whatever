@@ -2,7 +2,7 @@
 #include "util/RefPtr.h"
 #include "GraphicsConstants.h"
 #include "IFramebuffer.h"
-
+#include "IGPUResource.h"
 #include <vector>
 
 
@@ -76,7 +76,7 @@ namespace wtv
 		}
 	};
 
-	struct IGPURenderPass : public IReferenceCounted
+	struct IGPURenderPass : public IReferenceCounted, public IGPUResource
 	{
 		virtual ~IGPURenderPass() {}
 

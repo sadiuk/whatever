@@ -11,12 +11,22 @@ namespace wtv
 	{
 		m_buffer = m_allocator->AllocateBuffer(params);
 
-		m_device->GetDebugNamer().SetBufferName(m_buffer, name.c_str());
+		m_device->GetDebugNamer().SetResourceName(m_buffer, VK_OBJECT_TYPE_BUFFER, name.c_str());
 	}
 
 	VulkanGPUBuffer::~VulkanGPUBuffer()
 	{
-		m_device->EnqueueForDeletion(m_buffer, GetSemaphoreWaitValue());
+		uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+		VkBuffer buffer = m_buffer;
+		IVulkanAllocator* allocator = m_allocator;
+		m_device->EnqueueForDeletion([semaphoreWaitValue, buffer, allocator](uint64_t completedValue) {
+			if (completedValue >= semaphoreWaitValue)
+			{
+				allocator->DeallocateBuffer(buffer);
+				return true;
+			}
+			return false;
+		});
 	}
 
 	IServiceProvider* VulkanGPUBuffer::GetServiceProvider() const

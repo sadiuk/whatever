@@ -1,7 +1,7 @@
 #include "VulkanCommandPool.h"
 #include "VulkanDevice.h"
 #include "VkMakros.h"
-
+#include "VulkanCommandBuffer.h"
 #include <cassert>
 namespace wtv
 {
@@ -17,22 +17,19 @@ namespace wtv
 		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateCommandPool(m_engine->GetDevice(), &commandPoolInfo, nullptr, &m_commandPool));
 	}
 
+	VulkanCommandPool::~VulkanCommandPool()
+	{
+		vkDestroyCommandPool(m_engine->GetDevice(), m_commandPool, nullptr);
+	}
+
 	RefPtr<VulkanCommandBuffer> wtv::VulkanCommandPool::CreateCommandBuffer()
 	{
-		auto cb = MakeRef<VulkanCommandBuffer>(m_engine, m_commandPool);
-		m_commandBuffers.push_back(cb);
+		auto cb = MakeRef<VulkanCommandBuffer>(m_engine, RefPtr(this));
 		return cb;
 	}
 
 	void wtv::VulkanCommandPool::WaitCommandBuffersAndClear()
 	{
-		//for (auto& cb : m_commandBuffers)
-		//{
-		//	uint32_t refCount = cb->RefCount();
-		//	assert(refCount == 1);
-		//	cb->GetFence().Wait();
-		//}
-		m_commandBuffers.clear();
 		vkResetCommandPool(m_engine->GetDevice(), m_commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	}
 

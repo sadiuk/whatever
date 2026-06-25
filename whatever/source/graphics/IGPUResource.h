@@ -9,9 +9,14 @@ namespace wtv
 		Unknown = 0xFFFFFFFF
 	};
 
+	struct IGPUMemoryResource
+	{
+		virtual ~IGPUMemoryResource() = default;
+		virtual GPUResourceType GetResourceType() const = 0;
+	};
+
 	struct IGPUResource
 	{
-		virtual GPUResourceType GetResourceType() const = 0;
 		virtual ~IGPUResource() = default;
 		void SetSemaphoreWaitValue(uint64_t value) { m_waitValue = value; }
 		uint64_t GetSemaphoreWaitValue() const { return m_waitValue; }

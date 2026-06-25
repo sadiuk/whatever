@@ -32,12 +32,15 @@ namespace wtv
 	bool VulkanSurfaceSDL::Initialize(VkInstance instance)
 	{
 		bool res = SDL_Vulkan_CreateSurface((SDL_Window*)m_window->GetNativeHandle(), instance, &m_surface);
+		if (res)
+			m_instance = instance;
 		return res;
 	}
 
 	bool VulkanSurfaceSDL::Deinitialize()
 	{
-		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		if(m_instance != VK_NULL_HANDLE)
+			vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		return true;
 	}
 

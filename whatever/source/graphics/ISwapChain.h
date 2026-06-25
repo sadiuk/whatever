@@ -11,6 +11,6 @@ namespace wtv
 		{
 			glm::uvec2 extent;
 		};
-		virtual RefPtr<IGPUImage> GetBackBuffer() = 0;
+		virtual IGPUImage* GetBackBuffer() = 0;
 	};
 }

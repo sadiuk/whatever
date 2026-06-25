@@ -7,7 +7,7 @@
 #include <type_traits>
 namespace wtv
 {
-	struct IGPUImage : public IImage, public IGPUResource
+	struct IGPUImage : public IImage, public IGPUResource, public IGPUMemoryResource
 	{
 		IGPUImage(const CreationParams& params) : m_props(params)
 		{

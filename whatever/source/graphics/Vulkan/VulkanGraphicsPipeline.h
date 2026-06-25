@@ -4,9 +4,10 @@
 #include "graphics/IDevice.h"
 #include "VulkanShader.h"
 #include "IServiceProvider.h"
+#include "graphics/IGPUResource.h"
+#include "VulkanRenderPass.h"
 
 #include <array>
-#include "VulkanRenderPass.h"
 namespace wtv
 {
 	class VulkanGraphicsPipelineLayout : public IGraphicsPipelineLayout
@@ -17,11 +18,12 @@ namespace wtv
 		GraphicsPipelineLayoutCreateInfo m_params;
 	public:
 		VulkanGraphicsPipelineLayout(VulkanDevice* device, IServiceProvider* services, const GraphicsPipelineLayoutCreateInfo& params);
+		~VulkanGraphicsPipelineLayout();
 		VkPipelineLayout GetNativeHandle() const { return m_layout; }
 		IServiceProvider* GetServiceProvider() { return m_services; }
 	};
 
-	class VulkanGraphicsPipeline : public IGraphicsPipeline, public IServiceProviderHolder
+	class VulkanGraphicsPipeline : public IGraphicsPipeline, public IServiceProviderHolder, public IGPUResource
 	{
 
 	public:
@@ -57,7 +59,6 @@ namespace wtv
 		VulkanDevice* m_engine;
 		IServiceProvider* m_services;
 		VkPipeline m_pipeline{};
-		VkDevice m_device{};
 		VkPipelineCache m_pipelineCache{};
 		std::array<RefPtr<VulkanShader>, (size_t)ShaderStage::GraphicsStageCount> m_shaderStages;
 		VulkanGraphicsPipelineLayout* m_layout;

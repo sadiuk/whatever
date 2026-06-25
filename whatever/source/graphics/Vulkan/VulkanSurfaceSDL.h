@@ -27,6 +27,6 @@ namespace wtv
 	private:
 		VkSurfaceKHR m_surface;
 		RefPtr<IWindow> m_window;
-		VkInstance m_instance;
+		VkInstance m_instance = VK_NULL_HANDLE;
 	};
 }

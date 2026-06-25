@@ -35,6 +35,11 @@ namespace wtv
 
 		ASSERT_VK_SUCCESS(vkCreatePipelineLayout(m_device->GetDevice(), &layoutCreateInfo, nullptr, &m_layout));
 	}
+
+	VulkanGraphicsPipelineLayout::~VulkanGraphicsPipelineLayout()
+	{
+		vkDestroyPipelineLayout(m_device->GetDevice(), m_layout, nullptr);
+	}
 	
 	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* engine, IServiceProvider* services, const CreateInfo& params, VulkanGraphicsPipelineLayout* layout) :
 		IGraphicsPipeline(params),
@@ -99,12 +104,28 @@ namespace wtv
 		pipelineInfo.basePipelineIndex = 0;
 
 		ASSERT_VK_SUCCESS_ELSE_RET(vkCreateGraphicsPipelines(m_engine->GetDevice(), m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline));
+
+		//static int pipIndex = 0;
+		//std::string pipName = "GraphicsPipeline_" + std::to_string(pipIndex);
+		//m_engine->GetDebugNamer().SetPipelineName(m_pipeline, pipName.c_str());;
+		//pipIndex++;
 	}
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
-		vkDestroyPipeline(m_engine->GetDevice(), m_pipeline, nullptr);
-		vkDestroyPipelineCache(m_engine->GetDevice(), m_pipelineCache, nullptr);
+		uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+		VkDevice device = m_engine->GetDevice();
+		m_engine->EnqueueForDeletion([semaphoreWaitValue, device, pipeline = m_pipeline, cache = m_pipelineCache, shaders = m_shaderStages](uint64_t completedValue)
+			{
+				if (completedValue >= semaphoreWaitValue)
+				{
+					vkDestroyPipeline(device, pipeline, nullptr);
+					vkDestroyPipelineCache(device, cache, nullptr);
+					return true;
+				}
+				return false;
+			});
+		
 
 	}
 
@@ -141,6 +162,8 @@ namespace wtv
 			shaderParams.entryPoint = entryPoint;
 			shaderParams.stage = stage;
 			shaderParams.sourcePath = shaderPath;
+
+			// TODO: cache the shaders
 			m_shaderStages[(int)stage] = compiler->CreateShaderFromFile(shaderParams);
 
 			stagesInfo[i] = {};

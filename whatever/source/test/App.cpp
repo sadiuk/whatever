@@ -64,6 +64,8 @@ void App::Init()
 	params.SetDescriptorCount(DescriptorType::InputAttachment, 1000);
 	m_descPool = m_device->CreateDescriptorPool(params);
 
+	m_cpuToGpuConverter = MakeRef<CPUtoGPUConverter>(m_services.get(), m_device.get());
+
 	IImage::CreationParams depthBufferParams{ m_windowSize.x, m_windowSize.y, 1, 1, 1, ImageFormat::D32_SFLOAT, ImageDimension::Dimension2D, 1, ImageUsage::DepthStencilAttachment };
 	m_depthBuffer = m_device->CreateImage(depthBufferParams, MemoryPropertyFlags::DeviceLocal, "Scene Depth Buffer");
 
@@ -72,7 +74,7 @@ void App::Init()
 	framebufferLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
 	framebufferLayout.depthBuffer = m_depthBuffer->GetProperties().format;
 
-	IImage::View swapchainImageView(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+	IImage::View swapchainImageView(m_device->GetBackbuffer(), ImageAspectFlags::ColorBit);
 	IImage::View depthBufferImageView(m_depthBuffer.get(), ImageAspectFlags::DepthBit);
 	m_framebufferInfo.colorBuffers = { swapchainImageView };
 	m_framebufferInfo.depthBuffer = depthBufferImageView;
@@ -113,7 +115,6 @@ void App::Init()
 	imguiFBLayout.colorBuffers.emplace_back();
 	imguiFBLayout.colorBuffers[0] = m_device->GetSwapchainFormat();
 
-	m_cpuToGpuConverter = MakeRef<CPUtoGPUConverter>(m_services.get(), m_device.get());
 	
 	RenderPassParams imguiRPParams(imguiFBLayout);
 	imguiRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Load, AttachmentStoreOp::Store, ImageLayout::ColorAttachmentOptimal, ImageLayout::PresentSrcKhr);
@@ -139,6 +140,15 @@ App::App()
 	m_windowPos = { 300, 200 };
 	Init();
 }
+
+App::~App()
+{
+	vkDeviceWaitIdle(static_cast<VulkanDevice*>(m_device.get())->GetDevice());
+	ImGui_ImplVulkan_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
+}
+
 struct PushConstants
 {
 	uint32_t diffuseTexIndex;
@@ -269,7 +279,7 @@ void App::Run()
 
 		auto fbInfo = m_framebufferInfo;
 		// Update the backbuffer image view for the current frame
-		fbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+		fbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer(), ImageAspectFlags::ColorBit);
 		fbInfo.depthBuffer = IImage::View(m_depthBuffer.get(), ImageAspectFlags::DepthBit);
 		auto framebuffer = m_device->CreateFramebuffer(std::move(fbInfo));
 
@@ -314,12 +324,14 @@ void App::Run()
 		ImGui::NewFrame();
 		ImGui::Begin("Hello");
 		ImGui::Text("Hello, Vulkan + SDL2!");
+		auto pos = m_camera->GetPosition();
+		ImGui::Text("Camera Position: x=%.2f, y=%.2f, z=%.2f", pos.x, pos.y, pos.z);
 		ImGui::End();
 		ImGui::Render();
 
 		auto imguiFbInfo = m_imguiFramebufferInfo;
 		// Update the backbuffer image view for the current frame
-		imguiFbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer().get(), ImageAspectFlags::ColorBit);
+		imguiFbInfo.colorBuffers[0] = IImage::View(m_device->GetBackbuffer(), ImageAspectFlags::ColorBit);
 		auto imguiFB = m_device->CreateFramebuffer(std::move(imguiFbInfo));
 		ImDrawData* draw_data = ImGui::GetDrawData();
 		commandBuffer->BeginRenderPass(m_imguiRenderPass.get(), imguiFB.get());

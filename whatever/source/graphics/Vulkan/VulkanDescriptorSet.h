@@ -19,18 +19,18 @@ namespace wtv
 	};
 
 	class VulkanDescriptorPool;
-	class VulkanDescriptorSet : public IDescriptorSet
+	class VulkanDescriptorSet : public IDescriptorSet, public IGPUResource
 	{
 		VkDescriptorSet m_descriptorSet;
 		VulkanDevice* m_device;
-		VulkanDescriptorPool* m_descPool;
+		RefPtr<VulkanDescriptorPool> m_descPool;
 		RefPtr<VulkanDescriptorSetLayout> m_layout;
-		std::vector<std::pair<uint32_t, IGPUResource*>> m_resources;
+		std::vector<std::pair<uint32_t, IGPUMemoryResource*>> m_resources;
 	public:
-		VulkanDescriptorSet(VulkanDevice* device, VulkanDescriptorPool* descPool, RefPtr<VulkanDescriptorSetLayout>& layout);
-		~VulkanDescriptorSet() = default;
+		VulkanDescriptorSet(VulkanDevice* device, const RefPtr<VulkanDescriptorPool>& descPool, RefPtr<VulkanDescriptorSetLayout>& layout);
+		~VulkanDescriptorSet();
 		VkDescriptorSet GetNativeHandle() const { return m_descriptorSet; }
-		std::vector<std::pair<uint32_t, IGPUResource*>>& GetBoundResources() { return m_resources; }
+		std::vector<std::pair<uint32_t, IGPUMemoryResource*>>& GetBoundResources() { return m_resources; }
 		IDescriptorSetLayout* GetLayout() override { return m_layout.get(); }
 		//TODO:: ensure when adding texture bindings that we also add them to m_resources
 		void SetBinding(uint32_t slot, IGPUBuffer* buffer, uint32_t offset, uint32_t size) override;

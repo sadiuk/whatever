@@ -75,14 +75,17 @@ namespace wtv
 
 		CreateImages(swapchainImageParams);
 	}
+
 	VulkanSwapchain::~VulkanSwapchain()
 	{
 		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 	}
-	RefPtr<IGPUImage> VulkanSwapchain::GetBackBuffer()
+
+	IGPUImage* VulkanSwapchain::GetBackBuffer()
 	{
 		return m_images[m_imageIndex].get();
 	}
+
 	VulkanSwapchain::AvailableSwapchainCapabilities VulkanSwapchain::GetAvailableSwapchainCapabilities()
 	{
 		AvailableSwapchainCapabilities caps{};
@@ -99,6 +102,7 @@ namespace wtv
 		vkGetPhysicalDeviceSurfacePresentModesKHR(m_engine->GetPhysicalDevice(), (VkSurfaceKHR)m_surface->GetNativeHandle(), &modeCount, caps.presentModes.data());
 		return caps;
 	}
+
 	void VulkanSwapchain::CreateImages(const IImage::CreationParams& params)
 	{
 		uint32_t imageCount{};
@@ -113,12 +117,14 @@ namespace wtv
 			m_images[i] = MakeRef<VulkanGPUImage>(m_engine, params, "Swapchain Image" + std::to_string(i), rawSwapchainImages[i]);
 		}
 	}
+
 	void VulkanSwapchain::GetNextImage()
 	{
 		VulkanFence acquireImageFence(m_engine);
 		ASSERT_VK_SUCCESS_ELSE_RET(vkAcquireNextImageKHR(m_device, m_swapchain, UINT64_MAX, VK_NULL_HANDLE, acquireImageFence.GetNativeHandle(), &m_imageIndex));
 		acquireImageFence.Wait();
 	}
+
 	IServiceProvider* VulkanSwapchain::GetServiceProvider() const
 	{
 		return m_engine->GetServiceProvider();

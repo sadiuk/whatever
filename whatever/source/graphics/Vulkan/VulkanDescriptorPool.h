@@ -19,7 +19,7 @@ namespace wtv
 			VkDescriptorPoolCreateInfo info{};
 			info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			info.maxSets = params.maxSetCount;
-			info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+			info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 			std::vector<VkDescriptorPoolSize> sizes;
 			ObtainPoolSizes(sizes);
 			info.poolSizeCount = (uint32_t)sizes.size();

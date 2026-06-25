@@ -98,6 +98,12 @@ namespace wtv
 			return *this;
 		}
 
+		void Reset()
+		{
+			ReleasePointer();
+			m_pointer = nullptr;
+		}
+
 		template<BaseOfThis<Type> D>
 		operator RefPtr<D>()
 		{

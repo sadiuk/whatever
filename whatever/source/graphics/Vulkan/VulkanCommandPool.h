@@ -1,19 +1,21 @@
 #pragma once
-#include "VulkanCommandBuffer.h"
 #include <vulkan/vulkan.h>
+#include "util/RefPtr.h"
+#include "VulkanCommandBuffer.h"
 namespace wtv
 {
 	class VulkanDevice;
-	class VulkanCommandPool : public IServiceProviderHolder
+	class VulkanCommandPool : public IServiceProviderHolder, public IReferenceCounted
 	{
 	public:
 		VulkanCommandPool(VulkanDevice* engine);
+		~VulkanCommandPool();
 		RefPtr<VulkanCommandBuffer> CreateCommandBuffer();
 		void WaitCommandBuffersAndClear();
 		IServiceProvider* GetServiceProvider() const override;
+		VkCommandPool GetNativeHandle() { return m_commandPool; }
 	private:
 		VulkanDevice* m_engine;
-		std::vector<RefPtr<VulkanCommandBuffer>> m_commandBuffers;
 		VkCommandPool m_commandPool;
 	};
 }

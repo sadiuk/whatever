@@ -63,7 +63,18 @@ VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const RenderPassParams&
 
 VulkanRenderPass::~VulkanRenderPass()
 {
-	vkDestroyRenderPass(m_device->GetDevice(), m_renderPass, nullptr);
-}
+	uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+	VkDevice device = m_device->GetDevice();
+	VkRenderPass rp = m_renderPass;
+	m_device->EnqueueForDeletion([semaphoreWaitValue, device, rp](uint64_t completedValue)
+	{
+			if (completedValue >= semaphoreWaitValue)
+			{
+				vkDestroyRenderPass(device, rp, nullptr);
+				return true;
+			}
+			return false;
+		});
+	}
 
 }

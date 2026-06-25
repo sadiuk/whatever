@@ -11,7 +11,7 @@ namespace wtv
 	public:
 		VulkanSwapchain(VulkanDevice* engine, IVulkanSurface* surface);
 		~VulkanSwapchain();
-		RefPtr<IGPUImage> GetBackBuffer() override;
+		IGPUImage* GetBackBuffer() override;
 		VkSwapchainKHR GetNativeHandle() { return m_swapchain; }
 		uint32_t GetImageIndex() { return m_imageIndex; }
 		void GetNextImage();

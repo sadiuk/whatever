@@ -20,6 +20,7 @@ namespace wtv
 		VkImageView GetImageView(const IImage::View& view);
 		IServiceProvider* GetServiceProvider() const override;
 	private:
+		std::string m_debugName;
 		VulkanDevice* m_device;
 		VkImage m_image;
 		VkDeviceMemory m_memory;

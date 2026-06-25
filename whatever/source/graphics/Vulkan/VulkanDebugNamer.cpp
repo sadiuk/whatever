@@ -6,33 +6,10 @@ namespace wtv
 	void VulkanDebugNamer::Init(VulkanDevice* device)
 	{
 		m_device = device;
+
+		m_vkDevice = device->GetDevice();
 		auto instance = m_device->GetInstance();
 		vkSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)
 			vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectNameEXT");
-	}
-
-	void VulkanDebugNamer::SetBufferName(VkBuffer buffer, const char* name) const
-	{
-		if (vkSetDebugUtilsObjectNameEXT != nullptr) {
-			VkDebugUtilsObjectNameInfoEXT nameInfo{};
-			nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-			nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
-			nameInfo.objectHandle = (uint64_t)buffer;
-			nameInfo.pObjectName = name;
-
-			vkSetDebugUtilsObjectNameEXT(m_device->GetDevice(), &nameInfo);
-		}
-	}
-	void VulkanDebugNamer::SetImageName(VkImage image, const char* name) const
-	{
-		if (vkSetDebugUtilsObjectNameEXT != nullptr) {
-			VkDebugUtilsObjectNameInfoEXT nameInfo{};
-			nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-			nameInfo.objectType = VK_OBJECT_TYPE_IMAGE;
-			nameInfo.objectHandle = (uint64_t)image;
-			nameInfo.pObjectName = name;
-
-			vkSetDebugUtilsObjectNameEXT(m_device->GetDevice(), &nameInfo);
-		}
 	}
 }

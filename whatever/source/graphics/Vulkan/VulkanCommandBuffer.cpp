@@ -6,26 +6,39 @@
 #include "VulkanGPUBuffer.h"
 #include "VulkanGPUImage.h"
 #include "VulkanDescriptorSet.h"
+#include "VulkanCommandPool.h"
 
-wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* engine, VkCommandPool commandPool) :
+wtv::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* engine, const RefPtr<VulkanCommandPool>& commandPool) :
+	m_engine(engine),
 	m_device(engine->GetDevice()),
 	m_commandPool(commandPool),
-	m_queueWaitSemaphore(engine),
-	m_queueSignalSemaphore(engine),
 	m_queueSignalFence(engine)
 {
 	VkCommandBufferAllocateInfo bufferAllocInfo{};
 	bufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	bufferAllocInfo.pNext = nullptr;
-	bufferAllocInfo.commandPool = commandPool;
+	bufferAllocInfo.commandPool = m_commandPool->GetNativeHandle();
 	bufferAllocInfo.commandBufferCount = 1;
 	bufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	ASSERT_VK_SUCCESS(vkAllocateCommandBuffers(m_device, &bufferAllocInfo, &m_commandBuffer));
+
+	m_resourcesInUse.push_back(this);
+
 }
 
 wtv::VulkanCommandBuffer::~VulkanCommandBuffer()
 {
-	vkFreeCommandBuffers(m_device, m_commandPool, 1, &m_commandBuffer);
+	uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+	VkDevice device = m_engine->GetDevice();
+	m_engine->EnqueueForDeletion([semaphoreWaitValue, device, commandPool = m_commandPool->GetNativeHandle(), commandBuffer = m_commandBuffer](uint64_t completedValue)
+		{
+			if (completedValue >= semaphoreWaitValue)
+			{
+				vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+				return true;
+			}
+			return false;
+		});
 }
 
 void wtv::VulkanCommandBuffer::Reset()
@@ -99,6 +112,12 @@ void wtv::VulkanCommandBuffer::BeginRenderPass(IGPURenderPass* rp, IFramebuffer*
 		VulkanGPUImage* image = static_cast<VulkanGPUImage*>(properties.depthBuffer.value().image);
 		m_resourcesInUse.push_back(image);
 	}
+
+	m_resourcesInUse.push_back(rp);
+	m_resourcesInUse.push_back(vulkanFB);
+
+	
+
 }
 
 void wtv::VulkanCommandBuffer::EndRenderPass()
@@ -137,7 +156,7 @@ void wtv::VulkanCommandBuffer::BindPipeline(IGraphicsPipeline* pipeline)
 {
 	auto vkPipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
 	vkCmdBindPipeline(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetPipeline());
-
+	m_resourcesInUse.push_back(vkPipeline);
 }
 
 void wtv::VulkanCommandBuffer::BindVertexBuffers(IGPUBuffer** buffers, uint32_t count, size_t* offsets)
@@ -213,6 +232,7 @@ void wtv::VulkanCommandBuffer::BindDescriptorSet(uint32_t setIndex, IDescriptorS
 			m_resourcesInUse.push_back(image);
 		}
 	}
+	m_resourcesInUse.push_back(vulkanDS);
 }
 
 void wtv::VulkanCommandBuffer::CopyBuffer(IGPUBuffer* src, uint64_t srcOffset, IGPUBuffer* dst, uint64_t dstOffset, uint64_t size)

@@ -5,7 +5,7 @@
 #include <string>
 namespace wtv
 {
-	struct IGPUBuffer : public IBuffer, public IGPUResource
+	struct IGPUBuffer : public IBuffer, public IGPUResource, public IGPUMemoryResource
 	{
 		IGPUBuffer(const CreationParams& createInfo, std::string name) : IBuffer(createInfo, name) {}
 		GPUResourceType GetResourceType() const

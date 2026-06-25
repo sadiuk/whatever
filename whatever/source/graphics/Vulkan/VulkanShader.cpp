@@ -13,6 +13,12 @@ namespace wtv
 		moduleInfo.pCode = m_params.spirvCode;
 		ASSERT_VK_SUCCESS(vkCreateShaderModule(params.engine->GetDevice(), &moduleInfo, nullptr, &m_module));
 	}
+
+	VulkanShader::~VulkanShader()
+	{
+		vkDestroyShaderModule(m_params.engine->GetDevice(), m_module, nullptr);
+	}
+
 	IServiceProvider* VulkanShader::GetServiceProvider() const
 	{
 		return m_params.engine->GetServiceProvider();

@@ -44,7 +44,7 @@ namespace wtv
 	bool VulkanDevice::CreateCommandPools()
 	{
 		for (int i = 0; i < m_swapchain->GetImageCount(); ++i)
-			m_commandPools.push_back(VulkanCommandPool(this));
+			m_commandPools.push_back(MakeRef<VulkanCommandPool>(this));
 		return true;
 	}       
 	bool VulkanDevice::CreateCommandQueues()
@@ -272,7 +272,7 @@ namespace wtv
 
 	RefPtr<ICommandBuffer> VulkanDevice::CreateCommandBuffer()
 	{
-		return m_commandPools[m_swapchain->GetImageIndex()].CreateCommandBuffer();
+		return m_commandPools[m_swapchain->GetImageIndex()]->CreateCommandBuffer();
 	}
 
 	RefPtr<IFramebuffer> VulkanDevice::CreateFramebuffer(IFramebuffer::Properties&& params)
@@ -390,47 +390,20 @@ namespace wtv
 	void VulkanDevice::FlushDeletions()
 	{
 		uint64_t completedValue = m_gpuTimelineSemaphore->CheckCompletedValue();
-		for (auto buffIt = m_buffersToDelete.begin(); buffIt != m_buffersToDelete.end(); )
+		for (auto it = m_deletionQueue.begin(); it != m_deletionQueue.end();)
 		{
-			if (buffIt->second <= completedValue)
+			if (it->operator()(completedValue))
 			{
-				m_allocator->DeallocateBuffer(buffIt->first);
-				buffIt = m_buffersToDelete.erase(buffIt);
+				it = m_deletionQueue.erase(it);
 			}
 			else
 			{
-				++buffIt;
-			}
-		}
-
-		for (auto imgViewIt = m_imageViewsToDelete.begin(); imgViewIt != m_imageViewsToDelete.end(); )
-		{
-			if (imgViewIt->second <= completedValue)
-			{
-				vkDestroyImageView(m_device, imgViewIt->first, nullptr);
-				imgViewIt = m_imageViewsToDelete.erase(imgViewIt);
-			}
-			else
-			{
-				++imgViewIt;
-			}
-		}
-
-		for (auto imgIt = m_imagesToDelete.begin(); imgIt != m_imagesToDelete.end(); )
-		{
-			if (imgIt->second <= completedValue)
-			{
-				m_allocator->DeallocateImage(imgIt->first);
-				imgIt = m_imagesToDelete.erase(imgIt);
-			}
-			else
-			{
-				++imgIt;
+				++it;
 			}
 		}
 	}
 
-	RefPtr<IGPUImage> VulkanDevice::GetBackbuffer()
+	IGPUImage* VulkanDevice::GetBackbuffer()
 	{
 		return m_swapchain->GetBackBuffer();
 	}
@@ -466,14 +439,30 @@ namespace wtv
 	{
 		m_graphicsQueue->GetFence().Wait();
 		m_graphicsQueue->GetFence().Reset();
-		m_commandPools[m_swapchain->GetImageIndex()].WaitCommandBuffersAndClear();
+		m_commandPools[m_swapchain->GetImageIndex()]->WaitCommandBuffersAndClear();
 		m_swapchain->GetNextImage();
 	}
 
 
 	bool VulkanDevice::Deinit()
 	{
+		m_dummyRPs.clear();
 
+		m_presentQueue.Reset();
+		m_graphicsQueue.Reset();
+		m_swapchain.Reset();
+		m_surface.Reset();
+
+		while (m_deletionQueue.size() > 0)
+			FlushDeletions();
+		
+		m_commandPools.clear();
+		m_gpuTimelineSemaphore.Reset();
+		m_allocator.Reset();
+		
+		for (auto& sampler : m_samplers)
+			vkDestroySampler(m_device, sampler, nullptr);
+		
 		vkDestroyDevice(m_device, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
 

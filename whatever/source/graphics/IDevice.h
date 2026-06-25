@@ -39,7 +39,7 @@ namespace wtv
 		virtual RefPtr<IGraphicsPipelineLayout> CreateGraphicsPipelineLayout(const GraphicsPipelineLayoutCreateInfo& params) = 0;
 		virtual RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params, const RefPtr<const IGraphicsPipelineLayout>& layout) = 0;
 		virtual RefPtr<ICommandBuffer> CreateCommandBuffer() = 0;
-		virtual RefPtr<IGPUImage> GetBackbuffer() = 0;
+		virtual IGPUImage* GetBackbuffer() = 0;
 		virtual RefPtr<IFence> CreateFence(bool createSignaled) = 0;
 		virtual RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params, const std::string& name) = 0;
 		virtual RefPtr<IGPUImage> CreateImage(const IImage::CreationParams& params, MemoryPropertyFlags memoryFlags, const std::string& name) = 0;

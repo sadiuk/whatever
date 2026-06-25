@@ -71,7 +71,7 @@ namespace wtv
 		RefPtr<IGraphicsPipelineLayout> CreateGraphicsPipelineLayout(const GraphicsPipelineLayoutCreateInfo& params) override;
 		RefPtr<IGraphicsPipeline> CreateGraphicsPipeline(const IGraphicsPipeline::CreateInfo& params, const RefPtr<const IGraphicsPipelineLayout>& layout) override;
 		RefPtr<ICommandBuffer> CreateCommandBuffer() override;
-		RefPtr<IGPUImage> GetBackbuffer() override;
+		IGPUImage* GetBackbuffer() override;
 		RefPtr<IFence> CreateFence(bool createSignaled) override;
 		RefPtr<IGPUBuffer> CreateBuffer(const IGPUBuffer::CreationParams& params, const std::string& name) override;
 		RefPtr<IGPUImage> CreateImage(const IImage::CreationParams& params, MemoryPropertyFlags memoryFlags, const std::string& name) override;
@@ -102,14 +102,15 @@ namespace wtv
 		const VulkanDebugNamer& GetDebugNamer() { return m_debugNamer; }
 		VkSampler GetSampler(SamplerIndex index) { return m_samplers[index]; }
 	public:
-		void EnqueueForDeletion(VkBuffer buffer, uint64_t semaphoreWaitValue) { m_buffersToDelete.emplace_back(buffer, semaphoreWaitValue); }
-		void EnqueueForDeletion(VkImageView view, uint64_t semaphoreWaitValue) { m_imageViewsToDelete.emplace_back(view, semaphoreWaitValue); }
-		void EnqueueForDeletion(VkImage image, uint64_t semaphoreWaitValue) { m_imagesToDelete.emplace_back(image, semaphoreWaitValue); }
+		void EnqueueForDeletion(const std::function<bool(uint64_t)>& destroyFunc)
+		{
+			m_deletionQueue.push_back(destroyFunc);
+		}
 	private:
 		VkInstance m_instance;
 		VkPhysicalDevice m_physicalDevice;
 		VkDevice m_device;
-		std::vector<VulkanCommandPool> m_commandPools;
+		std::vector<RefPtr<VulkanCommandPool>> m_commandPools;
 		RefPtr<IVulkanSurface> m_surface;
 		RefPtr<VulkanSwapchain> m_swapchain;
 		RefPtr<VulkanQueue> m_graphicsQueue;
@@ -123,11 +124,9 @@ namespace wtv
 
 		std::unordered_map<IFramebuffer::Layout, RefPtr<VulkanRenderPass>> m_dummyRPs;
 		std::shared_mutex m_dummyRPsMutex;
-		std::list<std::pair<VkBuffer, uint64_t>> m_buffersToDelete;
-		std::list<std::pair<VkImageView, uint64_t>> m_imageViewsToDelete;
-		std::list<std::pair<VkImage, uint64_t>> m_imagesToDelete;
 		std::vector<VkSampler> m_samplers;
 
 		VulkanDebugNamer m_debugNamer;
+		std::list< std::function<bool(uint64_t)>> m_deletionQueue;
 	};
 }

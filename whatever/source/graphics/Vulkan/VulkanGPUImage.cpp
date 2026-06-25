@@ -11,8 +11,8 @@ namespace wtv
 		m_allocator(allocator)
 	{
 		m_image = m_allocator->AllocateImage(params, flags);
-		m_device->GetDebugNamer().SetImageName(m_image, name.c_str());
-
+		m_device->GetDebugNamer().SetResourceName(m_image, VK_OBJECT_TYPE_IMAGE, name.c_str());
+		m_debugName = name;
 	}
 
 	VulkanGPUImage::VulkanGPUImage(VulkanDevice* engine, const CreationParams& params, const std::string& name, VkImage rawHandle) :
@@ -20,18 +20,40 @@ namespace wtv
 		m_device(engine),
 		m_image(rawHandle)
 	{
+		m_debugName = name;
+		m_device->GetDebugNamer().SetResourceName(m_image, VK_OBJECT_TYPE_IMAGE, name.c_str());
 	}
 
 	VulkanGPUImage::~VulkanGPUImage()
 	{
+		uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+		IVulkanAllocator* allocator = m_allocator;
+		VkDevice device = m_device->GetDevice();
 		for (auto view : m_cachedViews)
 		{
-			m_device->EnqueueForDeletion(view.second, GetSemaphoreWaitValue());
+			VkImageView imageView = view.second;
+			m_device->EnqueueForDeletion([semaphoreWaitValue, imageView, allocator, device](uint64_t completedValue) 
+			{
+				if (completedValue >= semaphoreWaitValue)
+				{
+					vkDestroyImageView(device, imageView, nullptr);
+					return true;
+				}
+				return false;
+			});
 		}
-		if (m_allocator)
+
+		m_device->EnqueueForDeletion([semaphoreWaitValue, allocator, device, image = m_image](uint64_t completedValue)
 		{
-			vkDestroyImage(m_device->GetDevice(), m_image, nullptr);
-		}
+			if (completedValue >= semaphoreWaitValue)
+			{
+				if(allocator)
+					allocator->DeallocateImage(image);
+				return true;
+			}
+			return false;
+		});
+
 	}
 
 	VkImageView VulkanGPUImage::GetImageView(const IImage::View& view)
@@ -64,12 +86,12 @@ namespace wtv
 		viewInfo.subresourceRange.layerCount = view.arrayLayerCount;
 		viewInfo.subresourceRange.levelCount = view.mipCount;
 		viewInfo.subresourceRange.aspectMask = VulkanConstantTranslator::GetVkImageAspectFlagBits(view.aspectFlags);
-		if (viewInfo.format == VK_FORMAT_D32_SFLOAT)
-			int a = 0;
+		
+		static int a = 0;
 		ASSERT_VK_SUCCESS_ELSE_RET0(vkCreateImageView(m_device->GetDevice(), &viewInfo, nullptr, &newImageView));
-
+		a++;
+		m_device->GetDebugNamer().SetResourceName(newImageView, VK_OBJECT_TYPE_IMAGE_VIEW, (m_debugName + " Cached Image View" + std::to_string(a)).c_str());
 		m_cachedViews.push_back({ view, newImageView });
-
 		return newImageView;
 	}
 

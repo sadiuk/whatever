@@ -1,15 +1,16 @@
 #pragma once
 #include "graphics/IFramebuffer.h"
 #include "IServiceProvider.h"
-
+#include "graphics/IGPUResource.h"
 #include "vulkan/vulkan.h"
 namespace wtv
 {
 	class VulkanDevice;
-	class VulkanFramebuffer : public IFramebuffer, public IServiceProviderHolder
+	class VulkanFramebuffer : public IFramebuffer, public IServiceProviderHolder, public IGPUResource
 	{
 	public:
 		VulkanFramebuffer(Properties&& params, VulkanDevice* engine);
+		~VulkanFramebuffer();
 		VkFramebuffer GetNativeHandle() { return m_framebuffer; }
 		const std::vector<VkImageView>& GetAttachments() const { return m_attachments; }
 		IServiceProvider* GetServiceProvider() const override;

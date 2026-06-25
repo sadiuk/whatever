@@ -53,6 +53,22 @@ namespace wtv
 		ASSERT_VK_SUCCESS(vkCreateFramebuffer(m_engine->GetDevice(), &createInfo, nullptr, &m_framebuffer));
 	}
 
+	VulkanFramebuffer::~VulkanFramebuffer()
+	{
+		uint64_t semaphoreWaitValue = GetSemaphoreWaitValue();
+		VkDevice device = m_engine->GetDevice();
+		m_engine->EnqueueForDeletion([semaphoreWaitValue, device, framebuffer = m_framebuffer](uint64_t completedValue)
+		{
+			if (completedValue >= semaphoreWaitValue)
+			{
+				vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+				return true;
+			}
+			return false;
+		});
+	}
+
 	
 	IServiceProvider* VulkanFramebuffer::GetServiceProvider() const
 	{

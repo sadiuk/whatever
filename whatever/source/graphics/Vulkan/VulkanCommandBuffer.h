@@ -16,11 +16,12 @@ namespace wtv
 	class VulkanGraphicsPipelineLayout;
 	class VulkanGPUBuffer;
 	class VulkanGPUImage;
-	class VulkanCommandBuffer : public ICommandBuffer, public IServiceProviderHolder
+	class VulkanCommandPool;
+	class VulkanCommandBuffer : public ICommandBuffer, public IGPUResource, public IServiceProviderHolder
 	{
 		static constexpr uint32_t CLEAR_COLOR_SIZE = 16;
 	public:
-		VulkanCommandBuffer(VulkanDevice* engine, VkCommandPool commandPool);
+		VulkanCommandBuffer(VulkanDevice* engine, const RefPtr<VulkanCommandPool>& commandPool);
 		~VulkanCommandBuffer();
 		VkCommandBuffer GetNativeHandle() { return m_commandBuffer; }
 	public:
@@ -59,9 +60,8 @@ namespace wtv
 		std::optional<VkRenderPass> m_renderpass;
 		VkDevice m_device;
 		VkCommandBuffer m_commandBuffer;
-		VkCommandPool m_commandPool;
-
-		VulkanSemaphore m_queueWaitSemaphore, m_queueSignalSemaphore;
+		RefPtr<VulkanCommandPool> m_commandPool;
+		 
 		VulkanFence m_queueSignalFence;
 	};
 }

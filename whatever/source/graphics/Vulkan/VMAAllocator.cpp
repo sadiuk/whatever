@@ -17,6 +17,11 @@ namespace wtv
 
 	}
 
+	VMAAllocator::~VMAAllocator()
+	{
+		vmaDestroyAllocator(m_allocator);
+	}
+
 	VkBuffer VMAAllocator::AllocateBuffer(const IGPUBuffer::CreationParams& params)
 	{
 		auto device = m_device->GetDevice();

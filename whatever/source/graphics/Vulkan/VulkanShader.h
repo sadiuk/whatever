@@ -2,7 +2,7 @@
 #include "graphics/IShader.h"
 #include "graphics/GraphicsConstants.h"
 #include "IServiceProvider.h"
-
+#include "graphics/IGPUResource.h"
 #include "vulkan/vulkan.h"
 
 #include <vector>
@@ -22,7 +22,7 @@ namespace wtv
 		};
 
 		VulkanShader(const CreationParams& params);
-
+		~VulkanShader();
 		VkShaderModule GetNativeHandle() { return m_module; }
 
 		IServiceProvider* GetServiceProvider() const override;
