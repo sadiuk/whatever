@@ -5,3 +5,4 @@ whatever/bin/*
 whatever/third-party/vs_projects/imgui/x86
 whatever/third-party/vs_projects/imgui/x64
 whatever/x64
+whatever/whatever/imgui.ini
