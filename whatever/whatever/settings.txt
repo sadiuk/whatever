@@ -1,0 +1,7 @@
+Camera Direction = {0.141785 -0.049647 -0.988652}
+Camera Far = 5000
+Camera Fov = 69.11
+Camera Near = 0.01
+Camera Position = {-539.459839 -8.232251 162.451233}
+CameraDirection = {-1.000000 0.000000 0.000000}
+CameraPosition = {111.000000 0.000000 0.000000}

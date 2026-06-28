@@ -219,9 +219,9 @@ void App::Run()
 		pipelineInfo.blendStateInfo.attachmentBlendStates[0].dstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
 
 		pipelineInfo.depthStencilInfo.depthTestEnable = true;
-		pipelineInfo.depthStencilInfo.depthTestPassResult = CompareOperation::Less;
 		pipelineInfo.depthStencilInfo.depthWriteEnable = true;
 		pipelineInfo.depthStencilInfo.stencilTestEnabled = false;
+		pipelineInfo.depthStencilInfo.depthTestPassResult = CompareOperation::Greater;
 
 		pipelineInfo.rasterInfo.frontFace = FrontFace::CounterClockwise;
 		pipelineInfo.rasterInfo.cullMode = CullMode::None;
@@ -266,7 +266,7 @@ void App::Run()
 
 	RenderPassParams mainRPParams(m_framebufferInfo.layout);
 	glm::vec4 clearColor(0, 0, 0, 0);
-	float clearDepth = 1;
+	float clearDepth = 0;
 	mainRPParams.SetColorAttachmentInfo(0, AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::ColorAttachmentOptimal, &clearColor);
 	mainRPParams.SetDepthAttachmentInfo(AttachmentLoadOp::Clear, AttachmentStoreOp::Store, ImageLayout::Undefined, ImageLayout::DepthStencilAttachmentOptimal, &clearDepth);
 	auto mainRP = m_device->CreateRenderPass(mainRPParams);

@@ -21,6 +21,7 @@ namespace wtv
 		}
 		void OnMouseButtonStateChange(IWindow* window, MouseButton button, MouseButtonState state) override
 		{
+			m_mousePos = window->GetMousePosition();
 			if (m_mouseButtonStates[(int)button] != state)
 				m_relativeMousePos = { 0, 0 };
 			m_mouseButtonStates[(int)button] = state;
