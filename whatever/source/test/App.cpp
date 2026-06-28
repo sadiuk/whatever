@@ -7,6 +7,7 @@
 #include "graphics/GPUMesh.h"
 #include <set>
 #include "CameraControler.h"
+#include "util/Settings.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
@@ -24,6 +25,8 @@ void App::Init()
 {
 	m_services = MakeRef<VulkanAppServiceProvider>();
 
+	
+
 	IWindow::CreationParams windowParams{};
 	windowParams.caption = "EngineTest";
 	windowParams.windowPos = m_windowPos;
@@ -32,14 +35,20 @@ void App::Init()
 
 	m_input = MakeRef<Input>(m_window.get());
 
+	Settings* settings = m_services->GetService<Settings>();
+	glm::vec3 cameraPos = settings->GetValue<glm::vec3>("Camera Position", glm::vec3(0, 0, 0));
+	glm::vec3 cameraDir = settings->GetValue<glm::vec3>("Camera Direction", glm::vec3(-1, 0, 0));
+	float cameraFov = settings->GetValue<float>("Camera Fov", 60.0f);
+	float cameraNear = settings->GetValue<float>("Camera Near", 0.01f);
+	float cameraFar = settings->GetValue<float>("Camera Far", 1000.0f);
 	m_camera = MakeRef<Camera>(Camera::CreationParams{
-			.position = glm::vec3(0, 0, 0),
-			.normalizedDirection = glm::vec3(-1, 0, 0),
+			.position = cameraPos,
+			.normalizedDirection = cameraDir,
 			.up = glm::vec3(0, 0, 1),
-			.fovYInDegrees = 60,
+			.fovYInDegrees = cameraFov,
 			.widthToHeightRatio = (float)m_windowSize.x / m_windowSize.y,
-			.nearPlane = 0.01f,
-			.farPlane = 10000.0f,
+			.nearPlane = cameraNear,
+			.farPlane = cameraFar,
 		});
 
 	m_cameraController = MakeRef<CameraController>(m_services.get(), m_input, m_camera);
@@ -323,9 +332,35 @@ void App::Run()
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		ImGui::Begin("Hello");
-		ImGui::Text("Hello, Vulkan + SDL2!");
 		auto pos = m_camera->GetPosition();
-		ImGui::Text("Camera Position: x=%.2f, y=%.2f, z=%.2f", pos.x, pos.y, pos.z);
+		if (ImGui::InputFloat3("Position", &pos.x))
+		{
+			m_camera->SetPosition(pos);
+		}
+		auto direction = m_camera->GetDirection();
+		if (ImGui::InputFloat3("Direction", &direction.x))
+		{
+			m_camera->SetDirection(glm::normalize(direction));
+		}
+		float camNear = m_camera->GetNearPlane();
+		float camFar = m_camera->GetFarPlane();
+		float camFov = m_camera->GetFovYInDegrees();
+		
+		if(ImGui::InputFloat("Camera Near", &camNear) || 
+			ImGui::InputFloat("Camera Far", &camFar) ||
+			ImGui::SliderFloat("Camera Fov", &camFov, 1.0f, 179.0f))
+		{
+			m_camera->SetProjectionParams(camNear, camFar, camFov);
+		}
+		if (ImGui::Button("Save Camera"))
+		{
+			m_services->GetService<Settings>()->SetValue("Camera Position", m_camera->GetPosition());
+			m_services->GetService<Settings>()->SetValue("Camera Direction", m_camera->GetDirection());
+			m_services->GetService<Settings>()->SetValue("Camera Near", m_camera->GetNearPlane());
+			m_services->GetService<Settings>()->SetValue("Camera Far", m_camera->GetFarPlane());
+			m_services->GetService<Settings>()->SetValue("Camera Fov", m_camera->GetFovYInDegrees());
+			m_services->GetService<Settings>()->SaveSettings();
+		}
 		ImGui::End();
 		ImGui::Render();
 

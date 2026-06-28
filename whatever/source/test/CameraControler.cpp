@@ -10,7 +10,7 @@ namespace wtv
 		float mouseSensitivity = 0.02;
 		float step = dt * 100;
 		auto position = m_camera->GetPosition();
-		auto direction = glm::normalize(m_camera->GetForwardVector());
+		auto direction = glm::normalize(m_camera->GetDirection());
 		auto right = glm::normalize(glm::cross(direction, m_camera->GetUpVector()));
 		if (m_input->IsKeyDown(Key::LeftShift))
 		{
@@ -39,9 +39,7 @@ namespace wtv
 			{
 				m_yaw -= pixelDelta.x * mouseSensitivity;
 				m_pitch += -pixelDelta.y * mouseSensitivity;
-			/*	auto rotation = glm::yawPitchRoll(m_yaw, 0.0f, m_pitch);
-				direction = rotation * glm::vec4(m_initialDirection, 0);*/
-				m_pitch = glm::clamp(m_pitch, -glm::half_pi<float>(), glm::half_pi<float>());
+				m_pitch = glm::clamp(m_pitch, -glm::half_pi<float>() + 0.01f, glm::half_pi<float>() - 0.01f);
 				direction.x = cos(m_pitch) * cos(m_yaw);
 				direction.y = cos(m_pitch) * sin(m_yaw);
 				direction.z = sin(m_pitch);

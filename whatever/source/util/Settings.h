@@ -14,7 +14,6 @@ namespace wtv
 		Settings(const std::string& configFilePath) : m_configFilePath(configFilePath)
 		{
 			std::ifstream ifs(configFilePath);
-			assert(ifs.is_open());
 			ParseSettings(ifs);
 		}
 

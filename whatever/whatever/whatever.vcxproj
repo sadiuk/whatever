@@ -149,9 +149,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\asset\CPUMaterial.cpp" />
     <ClCompile Include="..\source\asset\CPUMesh.cpp" />
     <ClCompile Include="..\source\asset\GLTFModelLoader.cpp" />
     <ClCompile Include="..\source\asset\Model.cpp" />
+    <ClCompile Include="..\source\graphics\CPUtoGPUConverter.cpp" />
+    <ClCompile Include="..\source\graphics\GPUMaterial.cpp" />
     <ClCompile Include="..\source\graphics\Renderers\GeometryRenderer.cpp" />
     <ClCompile Include="..\source\graphics\Vulkan\VMAAllocator.cpp" />
     <ClCompile Include="..\source\graphics\Vulkan\VulkanCommandBuffer.cpp" />
@@ -194,12 +197,17 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\asset\CPUMaterial.h" />
     <ClInclude Include="..\source\asset\CPUMesh.h" />
     <ClInclude Include="..\source\asset\GLTFModelLoader.h" />
     <ClInclude Include="..\source\asset\Model.h" />
+    <ClInclude Include="..\source\graphics\CPUtoGPUConverter.h" />
+    <ClInclude Include="..\source\graphics\GPUMaterial.h" />
+    <ClInclude Include="..\source\graphics\GPUMesh.h" />
     <ClInclude Include="..\source\graphics\IGPUResource.h" />
     <ClInclude Include="..\source\graphics\ISemaphore.h" />
     <ClInclude Include="..\source\graphics\Renderers\GeometryRenderer.h" />
+    <ClInclude Include="..\source\graphics\Sampler.h" />
     <ClInclude Include="..\source\graphics\Vulkan\IVulkanAllocator.h" />
     <ClInclude Include="..\source\graphics\Vulkan\IVulkanShaderCompiler.h" />
     <ClInclude Include="..\source\graphics\Vulkan\IVulkanSurface.h" />
@@ -262,6 +270,7 @@
     <ClInclude Include="..\source\ui\WindowSDL2.h" />
     <ClInclude Include="..\source\util\ConsoleLogger.h" />
     <ClInclude Include="..\source\util\ILogger.h" />
+    <ClInclude Include="..\source\util\Settings.h" />
     <ClInclude Include="..\source\util\StringUtils.h" />
     <ClInclude Include="..\third-party\imgui\imconfig.h" />
     <ClInclude Include="..\third-party\imgui\imgui.h" />
